@@ -160,6 +160,16 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
     }, [wageRaise, workLoad]);
     // Note: We DO NOT put baseSalary in deps to avoid loops, and we handle manual input separately.
 
+    // Auto-reset children to "Keine" when count reaches 0
+    useEffect(() => {
+        if (hasChildren && childCount === 0) {
+            const timer = setTimeout(() => {
+                setHasChildren(false);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [hasChildren, childCount]);
+
     // Auto-Calculate Effect for ALL inputs if hasResult is true
     useEffect(() => {
         if (hasResult) {
@@ -518,7 +528,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                         <label className="text-sm font-medium text-slate-400 block">Kinder</label>
                         {!hasChildren ? (
                             <button
-                                onClick={() => setHasChildren(true)}
+                                onClick={() => { setHasChildren(true); setChildCount(1); }}
                                 className="w-full py-2.5 px-3 rounded-lg border border-slate-800 text-slate-400 text-base sm:text-sm font-medium hover:bg-slate-900 transition-all bg-slate-950"
                             >
                                 Keine
@@ -539,13 +549,6 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                                     className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white"
                                 >
                                     +
-                                </button>
-                                <button
-                                    onClick={() => { setHasChildren(false); setChildCount(0); }}
-                                    className="w-8 h-10 flex items-center justify-center rounded-lg text-slate-600 hover:text-rose-500 ml-1"
-                                    title="Keine Kinder"
-                                >
-                                    x
                                 </button>
                             </div>
                         )}
