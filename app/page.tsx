@@ -80,7 +80,7 @@ export default function Home() {
 
   return (
     <CalculatorLayout
-      sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} />}
+      sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} />}
       results={
         <div ref={resultsRef} className="scroll-mt-6">
           <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} curve={curve} />

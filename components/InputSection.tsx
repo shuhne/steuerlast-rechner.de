@@ -49,6 +49,7 @@ const formatLiveInput = (val: string): string => {
 interface InputSectionProps {
     onCalculate: (data: TaxRequest | null) => void;
     isLoading: boolean;
+    hasResult?: boolean;
 }
 
 const SCENARIOS = {
@@ -59,7 +60,7 @@ const SCENARIOS = {
         values: { rv: 18.6, av: 2.6, kv_add: 2.9, pv: 3.6, tax: 1.0, soli: 1.0 }
     },
     'pessimist_2035': {
-        label: 'Demografische Progression (2035)',
+        label: 'Pessimistisches Szenario (2035)',
         desc: 'Status Quo bei rapider Alterung',
         details: [
             'Keine Anhebung des Renteneintrittsalters (Verbleib bei 67 Jahren).',
@@ -70,7 +71,7 @@ const SCENARIOS = {
         values: { rv: 22.5, av: 3.0, kv_add: 7.0, pv: 7.0, tax: 1.1, soli: 1.1 }
     },
     'realist_2030': {
-        label: 'Intergenerationale Kompromisse (2035)',
+        label: 'Realistisches Szenario (2035)',
         desc: 'Moderate Anpassungen zur Stabilisierung',
         details: [
             'Dämpfung der Ausgaben durch moderate Leistungsanpassungen.',
@@ -81,7 +82,7 @@ const SCENARIOS = {
         values: { rv: 20.5, av: 2.8, kv_add: 4.5, pv: 5.0, tax: 1.05, soli: 1.0 }
     },
     'optimist_2030': {
-        label: 'Systemische Diversifizierung (2035)',
+        label: 'Optimistisches Szenario (2035)',
         desc: 'Umfassende Strukturreformen',
         details: [
             'Dynamisierung des Renteneintrittsalters (Koppelung an Lebenserwartung).',
@@ -93,7 +94,7 @@ const SCENARIOS = {
     },
 };
 
-export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
+export function InputSection({ onCalculate, isLoading, hasResult }: InputSectionProps) {
     // Basic States
     // Initialize with formatted string
     const [grossSalary, setGrossSalary] = useState<string>('');
@@ -101,6 +102,12 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
     const [taxClass, setTaxClass] = useState<string>('1');
     const [churchTax, setChurchTax] = useState<boolean>(false);
     const [state, setState] = useState<string>('be');
+
+    // Logic for Sliders (Base Salary tracking)
+    // We store the "Base" salary (100% value) separately to calculate sliders correctly
+    const [baseSalary, setBaseSalary] = useState<number>(0);
+    const [wageRaise, setWageRaise] = useState<number>(0); // 0-100%
+    const [workLoad, setWorkLoad] = useState<number>(100); // 5-100%
 
     // Future Mode States
     const [mode, setMode] = useState<'current' | 'future'>('current');
@@ -113,6 +120,54 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
     const [simKvAdd, setSimKvAdd] = useState(2.9);
     const [simPv, setSimPv] = useState(3.6); // Total rate
     const [simTaxFactor, setSimTaxFactor] = useState(1.0);
+
+    // Update Salary when logic inputs change
+    // This effect runs when wageRaise or workLoad changes to update the DISPLAYED grossSalary
+    useEffect(() => {
+        if (baseSalary === 0) return;
+
+        // Formula: New Gross = Base * (1 + Raise%) * (WorkLoad%)
+        const raised = baseSalary * (1 + wageRaise / 100);
+        const final = raised * (workLoad / 100);
+
+        setGrossSalary(formatGermanNumber(final));
+
+        // Auto-Calculate if we already have results
+        if (hasResult) {
+            // Debounce slightly in strict mode or just call it directly?
+            // We use a small timeout to avoid stutter only if really needed, but direct call is usually fine for these calculations.
+            // We need to call performCalculation with the NEW value, but performCalculation reads from state 'grossSalary'.
+            // Because setGrossSalary is async, we pass the value explicitly or wait.
+            // To be safe, we'll wait for the effect of grossSalary change? No, that would trigger on manual typing too.
+            // BETTER: pass explicit gross to performCalculation
+            const settings = getSimulationSettings();
+            onCalculate({
+                gross_income: period === 'monthly' ? final * 12 : final,
+                period: 'yearly',
+                tax_class: parseInt(taxClass),
+                church_tax: churchTax,
+                state: state.toUpperCase(),
+                simulation_settings: settings
+            });
+        }
+
+    }, [wageRaise, workLoad]);
+    // Note: We DO NOT put baseSalary in deps to avoid loops, and we handle manual input separately.
+
+    // Handle Manual Input
+    const handleManualInput = (val: string) => {
+        setGrossSalary(formatLiveInput(val));
+
+        // When user types manually, we assume this is the NEW 100% Base, and reset sliders
+        // We debounce the base update slightly or just set it on Blur?
+        // Let's set it on parse.
+        const num = parseGermanNumber(val);
+        if (num > 0) {
+            setBaseSalary(num);
+            setWageRaise(0);
+            setWorkLoad(100);
+        }
+    };
 
     const handlePeriodChange = (newPeriod: 'yearly' | 'monthly') => {
         if (newPeriod === period) return;
@@ -128,14 +183,27 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
 
         setGrossSalary(formatGermanNumber(newVal));
         setPeriod(newPeriod);
+
+        // Update Base for logic consistency
+        setBaseSalary(newVal);
+    };
+
+    const getSimulationSettings = (): SimulationSettings | null => {
+        if (mode === 'future' || showCustomSettings) {
+            return {
+                rv_rate_total: simRv / 100,
+                av_rate_total: simAv / 100,
+                kv_rate_add: simKvAdd / 100,
+                pv_rate_total: simPv / 100,
+                income_tax_factor: simTaxFactor,
+                soli_factor: simTaxFactor
+            };
+        }
+        return null;
     };
 
     const performCalculation = (explicitSettings?: SimulationSettings | null) => {
         let finalGross = parseGermanNumber(grossSalary);
-
-        if (period === 'monthly') {
-            finalGross *= 12;
-        }
 
         if (finalGross <= 0) {
             onCalculate(null);
@@ -143,22 +211,7 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
         }
 
         // Use explicit settings if provided, otherwise derive from current state
-        let settings = explicitSettings;
-
-        if (settings === undefined) {
-            if (mode === 'future' || showCustomSettings) {
-                settings = {
-                    rv_rate_total: simRv / 100,
-                    av_rate_total: simAv / 100,
-                    kv_rate_add: simKvAdd / 100,
-                    pv_rate_total: simPv / 100,
-                    income_tax_factor: simTaxFactor,
-                    soli_factor: simTaxFactor
-                };
-            } else {
-                settings = null;
-            }
-        }
+        let settings = explicitSettings ?? getSimulationSettings();
 
         onCalculate({
             gross_income: finalGross,
@@ -168,6 +221,11 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
             state: state.toUpperCase(),
             simulation_settings: settings
         });
+
+        // Update Base Salary on explicit calculation if sliders are at default
+        if (wageRaise === 0 && workLoad === 100) {
+            setBaseSalary(parseGermanNumber(grossSalary));
+        }
     };
 
     // Effect: Update sim values AND trigger calculation when scenario/mode changes
@@ -177,7 +235,7 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
         if (mode === 'current') {
             const v = SCENARIOS['current'].values;
             setSimRv(v.rv); setSimAv(v.av); setSimKvAdd(v.kv_add); setSimPv(v.pv); setSimTaxFactor(v.tax);
-            // In current mode, we usually don't send settings unless custom mode is active. 
+            // In current mode, we usually don't send settings unless custom mode is active.
             // But if switching TO current, we should force standard calculation (null settings).
             newSettings = null;
         } else {
@@ -258,9 +316,9 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
                             onChange={(e) => setSelectedScenario(e.target.value)}
                             className="w-full bg-slate-950 border border-rose-500/50 text-white pl-4 pr-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 appearance-none cursor-pointer"
                         >
-                            <option value="pessimist_2035">Demografische Progression (2035)</option>
-                            <option value="realist_2030">Intergenerationale Kompromisse (2035)</option>
-                            <option value="optimist_2030">Systemische Diversifizierung (2035)</option>
+                            <option value="pessimist_2035">Pessimistisches Szenario (2035)</option>
+                            <option value="realist_2030">Realistisches Szenario (2035)</option>
+                            <option value="optimist_2030">Optimistisches Szenario (2035)</option>
                             <option value="custom" disabled className="text-slate-500">Eigenes Szenario jederzeit im Expertenmodus unten</option>
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -321,11 +379,12 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
                             id="gross-salary"
                             type="text"
                             value={grossSalary}
-                            onChange={(e) => setGrossSalary(formatLiveInput(e.target.value))}
+                            onChange={(e) => handleManualInput(e.target.value)}
                             onBlur={() => {
                                 // optional: format strictly on blur
                                 const val = parseGermanNumber(grossSalary);
                                 setGrossSalary(formatGermanNumber(val));
+                                if (wageRaise === 0 && workLoad === 100) setBaseSalary(val);
                             }}
                             className="w-full bg-slate-950 border border-slate-800 text-white pl-10 pr-24 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono text-lg"
                             placeholder="50.000,00"
@@ -428,39 +487,84 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
                 </button>
 
                 {showCustomSettings && (
-                    <div className="p-4 bg-slate-900 border-t border-slate-800 space-y-4 animate-in slide-in-from-top-2">
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-slate-900 border-t border-slate-800 space-y-6 animate-in slide-in-from-top-2">
+
+                        {/* 1. Global Expert Settings (Always Visible) */}
+                        <div className="space-y-4">
                             <div className="space-y-1">
-                                <label className="text-xs text-slate-400">Rentenvers. (%)</label>
-                                <input type="number" value={simRv} onChange={e => setSimRv(parseFloat(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none" />
+                                <div className="flex justify-between">
+                                    <label className="text-xs text-slate-400">Lohnerhöhung (+{wageRaise}%)</label>
+                                    <span className="text-xs font-mono text-emerald-400">{wageRaise}%</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0" max="100" step="1"
+                                    value={wageRaise}
+                                    onChange={e => setWageRaise(parseInt(e.target.value))}
+                                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                />
                             </div>
+
                             <div className="space-y-1">
-                                <label className="text-xs text-slate-400">Krankenvers. Zusatz (%)</label>
-                                <input type="number" value={simKvAdd} onChange={e => setSimKvAdd(parseFloat(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none" />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-xs text-slate-400">Pflegevers. Gesamt (%)</label>
-                                <input type="number" value={simPv} onChange={e => setSimPv(parseFloat(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none" />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-xs text-slate-400">Arbeitslosenvers. (%)</label>
-                                <input type="number" value={simAv} onChange={e => setSimAv(parseFloat(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none" />
+                                <div className="flex justify-between">
+                                    <label className="text-xs text-slate-400">Arbeitszeit ({workLoad}%)</label>
+                                    <span className="text-xs font-mono text-indigo-400">{workLoad}%</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="5" max="100" step="5"
+                                    value={workLoad}
+                                    onChange={e => setWorkLoad(parseInt(e.target.value))}
+                                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                                />
                             </div>
                         </div>
 
-                        <div className="space-y-1 pt-2 border-t border-slate-800">
-                            <label className="text-xs text-slate-400 block mb-2">Steuererhöhung (Faktor)</label>
-                            <div className="flex items-center gap-4">
-                                <input
-                                    type="range"
-                                    min="0.8" max="2.0" step="0.1"
-                                    value={simTaxFactor}
-                                    onChange={e => setSimTaxFactor(parseFloat(e.target.value))}
-                                    className="flex-1 h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                                />
-                                <span className="text-sm font-mono text-white w-12 text-right">x{simTaxFactor.toFixed(1)}</span>
+                        {/* 2. Simulation Settings (Only in Future Mode or if explicitly needed)
+                             Currently we show them always in expert mode, but user asked to remove Tax Slider unless in Future Mode.
+                             We can keep the social security inputs visible or hide them too?
+                             The request said "Restrict Tax Slider visibility to future mode".
+                             Let's group the simulation specific ones.
+                        */}
+
+                        <div className="pt-4 border-t border-slate-800 space-y-4">
+                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sozialabgaben</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs text-slate-400">Rentenvers. (%)</label>
+                                    <input type="number" value={simRv} onChange={e => setSimRv(parseFloat(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none" />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs text-slate-400">Krankenvers. Z. (%)</label>
+                                    <input type="number" value={simKvAdd} onChange={e => setSimKvAdd(parseFloat(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none" />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs text-slate-400">Pflegevers. (%)</label>
+                                    <input type="number" value={simPv} onChange={e => setSimPv(parseFloat(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none" />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs text-slate-400">Arbeitslosenv. (%)</label>
+                                    <input type="number" value={simAv} onChange={e => setSimAv(parseFloat(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:outline-none" />
+                                </div>
                             </div>
                         </div>
+
+                        {/* Tax Factor - ONLY in Future Mode */}
+                        {mode === 'future' && (
+                            <div className="space-y-1 pt-2 border-t border-slate-800 animate-in fade-in">
+                                <label className="text-xs text-slate-400 block mb-2">Simulierte Steuererhöhung (Faktor)</label>
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="range"
+                                        min="0.8" max="2.0" step="0.1"
+                                        value={simTaxFactor}
+                                        onChange={e => setSimTaxFactor(parseFloat(e.target.value))}
+                                        className="flex-1 h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
+                                    />
+                                    <span className="text-sm font-mono text-white w-12 text-right">x{simTaxFactor.toFixed(1)}</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
