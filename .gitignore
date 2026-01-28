@@ -1,0 +1,36 @@
+# Typical Next.js ignores (adjusted for monorepo)
+frontend/node_modules
+frontend/.next/
+frontend/out/
+frontend/build
+frontend/next-env.d.ts
+frontend/*.tsbuildinfo
+
+# Python / FastAPI ignores
+app/__pycache__/
+venv/
+*.py[cod]
+*$py.class
+app/.env
+.venv
+env/
+venv.bak/
+ENV/
+
+# OS / Tooling
+.DS_Store
+.claude/
+.playwright-mcp/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env*
+.vercel
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+pubsub-debug.log
+ui-debug.log
