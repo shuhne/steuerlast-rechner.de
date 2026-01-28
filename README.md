@@ -1,73 +1,36 @@
-# Steuerlast-Rechner.de
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
-![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38bdf8)
+## Getting Started
 
-**Steuerlast-Rechner.de** ist eine hochentwickelte Open-Source-Plattform zur detaillierten Analyse von Netto-Einkommen, Steuerlast und Sozialabgaben in Deutschland. 
-
-Projekt-Status: **Unified Next.js Architecture**. Die gesamte Rechenlogik wurde in TypeScript portiert und läuft nun nativ als Next.js API-Routes. Ein separates Python-Backend ist nicht mehr erforderlich.
-
-## ✨ Hauptfunktionen
-
-### 1. Detaillierte Steuerberechnung 2026
-- **Exakte Algorithmen**: Implementiert die offiziellen Formeln für 2026, inkl. neuem Grundfreibetrag (12.348 €) und aktuellen Beitragsbemessungsgrenzen.
-- **Vollständige Abgabenanalyse**: Aufschlüsselung von Lohnsteuer, Kirchensteuer, Soli, sowie RV, AV, KV und PV.
-
-### 2. Zukunftssimulator & Expertenmodus
-- **Szenario-Analyse**: Simulieren Sie demografische Entwicklungen, wie z.B. einen Anstieg der Sozialabgaben im Jahr 2035 ("Pessimistisch 2035").
-- **Custom-Engine**: Passen Sie im Expertenmodus jeden Parameter (KV-Zusatzbeitrag, Rentenwert, Steuerprogression) manuell an.
-
-### 3. Intelligente Teilzeit-Analyse
-- **Effizienz-Rechner**: Visualisiert, wie sich Stundenreduzierungen (90%, 80%, 50%) auf das Netto auswirken.
-
-### 4. Grenzbelastungs-Chart
-- **Interaktive Kurve**: Zeigt grafisch, wie hoch die Abzüge für den *nächsten* verdienten Euro sind.
-
----
-
-## 🛠 Tech Stack
-
-Das Projekt ist jetzt eine reine Next.js Applikation:
-
-*   **Framework**: [Next.js 15](https://nextjs.org/) (App Router).
-*   **Sprache**: TypeScript (Rechenlogik & UI).
-*   **Styling**: TailwindCSS.
-*   **Charts**: Recharts.
-*   **API**: Next.js Route Handlers (`app/api/*`).
-*   **Hosting**: Firebase Hosting, Vercel oder Netlify (Dank Serverless/Static-Ready Architektur zu 100% kostenlos hostbar).
-
-## 🚀 Installation & Entwicklung
-
-### Voraussetzungen
-*   Node.js 18+
-*   Git
-
-### 1. Repository klonen
+First, run the development server:
 
 ```bash
-git clone https://github.com/shuhne/steuerlast-rechner.de.git
-cd steuerlast-rechner.de/frontend
-```
-
-### 2. Frontend & API starten
-
-```bash
-npm install
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Die Anwendung ist nun unter `http://localhost:3000` erreichbar. Die API-Routes befinden sich unter `app/api/`.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🤝 Contributing
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-Beiträge sind willkommen!
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-1.  Öffnen Sie ein [Issue](https://github.com/shuhne/steuerlast-rechner.de/issues).
-2.  Forken Sie das Repository.
-3.  Erstellen Sie einen Feature-Branch.
-4.  Öffnen Sie einen Pull Request.
+## Learn More
 
-## 📄 Lizenz
+To learn more about Next.js, take a look at the following resources:
 
-Dieses Projekt ist unter der MIT-Lizenz veröffentlicht.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
