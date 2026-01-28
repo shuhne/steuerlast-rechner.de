@@ -111,6 +111,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
 
     // Age and Children
     const [age, setAge] = useState<number>(30);
+    const [ageInput, setAgeInput] = useState<string>('30');
     const [hasChildren, setHasChildren] = useState<boolean>(false);
     const [childCount, setChildCount] = useState<number>(0);
 
@@ -463,7 +464,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                                 id="state-select"
                                 value={state}
                                 onChange={(e) => setState(e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-800 text-white pl-3 pr-8 py-2.5 rounded-lg text-sm appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                className="w-full bg-slate-950 border border-slate-800 text-white pl-3 pr-8 py-2.5 rounded-lg text-base sm:text-sm appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                             >
                                 <option value="bw">BW</option><option value="by">BY</option><option value="be">BE</option>
                                 <option value="bb">BB</option><option value="hb">HB</option><option value="hh">HH</option>
@@ -482,7 +483,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                         <button
                             onClick={() => setChurchTax(!churchTax)}
                             className={cn(
-                                "w-full py-2.5 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center gap-2",
+                                "w-full py-2.5 px-3 rounded-lg border text-base sm:text-sm font-medium transition-all flex items-center justify-center gap-2",
                                 churchTax ? "bg-indigo-900/30 border-indigo-500 text-indigo-300" : "bg-slate-950 border-slate-800 text-slate-400"
                             )}
                         >
@@ -500,9 +501,15 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                             id="age-input"
                             type="number"
                             min="15" max="100"
-                            value={age}
-                            onChange={(e) => setAge(Math.min(100, Math.max(15, parseInt(e.target.value) || 0)))}
-                            className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2.5 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            value={ageInput}
+                            onChange={(e) => setAgeInput(e.target.value)}
+                            onBlur={() => {
+                                const num = parseInt(ageInput) || 30;
+                                const clamped = Math.min(100, Math.max(15, num));
+                                setAgeInput(String(clamped));
+                                setAge(clamped);
+                            }}
+                            className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2.5 rounded-lg text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                         />
                     </div>
 
@@ -512,7 +519,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                         {!hasChildren ? (
                             <button
                                 onClick={() => setHasChildren(true)}
-                                className="w-full py-2.5 px-3 rounded-lg border border-slate-800 text-slate-400 text-sm font-medium hover:bg-slate-900 transition-all bg-slate-950"
+                                className="w-full py-2.5 px-3 rounded-lg border border-slate-800 text-slate-400 text-base sm:text-sm font-medium hover:bg-slate-900 transition-all bg-slate-950"
                             >
                                 Keine
                             </button>
