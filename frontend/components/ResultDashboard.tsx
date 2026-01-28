@@ -135,7 +135,7 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome }
                         {/* Center Label */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-slate-400 text-xs">Gesamt</span>
-                            <span className="text-white font-bold text-lg">{gross_income / 1000}k</span>
+                            <span className="text-white font-bold text-lg">{new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format(gross_income / 1000)}k</span>
                         </div>
                     </div>
 
