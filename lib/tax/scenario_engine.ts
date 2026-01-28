@@ -14,8 +14,21 @@ export class ScenarioEngine {
         const simSettings = req.simulation_settings || null;
 
         // 1. Social Security
-        // Default year_of_birth if missing (should be handled by validation, but safe fallback)
-        const yearOfBirth = req.year_of_birth ?? 1990;
+        // Determine Age & Year of Birth consistently
+        let age: number;
+        let yearOfBirth: number;
+
+        if (req.age !== undefined) {
+            age = req.age;
+            yearOfBirth = 2026 - age;
+        } else if (req.year_of_birth !== undefined) {
+            yearOfBirth = req.year_of_birth;
+            age = 2026 - yearOfBirth;
+        } else {
+            // Default
+            age = 30;
+            yearOfBirth = 1996;
+        }
 
         const sv = SocialSecurity2026.calculateSvContributions(
             gross,
@@ -39,9 +52,7 @@ export class ScenarioEngine {
         const deductibleRv = sv.rv;
         const deductibleKvPv = (sv.kv + sv.pv); // Simplified
 
-        // Werbungskostenpauschale 2023+: 1230 Euro
         const WERBUNGSKOSTEN = 1230.0;
-        // Sonderausgaben Pauschbetrag
         const SONDERAUSGABEN = 36.0;
 
         const deductions = deductibleRv + deductibleKvPv + WERBUNGSKOSTEN + SONDERAUSGABEN;
@@ -56,7 +67,8 @@ export class ScenarioEngine {
             soliFactor = simSettings.soli_factor;
         }
 
-        const est = TaxCalculator2026.calculateIncomeTax(zvE, taxFactor);
+        // Pass 'age' to TaxCalculator for Altersentlastungsbetrag
+        const est = TaxCalculator2026.calculateIncomeTax(zvE, taxFactor, age);
         const soli = TaxCalculator2026.calculateSoli(est, false, soliFactor);
         let kist = 0.0;
         if (req.church_tax) {

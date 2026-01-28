@@ -15,6 +15,7 @@ export interface TaxRequest {
     period: 'yearly' | 'monthly';
     has_children?: boolean;
     child_count?: number;
+    age?: number;
     year_of_birth?: number;
     health_insurance_type?: 'statutory' | 'private';
     kv_add_rate?: number;

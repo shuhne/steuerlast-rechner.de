@@ -15,7 +15,8 @@ export interface TaxRequest {
     period: 'yearly' | 'monthly';
     has_children?: boolean;
     child_count?: number;
-    year_of_birth?: number;
+    age?: number; // New param for 2026 calculation
+    year_of_birth?: number; // Deprecated or kept for compat, prefer age for simplicity in frontend
     health_insurance_type?: 'statutory' | 'private';
     kv_add_rate?: number;
     private_kv_amount?: number;

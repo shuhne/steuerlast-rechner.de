@@ -109,6 +109,11 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
     const [wageRaise, setWageRaise] = useState<number>(0); // 0-100%
     const [workLoad, setWorkLoad] = useState<number>(100); // 5-100%
 
+    // Age and Children
+    const [age, setAge] = useState<number>(30);
+    const [hasChildren, setHasChildren] = useState<boolean>(false);
+    const [childCount, setChildCount] = useState<number>(0);
+
     // Future Mode States
     const [mode, setMode] = useState<'current' | 'future'>('current');
     const [selectedScenario, setSelectedScenario] = useState<string>('pessimist_2035');
@@ -154,13 +159,22 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
     }, [wageRaise, workLoad]);
     // Note: We DO NOT put baseSalary in deps to avoid loops, and we handle manual input separately.
 
+    // Auto-Calculate Effect for ALL inputs if hasResult is true
+    useEffect(() => {
+        if (hasResult) {
+            // We use a debounce or simple check.
+            const timer = setTimeout(() => {
+                performCalculation();
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario]);
+
     // Handle Manual Input
     const handleManualInput = (val: string) => {
         setGrossSalary(formatLiveInput(val));
 
         // When user types manually, we assume this is the NEW 100% Base, and reset sliders
-        // We debounce the base update slightly or just set it on Blur?
-        // Let's set it on parse.
         const num = parseGermanNumber(val);
         if (num > 0) {
             setBaseSalary(num);
@@ -214,11 +228,14 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
         let settings = explicitSettings ?? getSimulationSettings();
 
         onCalculate({
-            gross_income: finalGross,
+            gross_income: period === 'monthly' ? finalGross * 12 : finalGross,
             period: 'yearly',
             tax_class: parseInt(taxClass),
             church_tax: churchTax,
             state: state.toUpperCase(),
+            has_children: hasChildren,
+            child_count: hasChildren ? childCount : 0,
+            age: age,
             simulation_settings: settings
         });
 
@@ -469,6 +486,61 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                         >
                             {churchTax ? "Ja" : "Nein"}
                         </button>
+                    </div>
+                </div>
+
+                {/* Age & Children Row */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <div className="flex justify-between">
+                            <label htmlFor="age-input" className="text-sm font-medium text-slate-400 block mb-1">Alter</label>
+                            {age > 64 && <span className="text-[10px] text-emerald-400 bg-emerald-900/20 px-1.5 py-0.5 rounded border border-emerald-500/20">Altersentlastung</span>}
+                        </div>
+                        <input
+                            id="age-input"
+                            type="number"
+                            min="15" max="100"
+                            value={age}
+                            onChange={(e) => setAge(Math.min(100, Math.max(15, parseInt(e.target.value) || 0)))}
+                            className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2.5 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-400 block mb-1">Kinder</label>
+                        {!hasChildren ? (
+                            <button
+                                onClick={() => setHasChildren(true)}
+                                className="w-full py-2.5 px-3 rounded-lg border border-slate-800 text-slate-400 text-sm font-medium hover:bg-slate-900 transition-all bg-slate-950"
+                            >
+                                Keine
+                            </button>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setChildCount(Math.max(0, childCount - 1))}
+                                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white"
+                                >
+                                    -
+                                </button>
+                                <div className="flex-1 text-center font-mono text-white text-lg font-medium">
+                                    {childCount}
+                                </div>
+                                <button
+                                    onClick={() => setChildCount(Math.min(10, childCount + 1))}
+                                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white"
+                                >
+                                    +
+                                </button>
+                                <button
+                                    onClick={() => { setHasChildren(false); setChildCount(0); }}
+                                    className="w-8 h-10 flex items-center justify-center rounded-lg text-slate-600 hover:text-rose-500 ml-1"
+                                    title="Keine Kinder"
+                                >
+                                    x
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

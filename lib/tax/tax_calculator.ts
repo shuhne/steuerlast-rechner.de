@@ -14,9 +14,24 @@ export class TaxCalculator2026 {
      * Input: zu versteuerndes Einkommen (zvE)
      * Output: Income Tax Amount (yearly)
      */
-    static calculateIncomeTax(zvE: number, factor: number = 1.0): number {
+    static calculateIncomeTax(zvE: number, factor: number = 1.0, age: number = 30): number {
         // Round down zvE to full Euro first (as per German Tax Law)
         let zvE_floored = Math.floor(zvE);
+
+        // Altersentlastungsbetrag (Simplified for 2026 Calculation)
+        // § 24a EStG: Applicable if age > 64 (completed 64th year before start of tax year)
+        if (age > 64) {
+            // Values for 2026 (based on cohort 2025/2026 trend)
+            // Percentage: 12.8%, Max: 608 EUR
+            // This applies to wage income (Arbeitslohn) mostly, simplification involves applying it to zvE part approx.
+            // Strictly it applies to "Einkünfte aus nichtselbstständiger Arbeit" etc.
+            // We assume mostly wage income here.
+            const reliefPercent = 0.128;
+            const reliefMax = 608;
+
+            const relief = Math.min(zvE_floored * reliefPercent, reliefMax);
+            zvE_floored = Math.floor(Math.max(0, zvE_floored - relief));
+        }
 
         if (zvE_floored <= this.GRUNDFREIBETRAG) {
             return 0.0;
