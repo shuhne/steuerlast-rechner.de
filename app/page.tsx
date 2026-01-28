@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CalculatorLayout } from '../components/CalculatorLayout';
 import { InputSection } from '../components/InputSection';
 import { ResultDashboard } from '../components/ResultDashboard';
@@ -12,6 +12,18 @@ export default function Home() {
   const [curve, setCurve] = useState<CurvePoint[] | null>(null);
   const [referenceNetIncome, setReferenceNetIncome] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to results on mobile when calculation finishes
+  useEffect(() => {
+    if (result && resultsRef.current && window.innerWidth < 1024) {
+      // Small timeout to ensure DOM update (if needed) and smooth UX
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [result]);
 
   const handleCalculate = async (data: TaxRequest | null) => {
     if (!data) {
@@ -69,7 +81,11 @@ export default function Home() {
   return (
     <CalculatorLayout
       sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} />}
-      results={<ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} curve={curve} />}
+      results={
+        <div ref={resultsRef} className="scroll-mt-6">
+          <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} curve={curve} />
+        </div>
+      }
     />
   );
 }
