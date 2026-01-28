@@ -18,7 +18,6 @@
 
 ### 3. Intelligente Teilzeit-Analyse
 - **Effizienz-Rechner**: Visualisiert, wie sich Stundenreduzierungen (90%, 80%, 50%) auf das Netto auswirken.
-- **Mobile Optimized**: Smooth-Scroll und optimierte UI für Smartphones und Tablets.
 
 ### 4. Grenzbelastungs-Chart
 - **Interaktive Kurve**: Zeigt grafisch, wie hoch die Abzüge für den *nächsten* verdienten Euro sind.
