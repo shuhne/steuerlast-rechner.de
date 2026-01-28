@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Steuerlast-Rechner.de
 
-## Getting Started
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38bdf8)
 
-First, run the development server:
+**Steuerlast-Rechner.de** ist eine hochentwickelte Open-Source-Plattform zur detaillierten Analyse von Netto-Einkommen, Steuerlast und Sozialabgaben in Deutschland. 
+
+Projekt-Status: **Unified Next.js Architecture**. Die gesamte Rechenlogik wurde in TypeScript portiert und läuft nun nativ als Next.js API-Routes. Ein separates Python-Backend ist nicht mehr erforderlich.
+
+## ✨ Hauptfunktionen
+
+### 1. Detaillierte Steuerberechnung 2026
+- **Exakte Algorithmen**: Implementiert die offiziellen Formeln für 2026, inkl. neuem Grundfreibetrag (12.348 €) und aktuellen Beitragsbemessungsgrenzen.
+- **Vollständige Abgabenanalyse**: Aufschlüsselung von Lohnsteuer, Kirchensteuer, Soli, sowie RV, AV, KV und PV.
+
+### 2. Zukunftssimulator & Expertenmodus
+- **Szenario-Analyse**: Simulieren Sie demografische Entwicklungen, wie z.B. einen Anstieg der Sozialabgaben im Jahr 2035 ("Pessimistisch 2035").
+- **Custom-Engine**: Passen Sie im Expertenmodus jeden Parameter (KV-Zusatzbeitrag, Rentenwert, Steuerprogression) manuell an.
+
+### 3. Intelligente Teilzeit-Analyse
+- **Effizienz-Rechner**: Visualisiert, wie sich Stundenreduzierungen (90%, 80%, 50%) auf das Netto auswirken.
+- **Mobile Optimized**: Smooth-Scroll und optimierte UI für Smartphones und Tablets.
+
+### 4. Grenzbelastungs-Chart
+- **Interaktive Kurve**: Zeigt grafisch, wie hoch die Abzüge für den *nächsten* verdienten Euro sind.
+
+---
+
+## 🛠 Tech Stack
+
+Das Projekt ist eine moderne Next.js Applikation (Single Repo):
+
+*   **Framework**: [Next.js 15](https://nextjs.org/) (App Router).
+*   **Sprache**: TypeScript (Rechenlogik & UI).
+*   **Styling**: TailwindCSS.
+*   **Charts**: Recharts.
+*   **API**: Next.js Route Handlers (`app/api/*`).
+*   **Hosting**: Firebase Hosting, Vercel oder Netlify (Static/Serverless-Ready).
+
+## 🚀 Installation & Entwicklung
+
+### Voraussetzungen
+*   Node.js 18+
+*   Git
+
+### 1. Repository klonen
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/shuhne/steuerlast-rechner.de.git
+cd steuerlast-rechner.de
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Dependencies installieren & Starten
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Die Anwendung ist nun unter `http://localhost:3000` erreichbar.
 
-## Learn More
+## 🔒 Datenschutz
 
-To learn more about Next.js, take a look at the following resources:
+Das Projekt folgt einem strikten "Privacy by Design"-Ansatz:
+- **Keine Cookies**: Es werden keine technsichen oder Tracking-Cookies gesetzt.
+- **Lokale Verarbeitung**: Die Berechnungslogik läuft stateless; Eingaben werden nicht gespeichert.
+- **Kein Logging**: Personenbezogene Daten (Gehalt, Steuerklasse) werden nicht persistiert.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🤝 Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Beiträge sind willkommen!
 
-## Deploy on Vercel
+1.  Öffnen Sie ein [Issue](https://github.com/shuhne/steuerlast-rechner.de/issues).
+2.  Forken Sie das Repository.
+3.  Erstellen Sie einen Feature-Branch.
+4.  Öffnen Sie einen Pull Request.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📄 Lizenz
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Dieses Projekt ist unter der MIT-Lizenz veröffentlicht.
