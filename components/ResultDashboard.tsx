@@ -20,7 +20,7 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome }
             <div className="flex flex-col items-center justify-center p-8 sm:p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400">
                 <Wallet className="w-12 h-12 mb-4 text-slate-600" />
                 <h3 className="text-lg font-medium text-white">Noch keine Berechnung</h3>
-                <p className="text-sm mt-1">Bitte geben Sie Ihre Daten links ein.</p>
+                <p className="text-sm mt-1">Bitte gib deine Daten <span className="lg:hidden">oben</span><span className="hidden lg:inline">links</span> ein.</p>
             </div>
         );
     }

@@ -39,7 +39,7 @@ export function ScenarioChart({ scenarios }: ScenarioChartProps) {
                 <ArrowRightLeft className="w-5 h-5 text-indigo-400" />
                 <h3 className="text-lg font-semibold text-white flex items-center">
                     Lohnentwicklung Teilzeit
-                    <InfoTooltip text="Zeigt, wie sich Ihr Nettogehalt verhält, wenn Sie Ihre Arbeitszeit reduzieren (z.B. auf 80% oder 50%). Da die Steuerbelastung progressiv ist, sinkt das Netto oft weniger stark als das Brutto." />
+                    <InfoTooltip text="Zeigt, wie sich dein Nettogehalt verhält, wenn du deine Arbeitszeit reduzierst (z.B. auf 80% oder 50%). Da die Steuerbelastung progressiv ist, sinkt das Netto oft weniger stark als das Brutto." />
                 </h3>
             </div>
 
