@@ -4,9 +4,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38bdf8)
 
-**Steuerlast-Rechner.de** ist eine hochentwickelte Open-Source-Plattform zur detaillierten Analyse von Netto-Einkommen, Steuerlast und Sozialabgaben in Deutschland. 
-
-Projekt-Status: **Unified Next.js Architecture**. Die gesamte Rechenlogik wurde in TypeScript portiert und läuft nun nativ als Next.js API-Routes. Ein separates Python-Backend ist nicht mehr erforderlich.
+**Steuerlast-Rechner.de** ist eine Open-Source-Plattform zur Analyse von Netto-Einkommen, Steuerlast und Sozialabgaben in Deutschland. 
 
 ## ✨ Hauptfunktionen
 
@@ -15,8 +13,8 @@ Projekt-Status: **Unified Next.js Architecture**. Die gesamte Rechenlogik wurde 
 - **Vollständige Abgabenanalyse**: Aufschlüsselung von Lohnsteuer, Kirchensteuer, Soli, sowie RV, AV, KV und PV.
 
 ### 2. Zukunftssimulator & Expertenmodus
-- **Szenario-Analyse**: Simulieren Sie demografische Entwicklungen, wie z.B. einen Anstieg der Sozialabgaben im Jahr 2035 ("Pessimistisch 2035").
-- **Custom-Engine**: Passen Sie im Expertenmodus jeden Parameter (KV-Zusatzbeitrag, Rentenwert, Steuerprogression) manuell an.
+- **Szenario-Analyse**: Simuliere demografische Entwicklungen, wie z.B. einen Anstieg der Sozialabgaben im Jahr 2035 ("Pessimistisch 2035").
+- **Custom-Engine**: Passe im Expertenmodus jeden Parameter (KV-Zusatzbeitrag, Rentenwert, Steuerprogression) manuell an.
 
 ### 3. Intelligente Teilzeit-Analyse
 - **Effizienz-Rechner**: Visualisiert, wie sich Stundenreduzierungen (90%, 80%, 50%) auf das Netto auswirken.
@@ -71,10 +69,10 @@ Das Projekt folgt einem strikten "Privacy by Design"-Ansatz:
 
 Beiträge sind willkommen!
 
-1.  Öffnen Sie ein [Issue](https://github.com/shuhne/steuerlast-rechner.de/issues).
-2.  Forken Sie das Repository.
-3.  Erstellen Sie einen Feature-Branch.
-4.  Öffnen Sie einen Pull Request.
+1.  Öffne ein [Issue](https://github.com/shuhne/steuerlast-rechner.de/issues).
+2.  Forke das Repository.
+3.  Erstelle einen Feature-Branch.
+4.  Öffne einen Pull Request.
 
 ## 📄 Lizenz
 
