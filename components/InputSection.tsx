@@ -284,7 +284,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
     };
 
     return (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-xl shadow-slate-950/50 space-y-5 sm:space-y-6">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-xl shadow-slate-950/50 space-y-6">
 
             {/* Header & Mode Switch */}
             <div className="flex flex-col gap-4">
@@ -324,8 +324,8 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
 
             {/* Future Scenario Selector */}
             {mode === 'future' && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                    <label htmlFor="scenario-select" className="text-sm font-medium text-slate-400 mb-2 block">Wähle ein Szenario</label>
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-2">
+                    <label htmlFor="scenario-select" className="text-sm font-medium text-slate-400 block">Wähle ein Szenario</label>
                     <div className="relative">
                         <select
                             id="scenario-select"
@@ -343,7 +343,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                     {/* Dynamic Scenario Description */}
                     {selectedScenario !== 'custom' && (
                         <div className={cn(
-                            "mt-3 border rounded-lg overflow-hidden transition-colors",
+                            "mt-4 border rounded-lg overflow-hidden transition-colors",
                             selectedScenario.includes('pessimist') ? "bg-rose-500/10 border-rose-500/20" :
                                 selectedScenario.includes('realist') ? "bg-orange-500/10 border-orange-500/20" :
                                     "bg-emerald-500/10 border-emerald-500/20"
@@ -432,7 +432,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
 
                 {/* Steuerklasse Select */}
                 <div className="space-y-2" role="group" aria-label="Steuerklasse wählen">
-                    <label className="text-sm font-medium text-slate-400">Steuerklasse</label>
+                    <label className="text-sm font-medium text-slate-400 block">Steuerklasse</label>
                     <div className="grid grid-cols-3 gap-1 sm:grid-cols-6">
                         {[1, 2, 3, 4, 5, 6].map((cls) => (
                             <button
@@ -453,10 +453,11 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                     </div>
                 </div>
 
-                {/* State & Church Tax */}
+                {/* State, Church, Age, Children - unified grid for consistent spacing */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label htmlFor="state-select" className="text-sm font-medium text-slate-400">Bundesland</label>
+                    {/* State */}
+                    <div className="space-y-1.5">
+                        <label htmlFor="state-select" className="text-sm font-medium text-slate-400 block">Bundesland</label>
                         <div className="relative">
                             <select
                                 id="state-select"
@@ -475,8 +476,9 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-400 block mb-1">Kirchensteuer</label>
+                    {/* Church Tax */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-400 block">Kirchensteuer</label>
                         <button
                             onClick={() => setChurchTax(!churchTax)}
                             className={cn(
@@ -487,13 +489,11 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                             {churchTax ? "Ja" : "Nein"}
                         </button>
                     </div>
-                </div>
 
-                {/* Age & Children Row */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <label htmlFor="age-input" className="text-sm font-medium text-slate-400 block mb-1">Alter</label>
+                    {/* Age */}
+                    <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                            <label htmlFor="age-input" className="text-sm font-medium text-slate-400">Alter</label>
                             {age > 64 && <span className="text-[10px] text-emerald-400 bg-emerald-900/20 px-1.5 py-0.5 rounded border border-emerald-500/20">Altersentlastung</span>}
                         </div>
                         <input
@@ -506,8 +506,9 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-400 block mb-1">Kinder</label>
+                    {/* Children */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-400 block">Kinder</label>
                         {!hasChildren ? (
                             <button
                                 onClick={() => setHasChildren(true)}
@@ -600,7 +601,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                         */}
 
                         <div className="pt-4 border-t border-slate-800 space-y-4">
-                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sozialabgaben</h4>
+                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Sozialabgaben</h4>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-xs text-slate-400">Rentenvers. (%)</label>
@@ -623,8 +624,8 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
 
                         {/* Tax Factor - ONLY in Future Mode */}
                         {mode === 'future' && (
-                            <div className="space-y-1 pt-2 border-t border-slate-800 animate-in fade-in">
-                                <label className="text-xs text-slate-400 block mb-2">Simulierte Steuererhöhung (Faktor)</label>
+                            <div className="space-y-1 pt-4 border-t border-slate-800 animate-in fade-in">
+                                <label className="text-xs text-slate-400 block">Simulierte Steuererhöhung (Faktor)</label>
                                 <div className="flex items-center gap-4">
                                     <input
                                         type="range"
@@ -645,7 +646,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                 onClick={handleCalculate}
                 disabled={isLoading}
                 className={cn(
-                    "w-full mt-4 text-white font-bold py-4 sm:py-3.5 px-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 group",
+                    "w-full text-white font-bold py-4 sm:py-3.5 px-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 group",
                     mode === 'future'
                         ? "bg-rose-600 hover:bg-rose-500 shadow-rose-900/20"
                         : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-900/20"

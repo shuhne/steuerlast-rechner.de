@@ -10,7 +10,7 @@
 .playwright-mcp/
 
 # next.js
-/.next/
+.next/
 /out/
 
 # production
@@ -48,3 +48,6 @@ ui-debug.log
 __pycache__/
 *.py[cod]
 *$py.class
+
+
+.claude/
