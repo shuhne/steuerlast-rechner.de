@@ -1,38 +1,57 @@
-# Steuer- & Arbeitszeit-Optimierer 2026
+# Steuerlast-Rechner.de
 
-Eine hochentwickelte Simulationsplattform zur Analyse von Netto-Einkommen, Steuerlast und Sozialabgaben in Deutschland. Die Anwendung ermöglicht nicht nur exakte Berechnungen für das Jahr 2026, sondern auch die Simulation zukünftiger Belastungsszenarien (z.B. 2035).
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green)
+![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38bdf8)
 
-## Hauptfunktionen
+**Steuerlast-Rechner.de** ist eine hochentwickelte Open-Source-Plattform zur detaillierten Analyse von Netto-Einkommen, Steuerlast und Sozialabgaben in Deutschland. 
 
-### 1. **Detaillierte Steuerberechnung 2026**
-- **Exakte Algorithmen**: Berücksichtigt den neuen Grundfreibetrag (12.348 €), aktualisierte Beitragsbemessungsgrenzen (BBG) und Soli-Freigrenzen.
-- **Umfassende Abgaben**: Berechnet Lohnsteuer, Kirchensteuer, Soli sowie alle Zweige der Sozialversicherung (RV, AV, KV, PV) zentgegenau.
+Anders als einfache Brutto-Netto-Rechner bietet dieses Projekt tiefergehende Einblicke: Es simuliert nicht nur das Jahr 2026 mit exakten gesetzlichen Parametern, sondern ermöglicht auch **Zukunftsprognosen** (z.B. Szenario 2035) und **Grenzsteueranalysen**, um die tatsächliche Belastung jedes zusätzlich verdienten Euros zu verstehen.
 
-### 2. **Zukunftssimulator & Expertenmodus**
-- **Zukunftsszenarien**: Simulieren Sie "Was wäre wenn"-Szenarien, wie z.B. einen drastischen Anstieg der Renten- und Krankenversicherungsbeiträge im Jahr 2035 ("Pessimistisch 2035").
-- **Expertenmodus**: Passen Sie jeden einzelnen Berechnungsfaktor manuell an. Ändern Sie Beitragssätze, Steuerfaktoren und Zusatzbeiträge, um individuelle Szenarien zu testen.
-- **Instant Calculation**: Wechseln Sie nahtlos zwischen Szenarien – die Ergebnisse aktualisieren sich sofort.
+## ✨ Hauptfunktionen
 
-### 3. **Intelligente Teilzeit-Analyse**
-- **Lohnentwicklung Teilzeit**: Visualisiert den Netto-Effekt einer Arbeitszeitreduzierung auf **90%, 80%, 70% und 50%**.
-- **Effizienz-Check**: Sehen Sie auf einen Blick, wie stark das Netto im Vergleich zum Brutto sinkt (oft überproportional günstig aufgrund der Steuerprogression).
+### 1. Detaillierte Steuerberechnung 2026
+- **Exakte Algorithmen**: Implementiert die offiziellen Formeln für 2026, inkl. neuem Grundfreibetrag (12.348 €) und aktuellen Beitragsbemessungsgrenzen.
+- **Vollständige Abgabenanalyse**: Aufschlüsselung von Lohnsteuer, Kirchensteuer, Soli, sowie RV, AV, KV und PV.
 
-### 4. **Grenzsteuer-Optimierung**
-- **Grenzsteuer-Chart**: Eine interaktive Kurve zeigt, wie viel Cent von jedem zusätzlich verdienten Euro an den Staat fließen.
-- **Interaktive Erklärungen**: Info-Tooltips erklären komplexe Begriffe wie "Grenzsteuersatz" oder "Progressionswirkung" direkt im Dashboard.
+### 2. Zukunftssimulator & Expertenmodus
+- **Szenario-Analyse**: Simulieren Sie demografische Entwicklungen, wie z.B. einen Anstieg der Sozialabgaben im Jahr 2035 ("Pessimistisch 2035").
+- **Custom-Engine**: Passen Sie im Expertenmodus jeden Parameter (KV-Zusatzbeitrag, Rentenwert, Steuerprogression) manuell an, um individuelle "Was-wäre-wenn"-Szenarien zu testen.
+
+### 3. Intelligente Teilzeit-Analyse
+- **Effizienz-Rechner**: Visualisiert, wie sich Stundenreduzierungen (90%, 80%, 50%) auf das Netto auswirken. Oft sinkt das Netto durch die Steuerprogression deutlich weniger stark als das Brutto.
+
+### 4. Grenzbelastungs-Chart
+- **Interaktive Kurve**: Zeigt grafisch, wie hoch die Abzüge für den *nächsten* verdienten Euro sind (Grenzsteuersatz + Sozialabgaben).
 
 ---
 
-## Technische Installation
+## 🛠 Tech Stack
 
-### Projektstruktur
-- **`app/`**: High-Performance Backend (FastAPI, Python). Implementiert die offizielle EStG-Logik.
-- **`frontend/`**: Modernes React-Frontend (Next.js, TypeScript, TailwindCSS). Bietet ein responsives Dark-Mode UI.
+Das Projekt ist als Monorepo strukturiert:
 
-### Setup & Start
+*   **Frontend**: [Next.js 15](https://nextjs.org/) (App Router), TypeScript, TailwindCSS, Recharts.
+*   **Backend**: [FastAPI](https://fastapi.tiangolo.com/) (Python 3.10+). Implementiert die Rechenlogik isoliert vom UI.
+*   **Hosting**: Firebase Hosting (Frontend) & Google Cloud Run (Backend Container).
 
-#### 1. Backend (Python)
-Benötigt Python 3.10+.
+## 🚀 Installation & Entwicklung
+
+### Voraussetzungen
+*   Node.js 18+
+*   Python 3.10+
+*   Git
+
+### 1. Repository klonen
+
+```bash
+git clone https://github.com/shuhne/steuerlast-rechner.de.git
+cd steuerlast-rechner.de
+```
+
+### 2. Backend (Python/FastAPI)
+
+Das Backend stellt die Rechenlogik bereit.
 
 ```bash
 # Virtual Environment erstellen & aktivieren
@@ -45,14 +64,37 @@ pip install -r requirements.txt
 # Server starten
 uvicorn app.main:app --reload
 ```
-Der API-Server läuft unter: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-#### 2. Frontend (Next.js)
-Benötigt Node.js 18+.
+Der API-Server läuft nun unter `http://127.0.0.1:8000`. Die API-Dokumentation (Swagger UI) finden Sie unter `http://127.0.0.1:8000/docs`.
+
+### 3. Frontend (Next.js)
+
+Das Frontend kommuniziert mit dem lokalen Backend.
 
 ```bash
+# In einem neuen Terminal:
 cd frontend
+
+# Abhängigkeiten installieren
 npm install
+
+# Entwicklungsserver starten
 npm run dev
 ```
-Die Anwendung ist erreichbar unter: [http://localhost:3000](http://localhost:3000)
+
+Die Anwendung ist nun unter `http://localhost:3000` erreichbar.
+
+## 🤝 Contributing
+
+Beiträge sind willkommen! Wenn Sie einen Fehler finden oder eine neue Funktion vorschlagen möchten:
+
+1.  Öffnen Sie ein [Issue](https://github.com/shuhne/steuerlast-rechner.de/issues).
+2.  Forken Sie das Repository.
+3.  Erstellen Sie einen Feature-Branch (`git checkout -b feature/AmazingFeature`).
+4.  Committen Sie Ihre Änderungen (`git commit -m 'Add some AmazingFeature'`).
+5.  Pushen Sie den Branch (`git push origin feature/AmazingFeature`).
+6.  Öffnen Sie einen Pull Request.
+
+## 📄 Lizenz
+
+Dieses Projekt ist unter der MIT-Lizenz veröffentlicht.
