@@ -52,10 +52,45 @@ interface InputSectionProps {
 }
 
 const SCENARIOS = {
-    'current': { label: 'Aktuell (2026)', desc: 'Geltendes Recht', values: { rv: 18.6, av: 2.6, kv_add: 2.9, pv: 3.6, tax: 1.0, soli: 1.0 } },
-    'pessimist_2035': { label: 'Pessimistisch 2036', desc: 'Ohne Reformen, massive Alterung.', values: { rv: 22.5, av: 3.0, kv_add: 7.0, pv: 7.0, tax: 1.1, soli: 1.1 } },
-    'realist_2030': { label: 'Realistisch (Mini Reformen) 2036', desc: 'Leichte Anpassungen, moderate Zuwanderung.', values: { rv: 20.5, av: 2.8, kv_add: 4.5, pv: 5.0, tax: 1.05, soli: 1.0 } },
-    'optimist_2030': { label: 'Optimistisch (Starke Reformen) 2036', desc: 'Effizientes System, hohe Zuwanderung.', values: { rv: 19.5, av: 2.6, kv_add: 3.5, pv: 4.0, tax: 1.02, soli: 1.0 } },
+    'current': {
+        label: 'Aktuell (2026)',
+        desc: 'Geltendes Recht',
+        details: [],
+        values: { rv: 18.6, av: 2.6, kv_add: 2.9, pv: 3.6, tax: 1.0, soli: 1.0 }
+    },
+    'pessimist_2035': {
+        label: 'Demografische Progression (2035)',
+        desc: 'Status Quo bei rapider Alterung',
+        details: [
+            'Keine Anhebung des Renteneintrittsalters (Verbleib bei 67 Jahren).',
+            'Konstante Netto-Zuwanderung (< 200k p.a.).',
+            'Fixierung des Rentenniveaus bei 48% (Haltelinie).',
+            'Signifikante Kostensteigerung im Gesundheitswesen durch Alterung.'
+        ],
+        values: { rv: 22.5, av: 3.0, kv_add: 7.0, pv: 7.0, tax: 1.1, soli: 1.1 }
+    },
+    'realist_2030': {
+        label: 'Intergenerationale Kompromisse (2035)',
+        desc: 'Moderate Anpassungen zur Stabilisierung',
+        details: [
+            'Dämpfung der Ausgaben durch moderate Leistungsanpassungen.',
+            'Netto-Zuwanderung von ca. 300k qualifizierten Fachkräften p.a.',
+            'Steuerliche Zuschüsse stabilisieren Rentenniveau teilweise.',
+            'Begrenzte Anhebung der Beitragsbemessungsgrenzen.'
+        ],
+        values: { rv: 20.5, av: 2.8, kv_add: 4.5, pv: 5.0, tax: 1.05, soli: 1.0 }
+    },
+    'optimist_2030': {
+        label: 'Systemische Diversifizierung (2035)',
+        desc: 'Umfassende Strukturreformen',
+        details: [
+            'Dynamisierung des Renteneintrittsalters (Koppelung an Lebenserwartung).',
+            'Erweiterung der Beitragszahlerbasis (Erwerbstätigenversicherung).',
+            'Hohe qualifizierte Zuwanderung (> 400k p.a.).',
+            'Effizienzgewinne im Gesundheitssektor durch Digitalisierung.'
+        ],
+        values: { rv: 19.5, av: 2.6, kv_add: 3.5, pv: 4.0, tax: 1.02, soli: 1.0 }
+    },
 };
 
 export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
@@ -223,28 +258,49 @@ export function InputSection({ onCalculate, isLoading }: InputSectionProps) {
                             onChange={(e) => setSelectedScenario(e.target.value)}
                             className="w-full bg-slate-950 border border-rose-500/50 text-white pl-4 pr-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 appearance-none cursor-pointer"
                         >
-                            <option value="pessimist_2035">Pessimistisch 2036</option>
-                            <option value="realist_2030">Realistisch (Mini Reformen) 2036</option>
-                            <option value="optimist_2030">Optimistisch (Starke Reformen) 2036</option>
+                            <option value="pessimist_2035">Demografische Progression (2035)</option>
+                            <option value="realist_2030">Intergenerationale Kompromisse (2035)</option>
+                            <option value="optimist_2030">Systemische Diversifizierung (2035)</option>
                             <option value="custom" disabled className="text-slate-500">Eigenes Szenario jederzeit im Expertenmodus unten</option>
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
                     {/* Dynamic Scenario Description */}
                     {selectedScenario !== 'custom' && (
-                        // @ts-ignore
                         <div className={cn(
-                            "mt-3 border rounded-lg p-3 flex gap-3 text-sm",
-                            selectedScenario.includes('pessimist') ? "bg-rose-500/10 border-rose-500/20 text-rose-200" :
-                                selectedScenario.includes('realist') ? "bg-orange-500/10 border-orange-500/20 text-orange-200" :
-                                    "bg-emerald-500/10 border-emerald-500/20 text-emerald-200"
+                            "mt-3 border rounded-lg overflow-hidden transition-colors",
+                            selectedScenario.includes('pessimist') ? "bg-rose-500/10 border-rose-500/20" :
+                                selectedScenario.includes('realist') ? "bg-orange-500/10 border-orange-500/20" :
+                                    "bg-emerald-500/10 border-emerald-500/20"
                         )}>
-                            <AlertTriangle className={cn("w-5 h-5 shrink-0",
-                                selectedScenario.includes('pessimist') ? "text-rose-500" :
-                                    selectedScenario.includes('realist') ? "text-orange-500" : "text-emerald-500"
-                            )} />
-                            {/* @ts-ignore */}
-                            <p>{SCENARIOS[selectedScenario]?.desc}</p>
+                            <div className="p-3 flex gap-3 text-sm">
+                                <AlertTriangle className={cn("w-5 h-5 shrink-0 mt-0.5",
+                                    selectedScenario.includes('pessimist') ? "text-rose-500" :
+                                        selectedScenario.includes('realist') ? "text-orange-500" : "text-emerald-500"
+                                )} />
+                                <div className="space-y-1 w-full">
+                                    {/* @ts-ignore */}
+                                    <p className={cn("font-medium", selectedScenario.includes('pessimist') ? "text-rose-200" : selectedScenario.includes('realist') ? "text-orange-200" : "text-emerald-200")}>
+                                        {/* @ts-ignore */}
+                                        {SCENARIOS[selectedScenario]?.desc}
+                                    </p>
+
+                                    <details className="group">
+                                        <summary className="cursor-pointer text-xs opacity-70 hover:opacity-100 flex items-center gap-1 select-none transition-opacity list-none mt-1">
+                                            <span className='border-b border-dashed border-current'>Details zu den Annahmen</span>
+                                            <ChevronDown className="w-3 h-3 group-open:rotate-180 transition-transform" />
+                                        </summary>
+                                        <ul className="mt-2 text-xs space-y-1.5 pl-4 list-disc marker:text-current/50 opacity-90 pb-1">
+                                            {/* @ts-ignore */}
+                                            {SCENARIOS[selectedScenario]?.details?.map((detail, idx) => (
+                                                <li key={idx} className={cn(selectedScenario.includes('pessimist') ? "text-rose-100" : selectedScenario.includes('realist') ? "text-orange-100" : "text-emerald-100")}>
+                                                    {detail}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </details>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
