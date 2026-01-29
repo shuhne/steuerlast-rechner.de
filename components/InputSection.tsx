@@ -537,20 +537,36 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                             <label htmlFor="age-input" className="text-sm font-medium text-slate-400">Alter</label>
                             {age > 64 && <span className="text-[10px] text-emerald-400 bg-emerald-900/20 px-1.5 py-0.5 rounded border border-emerald-500/20">Altersentlastung</span>}
                         </div>
-                        <input
-                            id="age-input"
-                            type="number"
-                            min="15" max="100"
-                            value={ageInput}
-                            onChange={(e) => setAgeInput(e.target.value)}
-                            onBlur={() => {
-                                const num = parseInt(ageInput) || 30;
-                                const clamped = Math.min(100, Math.max(15, num));
-                                setAgeInput(String(clamped));
-                                setAge(clamped);
-                            }}
-                            className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2.5 rounded-lg text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                        />
+                        <div className="relative group">
+                            <input
+                                id="age-input"
+                                type="number"
+                                min="15" max="100"
+                                value={ageInput}
+                                onChange={(e) => setAgeInput(e.target.value)}
+                                onBlur={() => {
+                                    const num = parseInt(ageInput) || 30;
+                                    const clamped = Math.min(100, Math.max(15, num));
+                                    setAgeInput(String(clamped));
+                                    setAge(clamped);
+                                }}
+                                className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2.5 rounded-lg text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <div className="absolute right-1 top-1 bottom-1 w-10 flex flex-col gap-0.5 bg-slate-900 rounded p-0.5 border border-slate-800">
+                                <button
+                                    onClick={() => { const v = Math.min(100, age + 1); setAge(v); setAgeInput(String(v)); }}
+                                    className="flex-1 text-[10px] font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                                >
+                                    +
+                                </button>
+                                <button
+                                    onClick={() => { const v = Math.max(15, age - 1); setAge(v); setAgeInput(String(v)); }}
+                                    className="flex-1 text-[10px] font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                                >
+                                    −
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Children */}
