@@ -130,38 +130,13 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
     const [simPv, setSimPv] = useState(3.6); // Total rate
     const [simTaxFactor, setSimTaxFactor] = useState(1.0);
 
-    // Update Salary when logic inputs change
-    // This effect runs when wageRaise or workLoad changes to update the DISPLAYED grossSalary
+    // Update displayed salary when slider inputs change (no auto-calc here, handled by debounced effect below)
     useEffect(() => {
         if (baseSalary === 0) return;
-
-        // Formula: New Gross = Base * (1 + Raise%) * (WorkLoad%)
         const raised = baseSalary * (1 + wageRaise / 100);
         const final = raised * (workLoad / 100);
-
         setGrossSalary(formatGermanNumber(final));
-
-        // Auto-Calculate if we already have results
-        if (hasResult) {
-            // Debounce slightly in strict mode or just call it directly?
-            // We use a small timeout to avoid stutter only if really needed, but direct call is usually fine for these calculations.
-            // We need to call performCalculation with the NEW value, but performCalculation reads from state 'grossSalary'.
-            // Because setGrossSalary is async, we pass the value explicitly or wait.
-            // To be safe, we'll wait for the effect of grossSalary change? No, that would trigger on manual typing too.
-            // BETTER: pass explicit gross to performCalculation
-            const settings = getSimulationSettings();
-            onCalculate({
-                gross_income: period === 'monthly' ? final * 12 : final,
-                period: 'yearly',
-                tax_class: parseInt(taxClass),
-                church_tax: churchTax,
-                state: state.toUpperCase(),
-                simulation_settings: settings
-            });
-        }
-
     }, [wageRaise, workLoad]);
-    // Note: We DO NOT put baseSalary in deps to avoid loops, and we handle manual input separately.
 
     // Auto-reset children to "Keine" when count reaches 0
     useEffect(() => {
@@ -174,12 +149,13 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
     }, [hasChildren, childCount]);
 
     // Auto-Calculate Effect for ALL inputs if hasResult is true
+    // Use 1s debounce for slider/button inputs (wageRaise, workLoad, age) to prevent
+    // auto-scroll on mobile while user is still adjusting values
     useEffect(() => {
         if (hasResult) {
-            // We use a debounce or simple check.
             const timer = setTimeout(() => {
                 performCalculation();
-            }, 300);
+            }, 1000);
             return () => clearTimeout(timer);
         }
     }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario]);
