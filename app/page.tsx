@@ -11,6 +11,7 @@ export default function Home() {
   const [scenarios, setScenarios] = useState<ScenarioResult | null>(null);
   const [curve, setCurve] = useState<CurvePoint[] | null>(null);
   const [referenceNetIncome, setReferenceNetIncome] = useState<number | null>(null);
+  const [userAge, setUserAge] = useState<number>(30);
   const [loading, setLoading] = useState(false);
 
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -37,6 +38,8 @@ export default function Home() {
     setResult(null);
     setScenarios(null);
     setCurve(null);
+    // Store user age for comparison
+    setUserAge(data.age || 30);
 
     try {
       // 1. Main Calculation

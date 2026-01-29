@@ -6,15 +6,17 @@ import { TrendingUp, Wallet, Building2, HeartPulse } from 'lucide-react';
 import { TaxResult, ScenarioResult, CurvePoint } from '../types/api';
 import { ScenarioChart } from './ScenarioChart';
 import { OptimizationChart } from './OptimizationChart';
+import { SalaryComparisonChart } from './SalaryComparisonChart';
 
 interface ResultDashboardProps {
     result: TaxResult | null;
     scenarios?: ScenarioResult | null;
     curve?: CurvePoint[] | null;
     referenceNetIncome?: number | null;
+    age?: number;
 }
 
-export function ResultDashboard({ result, scenarios, curve, referenceNetIncome }: ResultDashboardProps) {
+export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, age = 30 }: ResultDashboardProps) {
     if (!result) {
         return (
             <div className="flex flex-col items-center justify-center p-8 sm:p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400">
@@ -203,8 +205,11 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome }
             </div>
 
             {/* Advanced Analysis Grid - Loaded conditionally */}
-            {(scenarios || curve) && (
+            {(scenarios || curve || result) && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="lg:col-span-2">
+                        <SalaryComparisonChart annualGross={gross_income} age={age} />
+                    </div>
                     {scenarios && <ScenarioChart scenarios={scenarios} />}
                     {curve && <OptimizationChart data={curve} />}
                 </div>

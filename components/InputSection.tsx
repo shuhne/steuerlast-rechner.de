@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Euro, Calculator, MapPin, CheckCircle2, ChevronDown, ChevronUp, Settings2, AlertTriangle, Timer } from 'lucide-react';
+import { Euro, Calculator, MapPin, CheckCircle2, ChevronDown, ChevronUp, Settings2, AlertTriangle, Timer, Trash2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { TaxRequest, SimulationSettings } from '../types/api';
@@ -119,6 +119,9 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
     const [mode, setMode] = useState<'current' | 'future'>('current');
     const [selectedScenario, setSelectedScenario] = useState<string>('pessimist_2035');
     const [showCustomSettings, setShowCustomSettings] = useState(false);
+
+    // Validation message
+    const [showSalaryHint, setShowSalaryHint] = useState(false);
 
     // Custom Simulation Values (Initialized with Current)
     const [simRv, setSimRv] = useState(18.6);
@@ -291,6 +294,11 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
     }, [mode, selectedScenario]);
 
     const handleCalculate = () => {
+        if (!grossSalary || parseGermanNumber(grossSalary) === 0) {
+            setShowSalaryHint(true);
+            setTimeout(() => setShowSalaryHint(false), 2000);
+            return;
+        }
         performCalculation();
     };
 
@@ -299,9 +307,21 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
 
             {/* Header & Mode Switch */}
             <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-2 text-indigo-400">
-                    <Calculator className="w-5 h-5" />
-                    <h2 className="text-lg font-semibold text-white">Eingabedaten</h2>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-indigo-400">
+                        <Calculator className="w-5 h-5" />
+                        <h2 className="text-lg font-semibold text-white">Eingabedaten</h2>
+                    </div>
+                    {grossSalary && parseGermanNumber(grossSalary) > 0 && (
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded hover:bg-slate-800"
+                            aria-label="Alle Eingaben zurücksetzen"
+                            title="Zurücksetzen"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
 
                 {/* Mode Switcher */}
@@ -397,7 +417,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                 {/* Gehalt Eingabe mit Toggle */}
                 <div className="space-y-2">
                     <label htmlFor="gross-salary" className="text-sm font-medium text-slate-400 flex items-center justify-between">
-                        Gehalt
+                        Gehalt (Brutto)
                     </label>
                     <div className="relative group">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors">
@@ -652,6 +672,12 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                 )}
             </div>
 
+            <div className="relative">
+                {showSalaryHint && (
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[11px] text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700/40 whitespace-nowrap animate-in fade-in duration-200">
+                        Bitte zuerst ein Gehalt eingeben
+                    </div>
+                )}
             <button
                 onClick={handleCalculate}
                 disabled={isLoading}
@@ -671,6 +697,7 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                     </>
                 )}
             </button>
+            </div>
         </div>
     );
 }

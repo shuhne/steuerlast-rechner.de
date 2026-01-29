@@ -1,0 +1,27 @@
+{
+    "meta": {
+        "source": "Stepstone Gehaltsreport 2025",
+        "year": 2025,
+        "note": "Extrapolated via age/gender coefficients on 2025 constants"
+    },
+    "anchors": {
+        "median_all": 45800,
+        "median_male": 48000,
+        "median_female": 42100,
+        "average_all": 52300
+    },
+    "curve_factors": {
+        "18": 0.55,
+        "20": 0.65,
+        "25": 0.80,
+        "30": 1.00,
+        "35": 1.15,
+        "40": 1.25,
+        "45": 1.30,
+        "50": 1.32,
+        "55": 1.30,
+        "60": 1.25,
+        "65": 1.15,
+        "67": 1.05
+    }
+}
