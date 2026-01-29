@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ScenarioResult } from '../types/api';
 import { ArrowRightLeft } from 'lucide-react';
 import { InfoTooltip } from './InfoTooltip';
@@ -34,13 +34,16 @@ export function ScenarioChart({ scenarios }: ScenarioChartProps) {
     }).filter(item => item !== null);
 
     return (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-6">
-                <ArrowRightLeft className="w-5 h-5 text-indigo-400" />
-                <h3 className="text-lg font-semibold text-white flex items-center">
-                    Lohnentwicklung Teilzeit
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
+            <div className="mb-4">
+                <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <ArrowRightLeft className="w-5 h-5 text-indigo-400" />
+                        Lohnentwicklung Teilzeit
+                    </h3>
                     <InfoTooltip text="Zeigt, wie sich dein Nettogehalt verhält, wenn du deine Arbeitszeit reduzierst (z.B. auf 80% oder 50%). Da die Steuerbelastung progressiv ist, sinkt das Netto oft weniger stark als das Brutto." />
-                </h3>
+                </div>
+                <p className="text-sm text-slate-400 mt-1">Brutto vs. Netto bei verschiedenen Teilzeitmodellen</p>
             </div>
 
             <div className="h-[300px] w-full text-xs">
@@ -54,7 +57,7 @@ export function ScenarioChart({ scenarios }: ScenarioChartProps) {
                         />
                         <YAxis
                             stroke="#64748b"
-                            tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`}
+                            tickFormatter={(val) => val === 0 ? '0 €' : `${(val / 1000).toFixed(0)}k`}
                             tick={{ fill: '#64748b' }}
                         />
                         <Tooltip
@@ -65,16 +68,12 @@ export function ScenarioChart({ scenarios }: ScenarioChartProps) {
                         />
                         <Legend wrapperStyle={{ paddingTop: '20px' }} />
                         <Bar dataKey="gross" name="Brutto" fill="#334155" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="net" name="Netto" fill="#6366f1" radius={[4, 4, 0, 0]} >
-                            {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.name === 'Basis' ? '#4f46e5' : '#6366f1'} />
-                            ))}
-                        </Bar>
+                        <Bar dataKey="net" name="Netto" fill="#60a5fa" radius={[4, 4, 0, 0]} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
-            <p className="text-sm text-slate-400 mt-4 text-center">
-                Vergleich Brutto vs. Netto bei Teilzeitoptionen (90%, 80%, 70%, 50%)
+            <p className="text-xs text-slate-500 mt-4 text-center">
+                Vergleich Brutto vs. Netto bei verschiedenen Teilzeitmodellen.
             </p>
         </div>
     );

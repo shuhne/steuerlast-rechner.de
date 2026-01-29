@@ -7,6 +7,7 @@ import { TaxResult, ScenarioResult, CurvePoint } from '../types/api';
 import { ScenarioChart } from './ScenarioChart';
 import { OptimizationChart } from './OptimizationChart';
 import { SalaryComparisonChart } from './SalaryComparisonChart';
+import { InflationChart } from './InflationChart';
 
 interface ResultDashboardProps {
     result: TaxResult | null;
@@ -213,6 +214,11 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                     {scenarios && <ScenarioChart scenarios={scenarios} />}
                     {curve && <OptimizationChart data={curve} />}
                 </div>
+            )}
+
+            {/* Inflation / Purchasing Power Chart */}
+            {result && (
+                <InflationChart annualGross={gross_income} />
             )}
         </div>
     );

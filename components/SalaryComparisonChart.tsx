@@ -2,8 +2,9 @@
 
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot, Legend } from 'recharts';
-import { Info, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { getChartData, getUserComparison } from '../utils/salaryComparison';
+import { InfoTooltip } from './InfoTooltip';
 
 interface SalaryComparisonChartProps {
     annualGross: number; // Yearly gross income
@@ -34,43 +35,28 @@ export function SalaryComparisonChart({ annualGross, age }: SalaryComparisonChar
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
             {/* Header Section */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-2 relative z-10">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 relative z-10">
                 <div>
                     <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                             <Users className="w-5 h-5 text-indigo-400" />
                             Gehaltsvergleich
                         </h3>
-
-                        {/* Info Icon / Tooltip */}
-                        <div className="relative group flex items-center">
-                            <Info className="w-4 h-4 text-slate-500 hover:text-slate-300 cursor-help" />
-                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs text-slate-400 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 pointer-events-none">
-                                <p className="font-semibold text-slate-300 mb-1">Datenbasis</p>
-                                <ul className="list-disc pl-3 space-y-1">
-                                    <li>Stepstone Gehaltsreport 2025 (Prognose)</li>
-                                    <li>Destatis Verdienststrukturen</li>
-                                    <li>Extrapolation über Alterskoeffizienten</li>
-                                </ul>
-                                <div className="mt-2 pt-2 border-t border-slate-800 text-[10px] text-slate-500">
-                                    Hinweis: Die Werte sind statistische Näherungen (Median) und dienen der Orientierung.
-                                </div>
-                            </div>
-                        </div>
+                        <InfoTooltip text="Datenbasis: Stepstone Gehaltsreport 2025, Destatis Verdienststrukturen, Extrapolation über Alterskoeffizienten. Die Werte sind statistische Näherungen (Median) und dienen der Orientierung." />
                     </div>
                     <p className="text-sm text-slate-400 mt-1">
                         Vergleich mit Daten aus 2025 (Prognose Stepstone)
                     </p>
                 </div>
 
-                {/* Analysis Text / Metric - Top Right, Glassmorphism */}
-                <div className="w-full lg:w-1/2 lg:max-w-md bg-slate-800/20 backdrop-blur-sm border border-white/5 rounded-lg p-3">
+                {/* Metric */}
+                <div className="w-full lg:w-auto bg-slate-950/50 border border-slate-800 rounded-lg p-3">
                     <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-indigo-500/20 rounded-full text-indigo-300 flex-shrink-0">
+                        <div className="p-1.5 bg-indigo-500/10 rounded-full text-indigo-400 flex-shrink-0">
                             <Users className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
-                            <div className="text-indigo-100 font-medium text-sm leading-snug">
+                            <div className="text-slate-300 font-medium text-sm leading-snug">
                                 Du verdienst mehr als <span className="text-emerald-400 font-bold">{comparison.percentile.toFixed(0)}%</span>
                                 {' '}der Beschäftigten in deinem Alter.
                             </div>
@@ -78,8 +64,6 @@ export function SalaryComparisonChart({ annualGross, age }: SalaryComparisonChar
                     </div>
                 </div>
             </div>
-
-            {/* Analysis Text / Metric */}
 
 
             {/* Chart */}
@@ -103,7 +87,7 @@ export function SalaryComparisonChart({ annualGross, age }: SalaryComparisonChar
                         <YAxis
                             stroke="#64748b"
                             tick={{ fontSize: 12 }}
-                            tickFormatter={(val) => `${val / 1000}k`}
+                            tickFormatter={(val) => val === 0 ? '0 €' : `${val / 1000}k`}
                             width={35}
                         />
                         <Tooltip
