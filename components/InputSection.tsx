@@ -496,12 +496,22 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
                                 onChange={(e) => setState(e.target.value)}
                                 className="w-full bg-slate-950 border border-slate-800 text-white pl-3 pr-8 py-2.5 rounded-lg text-base sm:text-sm appearance-none cursor-pointer focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                             >
-                                <option value="bw">BW</option><option value="by">BY</option><option value="be">BE</option>
-                                <option value="bb">BB</option><option value="hb">HB</option><option value="hh">HH</option>
-                                <option value="he">HE</option><option value="mv">MV</option><option value="ni">NI</option>
-                                <option value="nw">NW</option><option value="rp">RP</option><option value="sl">SL</option>
-                                <option value="sn">SN</option><option value="st">ST</option><option value="sh">SH</option>
-                                <option value="th">TH</option>
+                                <option value="bw">Baden-Württemberg</option>
+                                <option value="by">Bayern</option>
+                                <option value="be">Berlin</option>
+                                <option value="bb">Brandenburg</option>
+                                <option value="hb">Bremen</option>
+                                <option value="hh">Hamburg</option>
+                                <option value="he">Hessen</option>
+                                <option value="mv">Mecklenburg-Vorpommern</option>
+                                <option value="ni">Niedersachsen</option>
+                                <option value="nw">Nordrhein-Westfalen</option>
+                                <option value="rp">Rheinland-Pfalz</option>
+                                <option value="sl">Saarland</option>
+                                <option value="sn">Sachsen</option>
+                                <option value="st">Sachsen-Anhalt</option>
+                                <option value="sh">Schleswig-Holstein</option>
+                                <option value="th">Thüringen</option>
                             </select>
                             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
                         </div>
