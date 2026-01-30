@@ -122,6 +122,9 @@ export class ScenarioEngine {
             };
         };
 
+        // 0. Base 100% (Hidden helper for calculations)
+        results["Base_100"] = this.calculateTaxRequest(baseReq);
+
         // 1. 90%
         results["A_Time_90"] = this.calculateTaxRequest(cloneReq(baseReq, 0.90));
 
