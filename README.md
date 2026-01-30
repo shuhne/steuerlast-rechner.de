@@ -1,8 +1,10 @@
 # Steuerlast-Rechner.de
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
-![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38bdf8)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![React](https://img.shields.io/badge/React-19-blue)
+![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8)
+![Vitest](https://img.shields.io/badge/Test-Vitest-yellow)
 
 **Steuerlast-Rechner.de** ist eine Open-Source-Plattform zur Analyse von Netto-Einkommen, Steuerlast und Sozialabgaben in Deutschland. 
 
@@ -10,17 +12,25 @@
 
 ### 1. Detaillierte Steuerberechnung 2026
 - **Exakte Algorithmen**: Implementiert die offiziellen Formeln für 2026, inkl. neuem Grundfreibetrag (12.348 €) und aktuellen Beitragsbemessungsgrenzen.
+- **Erweiterte Parameter**: Berücksichtigung von **Alter** (Altersentlastungsbetrag) und **Kinderzahl** (PV-Abschläge).
 - **Vollständige Abgabenanalyse**: Aufschlüsselung von Lohnsteuer, Kirchensteuer, Soli, sowie RV, AV, KV und PV.
 
-### 2. Zukunftssimulator & Expertenmodus
-- **Szenario-Analyse**: Simuliere demografische Entwicklungen, wie z.B. einen Anstieg der Sozialabgaben im Jahr 2035 ("Pessimistisch 2035").
-- **Custom-Engine**: Passe im Expertenmodus jeden Parameter (KV-Zusatzbeitrag, Rentenwert, Steuerprogression) manuell an.
+### 2. Visuelle Analysen & Charts
+- **Inflations-Diagramm**: Visualisiere die reale Kaufkraftentwicklung über die Jahre.
+- **Gehaltsvergleich**: Vergleiche verschiedene Einkommensszenarien direkt miteinander.
+- **Grenzbelastung**: Interaktive Kurve zeigt die Abzüge für den *nächsten* verdienten Euro.
 
-### 3. Intelligente Teilzeit-Analyse
-- **Effizienz-Rechner**: Visualisiert, wie sich Stundenreduzierungen (90%, 80%, 50%) auf das Netto auswirken.
+### 3. Zukunftssimulator & Expertenmodus
+- **Szenario-Analyse**: Simuliere demografische Entwicklungen (z.B. "Pessimistisch 2035") und deren Auswirkung auf das Netto.
+- **Custom-Engine**: Passe im Expertenmodus Parameter wie KV-Zusatzbeitrag, Rentenwert oder Steuerprogression manuell an.
 
-### 4. Grenzbelastungs-Chart
-- **Interaktive Kurve**: Zeigt grafisch, wie hoch die Abzüge für den *nächsten* verdienten Euro sind.
+### 4. Intelligente Teilzeit-Analyse
+- **Effizienz-Check**: Visualisiert die Auswirkungen von Stundenreduzierungen (z.B. 80%) auf das Netto.
+- **Fairer Vergleich**: Basiert auf einer echten 100%-Hochrechnung für präzise Stunden-Netto-Werte.
+
+### 5. Optimierte UX
+- **Performance**: Debounced Inputs verhindern unnötige Neuberechnungen (besonders auf Mobile).
+- **Smart Inputs**: Slider und Eingabefelder arbeiten synchron für intuitive Bedienung.
 
 ---
 
@@ -28,9 +38,11 @@
 
 Das Projekt ist eine moderne Next.js Applikation (Single Repo):
 
-*   **Framework**: [Next.js 15](https://nextjs.org/) (App Router).
+*   **Framework**: [Next.js 16](https://nextjs.org/) (App Router).
+*   **Core**: React 19.
 *   **Sprache**: TypeScript (Rechenlogik & UI).
-*   **Styling**: TailwindCSS.
+*   **Styling**: TailwindCSS 4.
+*   **Testing**: Vitest.
 *   **Charts**: Recharts.
 *   **API**: Next.js Route Handlers (`app/api/*`).
 *   **Hosting**: Firebase Hosting, Vercel oder Netlify (Static/Serverless-Ready).

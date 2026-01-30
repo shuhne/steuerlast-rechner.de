@@ -33,45 +33,6 @@ export function ScenarioChart({ scenarios }: ScenarioChartProps) {
         };
     }).filter(item => item !== null);
 
-    // Calculate Efficiency (Check 80% scenario vs Base)
-    // Calculate Efficiency (Find the Optimum)
-    const base = scenarios['Base_100'];
-    let bestScenarioString = "";
-
-    if (base) {
-        let maxEfficiencyGain = -1;
-
-        // Helper to parse key (e.g., "B_Time_80") -> 80
-        const getPercent = (key: string) => {
-            if (key.includes('Time_90')) return 90;
-            if (key.includes('Time_80')) return 80;
-            if (key.includes('Time_70')) return 70;
-            if (key.includes('Time_50')) return 50;
-            return 0;
-        };
-
-        Object.entries(scenarios).forEach(([key, val]) => {
-            if (key === 'Base_100') return;
-
-            const workPercent = getPercent(key);
-            if (workPercent === 0) return;
-
-            const grossReductionPct = 100 - workPercent; // e.g. 20%
-            const netRetentionPct = (val.net_income / base.net_income) * 100; // e.g. 87%
-
-            // "Efficiency Gain" = Net Retention - Work Percent
-            // Example: 88% Net - 80% Work = +8 points gain
-            const efficiencyGain = netRetentionPct - workPercent;
-
-            if (efficiencyGain > maxEfficiencyGain) {
-                maxEfficiencyGain = efficiencyGain;
-                bestScenarioString = `Teilzeit lohnt sich! Bei ${workPercent}% Arbeitszeit (-${grossReductionPct.toFixed(0)}%) bleiben dir noch ${netRetentionPct.toFixed(1)}% deines Nettos.`;
-            }
-        });
-    }
-
-    const efficiencyText = bestScenarioString || "Brutto vs. Netto bei verschiedenen Teilzeitmodellen";
-
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
             <div className="mb-4">
@@ -82,16 +43,7 @@ export function ScenarioChart({ scenarios }: ScenarioChartProps) {
                     </h3>
                     <InfoTooltip text="Zeigt, wie sich dein Nettogehalt verhält, wenn du deine Arbeitszeit reduzierst (z.B. auf 80% oder 50%). Da die Steuerbelastung progressiv ist, sinkt das Netto oft weniger stark als das Brutto." />
                 </div>
-                <p className="text-sm text-slate-400 mt-1">
-                    {bestScenarioString ? (
-                        <span>
-                            <span className="text-emerald-400 font-medium">Tipp: </span>
-                            {efficiencyText}
-                        </span>
-                    ) : (
-                        "Brutto vs. Netto bei verschiedenen Teilzeitmodellen"
-                    )}
-                </p>
+                <p className="text-sm text-slate-400 mt-1">Brutto vs. Netto bei verschiedenen Teilzeitmodellen</p>
             </div>
 
             <div className="h-[300px] w-full text-xs">
