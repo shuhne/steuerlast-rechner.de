@@ -52,3 +52,5 @@ export interface CurvePoint {
     net: number;
     marginal_tax: number;
 }
+
+export type DisplayPeriod = 'yearly' | 'monthly';

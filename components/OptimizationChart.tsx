@@ -2,16 +2,25 @@
 
 import React from 'react';
 import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { CurvePoint } from '../types/api';
+import { CurvePoint, DisplayPeriod } from '../types/api';
+import { convertToDisplayPeriod } from '../utils/periodConverter';
 import { TrendingUp } from 'lucide-react';
 import { InfoTooltip } from './InfoTooltip';
 
 interface OptimizationChartProps {
     data: CurvePoint[];
+    displayPeriod: DisplayPeriod;
 }
 
-export function OptimizationChart({ data }: OptimizationChartProps) {
+export function OptimizationChart({ data, displayPeriod }: OptimizationChartProps) {
     if (!data || data.length === 0) return null;
+
+    // Transform data for display period
+    const chartData = data.map(point => ({
+        ...point,
+        gross: convertToDisplayPeriod(point.gross, displayPeriod),
+        net: convertToDisplayPeriod(point.net, displayPeriod),
+    }));
 
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
@@ -28,7 +37,7 @@ export function OptimizationChart({ data }: OptimizationChartProps) {
 
             <div className="h-[300px] w-full text-xs">
                 <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                             <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.3} />
@@ -41,7 +50,7 @@ export function OptimizationChart({ data }: OptimizationChartProps) {
                             tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`}
                             stroke="#64748b"
                             tick={{ fill: '#64748b' }}
-                            label={{ value: 'Brutto-Jahresgehalt', position: 'insideBottom', offset: -2, fill: '#475569', fontSize: 11 }}
+                            label={{ value: displayPeriod === 'monthly' ? 'Brutto-Monatsgehalt' : 'Brutto-Jahresgehalt', position: 'insideBottom', offset: -2, fill: '#475569', fontSize: 11 }}
                         />
                         <YAxis
                             yAxisId="left"
@@ -60,7 +69,7 @@ export function OptimizationChart({ data }: OptimizationChartProps) {
                         <Tooltip
                             contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
                             itemStyle={{ color: '#f8fafc' }}
-                            labelFormatter={(val) => `Brutto: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val)}`}
+                            labelFormatter={(val) => `Brutto: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val)}${displayPeriod === 'monthly' ? '/Monat' : '/Jahr'}`}
                             formatter={(value: any, name: any) => {
                                 if (name === 'Netto') return [new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value), name];
                                 if (name === 'Grenzsteuer') return [`${value.toFixed(1)}%`, name];
@@ -92,7 +101,7 @@ export function OptimizationChart({ data }: OptimizationChartProps) {
                 </ResponsiveContainer>
             </div>
             <p className="text-xs text-slate-500 mt-4 text-center">
-                Entwicklung von Netto-Gehalt und Grenzsteuerbelastung bei Gehaltsänderungen.
+                Entwicklung von Netto-Gehalt und Grenzsteuerbelastung bei Gehaltsänderungen ({displayPeriod === 'monthly' ? 'monatlich' : 'jährlich'}).
             </p>
         </div>
     );

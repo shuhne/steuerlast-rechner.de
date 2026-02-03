@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CalculatorLayout } from '../components/CalculatorLayout';
 import { InputSection } from '../components/InputSection';
 import { ResultDashboard } from '../components/ResultDashboard';
-import { TaxRequest, TaxResult, ScenarioResult, CurvePoint } from '../types/api';
+import { TaxRequest, TaxResult, ScenarioResult, CurvePoint, DisplayPeriod } from '../types/api';
 
 export default function Home() {
   const [result, setResult] = useState<TaxResult | null>(null);
@@ -13,6 +13,7 @@ export default function Home() {
   const [referenceNetIncome, setReferenceNetIncome] = useState<number | null>(null);
   const [userAge, setUserAge] = useState<number>(30);
   const [loading, setLoading] = useState(false);
+  const [displayPeriod, setDisplayPeriod] = useState<DisplayPeriod>('yearly');
 
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -83,10 +84,10 @@ export default function Home() {
 
   return (
     <CalculatorLayout
-      sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} />}
+      sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />}
       results={
         <div ref={resultsRef} className="scroll-mt-6">
-          <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} curve={curve} />
+          <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />
         </div>
       }
     />

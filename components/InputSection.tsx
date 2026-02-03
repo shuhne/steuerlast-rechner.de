@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Euro, Calculator, MapPin, CheckCircle2, ChevronDown, ChevronUp, Settings2, AlertTriangle, Timer, Trash2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { TaxRequest, SimulationSettings } from '../types/api';
+import { TaxRequest, SimulationSettings, DisplayPeriod } from '../types/api';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -50,6 +50,8 @@ interface InputSectionProps {
     onCalculate: (data: TaxRequest | null) => void;
     isLoading: boolean;
     hasResult?: boolean;
+    displayPeriod: DisplayPeriod;
+    onDisplayPeriodChange: (period: DisplayPeriod) => void;
 }
 
 const SCENARIOS = {
@@ -94,7 +96,7 @@ const SCENARIOS = {
     },
 };
 
-export function InputSection({ onCalculate, isLoading, hasResult }: InputSectionProps) {
+export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod, onDisplayPeriodChange }: InputSectionProps) {
     // Basic States
     // Initialize with formatted string
     const [grossSalary, setGrossSalary] = useState<string>('');
@@ -190,6 +192,9 @@ export function InputSection({ onCalculate, isLoading, hasResult }: InputSection
 
         // Update Base for logic consistency
         setBaseSalary(newVal);
+
+        // Sync display period with global state
+        onDisplayPeriodChange(newPeriod);
     };
 
     const getSimulationSettings = (): SimulationSettings | null => {

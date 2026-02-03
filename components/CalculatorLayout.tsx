@@ -120,16 +120,21 @@ export function CalculatorLayout({ sidebar, results }: CalculatorLayoutProps) {
                     </nav>
                 </div>
 
-                <a
-                    href="https://github.com/shuhne/steuerlast-rechner.de"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white px-3 py-1.5 rounded-full transition-all group"
-                >
-                    <Github className="w-4 h-4" />
-                    <span className="font-medium">GitHub</span>
-                    <span className="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1 group-hover:bg-indigo-500/20">OPEN SOURCE</span>
-                </a>
+                <div className="flex flex-col items-center md:items-end gap-2">
+                    <a
+                        href="https://github.com/shuhne/steuerlast-rechner.de"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white px-3 py-1.5 rounded-full transition-all group"
+                    >
+                        <Github className="w-4 h-4" />
+                        <span className="font-medium">GitHub</span>
+                        <span className="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1 group-hover:bg-indigo-500/20">OPEN SOURCE</span>
+                    </a>
+                    <span className="text-slate-500 text-[10px] uppercase tracking-wider px-2">
+                        Entwickelt von <a href="https://shuhne.de" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-emerald-400 transition-colors">Sascha Huhne</a>
+                    </span>
+                </div>
             </footer>
         </div>
     );

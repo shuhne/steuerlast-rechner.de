@@ -3,7 +3,8 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { TrendingUp, Wallet, Building2, HeartPulse } from 'lucide-react';
-import { TaxResult, ScenarioResult, CurvePoint } from '../types/api';
+import { TaxResult, ScenarioResult, CurvePoint, DisplayPeriod } from '../types/api';
+import { convertToDisplayPeriod } from '../utils/periodConverter';
 import { ScenarioChart } from './ScenarioChart';
 import { OptimizationChart } from './OptimizationChart';
 import { SalaryComparisonChart } from './SalaryComparisonChart';
@@ -15,9 +16,11 @@ interface ResultDashboardProps {
     curve?: CurvePoint[] | null;
     referenceNetIncome?: number | null;
     age?: number;
+    displayPeriod: DisplayPeriod;
+    onDisplayPeriodChange: (period: DisplayPeriod) => void;
 }
 
-export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, age = 30 }: ResultDashboardProps) {
+export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, age = 30, displayPeriod, onDisplayPeriodChange }: ResultDashboardProps) {
     if (!result) {
         return (
             <div className="flex flex-col items-center justify-center p-8 sm:p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400">
@@ -55,9 +58,9 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
     }
 
     const data = [
-        { name: 'Netto', value: net_income, color: '#4f46e5' }, // Indigo-600
-        { name: 'Steuern', value: total_tax, color: '#94a3b8' }, // Slate-400
-        { name: 'Sozialabgaben', value: total_social_security, color: '#64748b' }, // Slate-500
+        { name: 'Netto', value: convertToDisplayPeriod(net_income, displayPeriod), color: '#4f46e5' }, // Indigo-600
+        { name: 'Steuern', value: convertToDisplayPeriod(total_tax, displayPeriod), color: '#94a3b8' }, // Slate-400
+        { name: 'Sozialabgaben', value: convertToDisplayPeriod(total_social_security, displayPeriod), color: '#64748b' }, // Slate-500
     ];
 
     const taxBurden = ((total_tax + total_social_security) / gross_income * 100).toFixed(1);
@@ -79,11 +82,29 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                         </div>
                         <div>
                             <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-1">
-                                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(net_income_monthly)}
+                                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayPeriod === 'monthly' ? net_income_monthly : net_income)}
                             </div>
-                            <div className="flex items-center gap-2 text-indigo-300 text-sm">
-                                <span className="bg-indigo-500/20 px-2 py-0.5 rounded text-xs font-bold">Monatlich</span>
-                                <span className="text-slate-400">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(net_income)} im Jahr</span>
+                            <div className="flex items-center gap-1 text-sm">
+                                <button
+                                    onClick={() => onDisplayPeriodChange('monthly')}
+                                    className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${
+                                        displayPeriod === 'monthly'
+                                            ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
+                                            : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
+                                    }`}
+                                >
+                                    Monatlich
+                                </button>
+                                <button
+                                    onClick={() => onDisplayPeriodChange('yearly')}
+                                    className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${
+                                        displayPeriod === 'yearly'
+                                            ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
+                                            : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
+                                    }`}
+                                >
+                                    Jährlich
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -138,7 +159,7 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                         {/* Center Label */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-slate-400 text-xs">Gesamt</span>
-                            <span className="text-white font-bold text-lg">{new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format(gross_income / 1000)}k</span>
+                            <span className="text-white font-bold text-lg">{new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format(convertToDisplayPeriod(gross_income, displayPeriod) / 1000)}k</span>
                         </div>
                     </div>
 
@@ -167,11 +188,11 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                             <div className="bg-slate-950/50 rounded-lg p-3 space-y-2 border border-slate-800/50">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Lohnsteuer</span>
-                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(income_tax)}</span>
+                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(convertToDisplayPeriod(income_tax, displayPeriod))}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Kirchensteuer</span>
-                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(church_tax)}</span>
+                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(convertToDisplayPeriod(church_tax, displayPeriod))}</span>
                                 </div>
                             </div>
                         </div>
@@ -185,19 +206,19 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                             <div className="bg-slate-950/50 rounded-lg p-3 space-y-2 border border-slate-800/50">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Rentenversicherung</span>
-                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(rv_employee)}</span>
+                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(convertToDisplayPeriod(rv_employee, displayPeriod))}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Arbeitslosenvers.</span>
-                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(av_employee)}</span>
+                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(convertToDisplayPeriod(av_employee, displayPeriod))}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Krankenversicherung</span>
-                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(kv_employee)}</span>
+                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(convertToDisplayPeriod(kv_employee, displayPeriod))}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-400">Pflegeversicherung</span>
-                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(pv_employee)}</span>
+                                    <span className="text-white font-mono">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(convertToDisplayPeriod(pv_employee, displayPeriod))}</span>
                                 </div>
                             </div>
                         </div>
@@ -209,16 +230,16 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
             {(scenarios || curve || result) && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div className="lg:col-span-2">
-                        <SalaryComparisonChart annualGross={gross_income} age={age} />
+                        <SalaryComparisonChart annualGross={gross_income} age={age} displayPeriod={displayPeriod} />
                     </div>
-                    {scenarios && <ScenarioChart scenarios={scenarios} />}
-                    {curve && <OptimizationChart data={curve} />}
+                    {scenarios && <ScenarioChart scenarios={scenarios} displayPeriod={displayPeriod} />}
+                    {curve && <OptimizationChart data={curve} displayPeriod={displayPeriod} />}
                 </div>
             )}
 
             {/* Inflation / Purchasing Power Chart */}
             {result && (
-                <InflationChart annualGross={gross_income} />
+                <InflationChart annualGross={gross_income} displayPeriod={displayPeriod} />
             )}
         </div>
     );

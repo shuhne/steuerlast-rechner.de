@@ -4,6 +4,8 @@ import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 import { TrendingDown, AlertTriangle } from 'lucide-react';
 import { InfoTooltip } from './InfoTooltip';
+import { DisplayPeriod } from '../types/api';
+import { convertToDisplayPeriod } from '../utils/periodConverter';
 
 // Historical German inflation rates (sources: Destatis, Länderdaten.info, Finanz-Tools.de)
 const INFLATION_RATES: Record<number, number> = {
@@ -26,6 +28,7 @@ const FUTURE_INFLATION = 2.0;
 
 interface InflationChartProps {
     annualGross: number;
+    displayPeriod: DisplayPeriod;
 }
 
 interface ChartDataPoint {
@@ -78,8 +81,15 @@ function buildChartData(annualGross: number): ChartDataPoint[] {
     return data;
 }
 
-export function InflationChart({ annualGross }: InflationChartProps) {
-    const chartData = useMemo(() => buildChartData(annualGross), [annualGross]);
+export function InflationChart({ annualGross, displayPeriod }: InflationChartProps) {
+    const chartData = useMemo(() => {
+        const rawData = buildChartData(annualGross);
+        return rawData.map(point => ({
+            ...point,
+            kaufkraft: point.kaufkraft ? convertToDisplayPeriod(point.kaufkraft, displayPeriod) : undefined,
+            kaufkraftFuture: point.kaufkraftFuture ? convertToDisplayPeriod(point.kaufkraftFuture, displayPeriod) : undefined,
+        }));
+    }, [annualGross, displayPeriod]);
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('de-DE', {
         style: 'currency',
@@ -105,7 +115,7 @@ export function InflationChart({ annualGross }: InflationChartProps) {
                     <InfoTooltip text="Zeigt, was dein heutiges Gehalt in der Vergangenheit wert gewesen wäre und wie die Inflation es in Zukunft entwertet. Historische Raten: Destatis. Prognose: ~2 % p.a. (EZB-Zielwert)." />
                 </div>
                 <p className="text-sm text-slate-400 mt-1">
-                    Was dein Gehalt ({formatCurrency(annualGross)}) real wert ist – gestern, heute, morgen
+                    Was dein Gehalt ({formatCurrency(convertToDisplayPeriod(annualGross, displayPeriod))}{displayPeriod === 'monthly' ? '/Monat' : '/Jahr'}) real wert ist – gestern, heute, morgen
                 </p>
             </div>
 

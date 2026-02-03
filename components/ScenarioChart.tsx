@@ -2,15 +2,17 @@
 
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { ScenarioResult } from '../types/api';
+import { ScenarioResult, DisplayPeriod } from '../types/api';
+import { convertToDisplayPeriod } from '../utils/periodConverter';
 import { ArrowRightLeft } from 'lucide-react';
 import { InfoTooltip } from './InfoTooltip';
 
 interface ScenarioChartProps {
     scenarios: ScenarioResult;
+    displayPeriod: DisplayPeriod;
 }
 
-export function ScenarioChart({ scenarios }: ScenarioChartProps) {
+export function ScenarioChart({ scenarios, displayPeriod }: ScenarioChartProps) {
     if (!scenarios || Object.keys(scenarios).length === 0) return null;
 
     // Transform object to array for Recharts
@@ -27,8 +29,8 @@ export function ScenarioChart({ scenarios }: ScenarioChartProps) {
 
         return {
             name: label,
-            gross: val.gross_income,
-            net: val.net_income,
+            gross: convertToDisplayPeriod(val.gross_income, displayPeriod),
+            net: convertToDisplayPeriod(val.net_income, displayPeriod),
             fullKey: key
         };
     }).filter(item => item !== null);
@@ -73,7 +75,7 @@ export function ScenarioChart({ scenarios }: ScenarioChartProps) {
                 </ResponsiveContainer>
             </div>
             <p className="text-xs text-slate-500 mt-4 text-center">
-                Vergleich Brutto vs. Netto bei verschiedenen Teilzeitmodellen.
+                Vergleich Brutto vs. Netto bei verschiedenen Teilzeitmodellen ({displayPeriod === 'monthly' ? 'monatlich' : 'jährlich'}).
             </p>
         </div>
     );

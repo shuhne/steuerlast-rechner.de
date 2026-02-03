@@ -4,18 +4,28 @@ import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceDot, Legend } from 'recharts';
 import { Users } from 'lucide-react';
 import { getChartData, getUserComparison } from '../utils/salaryComparison';
+import { DisplayPeriod } from '../types/api';
+import { convertToDisplayPeriod } from '../utils/periodConverter';
 import { InfoTooltip } from './InfoTooltip';
 
 interface SalaryComparisonChartProps {
     annualGross: number; // Yearly gross income
     age: number;
+    displayPeriod: DisplayPeriod;
 }
 
-export function SalaryComparisonChart({ annualGross, age }: SalaryComparisonChartProps) {
+export function SalaryComparisonChart({ annualGross, age, displayPeriod }: SalaryComparisonChartProps) {
     const gender = 'all';
 
     // Load Chart Data (Memoized as it's static/calculated once)
-    const chartData = useMemo(() => getChartData(), []);
+    const chartData = useMemo(() => {
+        const rawData = getChartData();
+        return rawData.map(point => ({
+            ...point,
+            medianMale: convertToDisplayPeriod(point.medianMale, displayPeriod),
+            medianFemale: convertToDisplayPeriod(point.medianFemale, displayPeriod),
+        }));
+    }, [displayPeriod]);
 
     // Calculate User Comparison
     const comparison = useMemo(() => {
@@ -122,7 +132,7 @@ export function SalaryComparisonChart({ annualGross, age }: SalaryComparisonChar
                         {/* User Dot */}
                         <ReferenceDot
                             x={age}
-                            y={annualGross}
+                            y={convertToDisplayPeriod(annualGross, displayPeriod)}
                             r={6}
                             fill="#10b981" // Emerald-500
                             stroke="#fff"
