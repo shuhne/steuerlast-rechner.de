@@ -33,7 +33,7 @@ export class ScenarioEngine {
         const sv = SocialSecurity2026.calculateSvContributions(
             gross,
             req.state,
-            req.kv_add_rate || 1.7, // Default 1.7 if missing
+            req.kv_add_rate || 2.9, // Default 2.9% (durchschnittlicher Zusatzbeitrag 2026)
             req.has_children || false,
             req.child_count || 0,
             yearOfBirth,

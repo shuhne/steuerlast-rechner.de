@@ -16,8 +16,8 @@ export class SocialSecurity2026 {
     static readonly PV_CHILD_RELIEF = 0.0025;
     static readonly PV_CHILD_RELIEF_MAX_CHILDREN = 5;
 
-    // Sachsen Spec
-    static readonly PV_SACHSEN_AG_SHARE = 0.012;
+    // Sachsen Spec (Buß- und Bettag Ausgleich: AG zahlt nur 1,3% statt 1,8%)
+    static readonly PV_SACHSEN_AG_SHARE = 0.013;
 
     static calculateSvContributions(
         grossIncome: number,
@@ -48,11 +48,8 @@ export class SocialSecurity2026 {
                 ratePvGen = simSettings.pv_rate_total;
             }
             if (simSettings.kv_rate_add !== undefined && simSettings.kv_rate_add !== null) {
-                // Determine if we need to convert?
-                // Logic: Python code assumed simSettings.kv_rate_add might be stored as e.g. 0.07 (7%).
-                // And existing input kvAddRate comes as e.g. 1.7 (1.7%).
-                // But in React frontend, we pass everything consistently properly before calling API.
-                // Assuming consistency: if simSettings stores 0.07, we use 7.0 for calculation if we multiply by 100.
+                // Convert from decimal (e.g. 0.07 for 7%) to percentage for calculation
+                // simSettings stores rates as decimals, kvAddRate is passed as percentage (e.g. 2.9 for 2.9%)
                 finalKvAddRate = simSettings.kv_rate_add * 100;
             }
         }
@@ -89,12 +86,8 @@ export class SocialSecurity2026 {
 
         // Determine Base Distribution based on current rate
         if (state === "SN") {
-            // Sachsen specific logic
-            if (simSettings && simSettings.pv_rate_total !== null && simSettings.pv_rate_total !== undefined) {
-                pvAgRate = 0.012; // Keep fixed 1.2% AG share in simulation too (simplified)
-            } else {
-                pvAgRate = this.PV_SACHSEN_AG_SHARE;
-            }
+            // Sachsen specific logic: AG pays only 1.3% (not 1.8%) due to Buß- und Bettag
+            pvAgRate = this.PV_SACHSEN_AG_SHARE; // Fixed 1.3% regardless of simulation
             pvAnBaseRate = currentPvRate - pvAgRate;
         } else {
             // Standard 50/50 split of the base rate
