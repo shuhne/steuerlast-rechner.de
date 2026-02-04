@@ -41,13 +41,14 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
     let compElement = null;
     if (referenceNetIncome !== undefined && referenceNetIncome !== null && Math.abs(referenceNetIncome - net_income) > 0.1) {
         const diff = net_income - referenceNetIncome;
+        const displayDiff = convertToDisplayPeriod(diff, displayPeriod);
         const percent = (diff / referenceNetIncome) * 100;
         const isPositive = diff > 0;
 
         compElement = (
             <div className="absolute top-6 right-6 text-right">
                 <div className={`text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(diff)}
+                    {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
                     <span className="text-xs text-slate-400 ml-1 font-normal block md:inline md:ml-2">gegenüber 2026</span>
                 </div>
                 <div className={`text-sm font-medium ${isPositive ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
@@ -87,21 +88,19 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                             <div className="flex items-center gap-1 text-sm">
                                 <button
                                     onClick={() => onDisplayPeriodChange('monthly')}
-                                    className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${
-                                        displayPeriod === 'monthly'
+                                    className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${displayPeriod === 'monthly'
                                             ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
                                             : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
-                                    }`}
+                                        }`}
                                 >
                                     Monatlich
                                 </button>
                                 <button
                                     onClick={() => onDisplayPeriodChange('yearly')}
-                                    className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${
-                                        displayPeriod === 'yearly'
+                                    className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${displayPeriod === 'yearly'
                                             ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
                                             : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
-                                    }`}
+                                        }`}
                                 >
                                     Jährlich
                                 </button>
