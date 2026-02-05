@@ -99,9 +99,10 @@ export function InflationChart({ annualGross, displayPeriod }: InflationChartPro
 
     const currentYear = 2026;
 
-    // Calculate total loss in ~25 years
-    const futureEnd = chartData.find(d => d.year === 2050);
-    const lossPercent = futureEnd?.kaufkraftFuture ? Math.round((1 - futureEnd.kaufkraftFuture / annualGross) * 100) : 0;
+    // Calculate total loss in ~25 years (use raw data, not display-converted values)
+    const rawData = useMemo(() => buildChartData(annualGross), [annualGross]);
+    const futureEndRaw = rawData.find(d => d.year === 2050);
+    const lossPercent = futureEndRaw?.kaufkraftFuture ? Math.round((1 - futureEndRaw.kaufkraftFuture / annualGross) * 100) : 0;
 
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
