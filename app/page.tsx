@@ -11,6 +11,7 @@ export default function Home() {
   const [scenarios, setScenarios] = useState<ScenarioResult | null>(null);
   const [curve, setCurve] = useState<CurvePoint[] | null>(null);
   const [referenceNetIncome, setReferenceNetIncome] = useState<number | null>(null);
+  const [baseNetIncome, setBaseNetIncome] = useState<number | null>(null); // Base value for slider comparison (0% raise, 100% workload)
   const [userAge, setUserAge] = useState<number>(30);
   const [loading, setLoading] = useState(false);
   const [displayPeriod, setDisplayPeriod] = useState<DisplayPeriod>('yearly');
@@ -27,7 +28,7 @@ export default function Home() {
     }
   }, [result]);
 
-  const handleCalculate = async (data: TaxRequest | null) => {
+  const handleCalculate = async (data: TaxRequest | null, isBaseCalculation?: boolean) => {
     if (!data) {
       setResult(null);
       setScenarios(null);
@@ -59,6 +60,11 @@ export default function Home() {
         setReferenceNetIncome(resultData.net_income);
       }
 
+      // Store base net income for slider comparison (0% raise, 100% workload in current mode)
+      if (isBaseCalculation) {
+        setBaseNetIncome(resultData.net_income);
+      }
+
       // 2. Fetch Advanced Data (Parallel)
       // We don't block the UI for these, but we trigger them now
       Promise.all([
@@ -87,7 +93,7 @@ export default function Home() {
       sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />}
       results={
         <div ref={resultsRef} className="scroll-mt-6">
-          <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />
+          <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} baseNetIncome={baseNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />
         </div>
       }
     />

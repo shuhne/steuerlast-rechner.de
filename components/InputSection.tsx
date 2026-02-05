@@ -47,7 +47,7 @@ const formatLiveInput = (val: string): string => {
 };
 
 interface InputSectionProps {
-    onCalculate: (data: TaxRequest | null) => void;
+    onCalculate: (data: TaxRequest | null, isBaseCalculation?: boolean) => void;
     isLoading: boolean;
     hasResult?: boolean;
     displayPeriod: DisplayPeriod;
@@ -222,6 +222,9 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
         // Use explicit settings if provided, otherwise derive from current state
         let settings = explicitSettings ?? getSimulationSettings();
 
+        // Determine if this is a base calculation (no slider adjustments, current mode)
+        const isBaseCalculation = mode === 'current' && wageRaise === 0 && workLoad === 100;
+
         onCalculate({
             gross_income: period === 'monthly' ? finalGross * 12 : finalGross,
             period: 'yearly',
@@ -232,7 +235,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
             child_count: hasChildren ? childCount : 0,
             age: age,
             simulation_settings: settings
-        });
+        }, isBaseCalculation);
 
         // Update Base Salary on explicit calculation if sliders are at default
         if (wageRaise === 0 && workLoad === 100) {

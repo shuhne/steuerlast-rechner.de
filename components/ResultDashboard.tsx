@@ -14,13 +14,14 @@ interface ResultDashboardProps {
     result: TaxResult | null;
     scenarios?: ScenarioResult | null;
     curve?: CurvePoint[] | null;
-    referenceNetIncome?: number | null;
+    referenceNetIncome?: number | null; // Reference for future scenario comparison (2026 base)
+    baseNetIncome?: number | null; // Base for slider comparison (0% raise, 100% workload)
     age?: number;
     displayPeriod: DisplayPeriod;
     onDisplayPeriodChange: (period: DisplayPeriod) => void;
 }
 
-export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, age = 30, displayPeriod, onDisplayPeriodChange }: ResultDashboardProps) {
+export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, baseNetIncome, age = 30, displayPeriod, onDisplayPeriodChange }: ResultDashboardProps) {
     if (!result) {
         return (
             <div className="flex flex-col items-center justify-center p-8 sm:p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400">
@@ -37,9 +38,16 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
         gross_income
     } = result;
 
-    // Calculate Comparison (only if reference exists and is different)
+    // Calculate Comparison
+    // Priority 1: Future scenario comparison (referenceNetIncome differs from current)
+    // Priority 2: Slider comparison (baseNetIncome differs, but we're in current mode)
     let compElement = null;
-    if (referenceNetIncome !== undefined && referenceNetIncome !== null && Math.abs(referenceNetIncome - net_income) > 0.1) {
+
+    const hasFutureScenarioComparison = referenceNetIncome !== undefined && referenceNetIncome !== null && Math.abs(referenceNetIncome - net_income) > 0.1;
+    const hasSliderComparison = baseNetIncome !== undefined && baseNetIncome !== null && Math.abs(baseNetIncome - net_income) > 0.1 && !hasFutureScenarioComparison;
+
+    if (hasFutureScenarioComparison && referenceNetIncome) {
+        // Future scenario mode - compare against 2026 reference
         const diff = net_income - referenceNetIncome;
         const displayDiff = convertToDisplayPeriod(diff, displayPeriod);
         const percent = (diff / referenceNetIncome) * 100;
@@ -50,6 +58,24 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                 <div className={`text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
                     <span className="text-xs text-slate-400 ml-1 font-normal block md:inline md:ml-2">gegenüber 2026</span>
+                </div>
+                <div className={`text-sm font-medium ${isPositive ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
+                    {isPositive ? '+' : ''}{percent.toFixed(1).replace('.', ',')} %
+                </div>
+            </div>
+        );
+    } else if (hasSliderComparison && baseNetIncome) {
+        // Slider adjustment mode - compare against base (0% raise, 100% workload)
+        const diff = net_income - baseNetIncome;
+        const displayDiff = convertToDisplayPeriod(diff, displayPeriod);
+        const percent = (diff / baseNetIncome) * 100;
+        const isPositive = diff > 0;
+
+        compElement = (
+            <div className="absolute top-6 right-6 text-right">
+                <div className={`text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
+                    <span className="text-xs text-slate-400 ml-1 font-normal block md:inline md:ml-2">gegenüber Basis</span>
                 </div>
                 <div className={`text-sm font-medium ${isPositive ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
                     {isPositive ? '+' : ''}{percent.toFixed(1).replace('.', ',')} %
