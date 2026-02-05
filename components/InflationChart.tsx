@@ -6,79 +6,11 @@ import { TrendingDown, AlertTriangle } from 'lucide-react';
 import { InfoTooltip } from './InfoTooltip';
 import { DisplayPeriod } from '../types/api';
 import { convertToDisplayPeriod } from '../utils/periodConverter';
-
-// Historical German inflation rates (sources: Destatis, Länderdaten.info, Finanz-Tools.de)
-const INFLATION_RATES: Record<number, number> = {
-    1970: 3.45, 1971: 5.24, 1972: 5.48, 1973: 7.03, 1974: 6.99,
-    1975: 5.91, 1976: 4.25, 1977: 3.73, 1978: 2.72, 1979: 4.04,
-    1980: 5.40, 1981: 6.30, 1982: 5.30, 1983: 3.30, 1984: 2.40,
-    1985: 2.10, 1986: -0.10, 1987: 0.20, 1988: 1.30, 1989: 2.80,
-    1990: 2.70, 1991: 3.50, 1992: 5.00, 1993: 4.50, 1994: 2.70,
-    1995: 1.90, 1996: 1.40, 1997: 1.90, 1998: 0.80, 1999: 0.70,
-    2000: 1.30, 2001: 2.00, 2002: 1.40, 2003: 1.00, 2004: 1.60,
-    2005: 1.60, 2006: 1.60, 2007: 2.30, 2008: 2.60, 2009: 0.30,
-    2010: 1.00, 2011: 2.20, 2012: 1.90, 2013: 1.50, 2014: 1.00,
-    2015: 0.50, 2016: 0.50, 2017: 1.50, 2018: 1.80, 2019: 1.40,
-    2020: 0.50, 2021: 3.10, 2022: 6.90, 2023: 5.90, 2024: 2.20,
-    2025: 2.20,
-};
-
-// Assumed future inflation rate (EZB target)
-const FUTURE_INFLATION = 2.0;
+import { buildChartData, calculatePurchasingPowerLoss, CURRENT_YEAR } from '../utils/inflationCalculator';
 
 interface InflationChartProps {
     annualGross: number;
     displayPeriod: DisplayPeriod;
-}
-
-interface ChartDataPoint {
-    year: number;
-    kaufkraft?: number;
-    kaufkraftFuture?: number;
-    inflationRate: number;
-}
-
-function buildChartData(annualGross: number): ChartDataPoint[] {
-    const currentYear = 2026;
-    const startYear = 2000;
-    const endYear = 2055;
-    const data: ChartDataPoint[] = [];
-
-    // Yearly data from 2000 onwards for smoother curve
-    for (let year = startYear; year <= endYear; year++) {
-        let cumulativeFactor = 1.0;
-
-        if (year < currentYear) {
-            for (let y = year; y < currentYear; y++) {
-                const rate = INFLATION_RATES[y] ?? FUTURE_INFLATION;
-                cumulativeFactor *= (1 + rate / 100);
-            }
-            data.push({
-                year,
-                kaufkraft: Math.round(annualGross * cumulativeFactor),
-                inflationRate: INFLATION_RATES[year] ?? FUTURE_INFLATION,
-            });
-        } else if (year === currentYear) {
-            data.push({
-                year,
-                kaufkraft: annualGross,
-                kaufkraftFuture: annualGross,
-                inflationRate: INFLATION_RATES[year] ?? FUTURE_INFLATION,
-            });
-        } else {
-            for (let y = currentYear; y < year; y++) {
-                const rate = INFLATION_RATES[y] ?? FUTURE_INFLATION;
-                cumulativeFactor *= (1 + rate / 100);
-            }
-            data.push({
-                year,
-                kaufkraftFuture: Math.round(annualGross / cumulativeFactor),
-                inflationRate: FUTURE_INFLATION,
-            });
-        }
-    }
-
-    return data;
 }
 
 export function InflationChart({ annualGross, displayPeriod }: InflationChartProps) {
@@ -97,12 +29,8 @@ export function InflationChart({ annualGross, displayPeriod }: InflationChartPro
         maximumFractionDigits: 0,
     }).format(val);
 
-    const currentYear = 2026;
-
-    // Calculate total loss in ~25 years (use raw data, not display-converted values)
-    const rawData = useMemo(() => buildChartData(annualGross), [annualGross]);
-    const futureEndRaw = rawData.find(d => d.year === 2050);
-    const lossPercent = futureEndRaw?.kaufkraftFuture ? Math.round((1 - futureEndRaw.kaufkraftFuture / annualGross) * 100) : 0;
+    // Calculate total loss in ~25 years using the dedicated utility function
+    const lossPercent = useMemo(() => calculatePurchasingPowerLoss(annualGross, 2050), [annualGross]);
 
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
@@ -160,7 +88,7 @@ export function InflationChart({ annualGross, displayPeriod }: InflationChartPro
                             wrapperStyle={{ paddingTop: '20px' }}
                             formatter={(value: string) => value === 'kaufkraft' ? 'Historisch' : 'Prognose'}
                         />
-                        <ReferenceLine x={currentYear} stroke="#475569" strokeDasharray="6 3" label={{ value: 'Heute', position: 'top', fill: '#64748b', fontSize: 11 }} />
+                        <ReferenceLine x={CURRENT_YEAR} stroke="#475569" strokeDasharray="6 3" label={{ value: 'Heute', position: 'top', fill: '#64748b', fontSize: 11 }} />
 
                         {/* Past area (blue) */}
                         <Area
