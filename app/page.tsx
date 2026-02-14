@@ -88,6 +88,46 @@ export default function Home() {
     }
   };
 
+
+
+  const seoContent = (
+    <article className="prose prose-invert prose-slate max-w-none">
+      <h2 className="text-3xl font-bold text-white mb-6">Wie funktioniert der Brutto-Netto-Rechner 2026?</h2>
+      <p className="text-slate-400 leading-relaxed mb-6">
+        Unser <strong>Lohnsteuerrechner für 2026</strong> hilft dir dabei, dein voraussichtliches Netto-Gehalt präzise zu ermitteln.
+        Da sich jedes Jahr Beitragsbemessungsgrenzen, Zusatzbeiträge der Krankenkassen und steuerliche Freibeträge ändern, ist eine aktuelle Prognose wichtig für deine Finanzplanung.
+        Besonders spannend für 2026: Die erwarteten Anpassungen in der Pflegeversicherung und beim Zusatzbeitrag zur Krankenversicherung.
+      </p>
+
+      <div className="grid md:grid-cols-2 gap-8 my-12">
+        <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
+          <h3 className="text-xl font-semibold text-white mb-3">Deine Vorteile</h3>
+          <ul className="space-y-2 text-slate-400">
+            <li className="flex gap-2"><span className="text-emerald-500">✓</span> Simulation zukünftiger Sozialabgaben</li>
+            <li className="flex gap-2"><span className="text-emerald-500">✓</span> Szenario-Analyse (Optimistisch vs. Pessimistisch)</li>
+            <li className="flex gap-2"><span className="text-emerald-500">✓</span> 100% Datenschutz: Berechnung im Browser</li>
+          </ul>
+        </div>
+        <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
+          <h3 className="text-xl font-semibold text-white mb-3">Was wird berechnet?</h3>
+          <ul className="space-y-2 text-slate-400">
+            <li className="flex gap-2"><span className="text-indigo-400">•</span> Lohnsteuer & Solidaritätszuschlag</li>
+            <li className="flex gap-2"><span className="text-indigo-400">•</span> Rentenversicherung & Arbeitslosenversicherung</li>
+            <li className="flex gap-2"><span className="text-indigo-400">•</span> Krankenversicherung & Pflegeversicherung</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 className="text-2xl font-bold text-white mb-4">Warum eine Zukunftsprognose?</h2>
+      <p className="text-slate-400 leading-relaxed mb-6">
+        Viele Rechner zeigen nur den Ist-Zustand. Doch durch den demografischen Wandel werden die Sozialabgaben in den nächsten Jahren voraussichtlich steigen.
+        Unser Tool bietet dir daher nicht nur den Status Quo, sondern auch einen Blick in die Zukunft:
+        Was passiert, wenn die Rentenbeiträge steigen? Wie wirkt sich eine Erhöhung der Pflegeversicherung auf dein Netto aus?
+        Nutze die Szenarien, um besser vorbereitet zu sein.
+      </p>
+    </article>
+  );
+
   return (
     <CalculatorLayout
       sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />}
@@ -96,6 +136,7 @@ export default function Home() {
           <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} baseNetIncome={baseNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />
         </div>
       }
+      content={seoContent}
     />
   );
 }

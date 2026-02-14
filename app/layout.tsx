@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   description: 'Berechne dein Netto-Gehalt für 2026 und simuliere zukünftige Abgabenlasten. Kostenloser Lohnsteuerrechner mit Szenario-Analyse für Renten- und Krankenkassenbeiträge.',
   metadataBase: new URL('https://steuerlast-rechner.de'),
   alternates: {
-    canonical: '/',
+    canonical: './',
   },
   openGraph: {
     title: 'Steuerlast Rechner 2026 - Was bleibt vom Brutto?',

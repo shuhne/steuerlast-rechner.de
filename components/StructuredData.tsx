@@ -1,7 +1,11 @@
 import React from 'react';
 
-export function StructuredData() {
-    const structuredData = {
+interface StructuredDataProps {
+    data?: Record<string, any>;
+}
+
+export function StructuredData({ data }: StructuredDataProps) {
+    const defaultData = {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Steuerlast Rechner 2026",
@@ -16,6 +20,8 @@ export function StructuredData() {
         "featureList": "Brutto Netto Rechner, Steuerlast Prognose, Sozialabgaben Rechner",
         "description": "Kostenloser Brutto-Netto-Rechner für 2026 mit Prognose-Funktion für zukünftige Sozialabgaben und Steuerlasten."
     };
+
+    const structuredData = data || defaultData;
 
     return (
         <script

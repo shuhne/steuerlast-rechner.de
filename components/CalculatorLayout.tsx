@@ -6,9 +6,10 @@ import { ShieldCheck, Lock, Check, Github } from 'lucide-react';
 interface CalculatorLayoutProps {
     sidebar: React.ReactNode;
     results: React.ReactNode;
+    content?: React.ReactNode;
 }
 
-export function CalculatorLayout({ sidebar, results }: CalculatorLayoutProps) {
+export function CalculatorLayout({ sidebar, results, content }: CalculatorLayoutProps) {
     const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
     const privacyButtonRef = useRef<HTMLButtonElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
@@ -108,6 +109,12 @@ export function CalculatorLayout({ sidebar, results }: CalculatorLayoutProps) {
                         {results}
                     </main>
                 </div>
+
+                {content && (
+                    <div className="mt-16 sm:mt-24 max-w-4xl mx-auto">
+                        {content}
+                    </div>
+                )}
             </div>
             {/* Footer */}
             <footer className="mx-auto max-w-7xl mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 text-sm">
