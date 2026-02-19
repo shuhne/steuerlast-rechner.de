@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ScenarioEngine } from '../../../lib/tax/scenario_engine';
-import { TaxRequest } from '../../../lib/tax/types';
+import { TaxRequestSchema } from '../../../lib/tax/validation';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const taxRequest = body as TaxRequest;
+        const result = TaxRequestSchema.safeParse(body);
 
-        const result = ScenarioEngine.generateCurve(taxRequest);
+        if (!result.success) {
+            return NextResponse.json(
+                { error: 'Ungültige Eingabe', details: result.error.flatten() },
+                { status: 400 }
+            );
+        }
 
-        return NextResponse.json(result);
+        const curveResult = ScenarioEngine.generateCurve(result.data);
+
+        return NextResponse.json(curveResult);
     } catch (error) {
         console.error('Curve Generation Error:', error);
         return NextResponse.json(
