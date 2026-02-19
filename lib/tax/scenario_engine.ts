@@ -69,10 +69,21 @@ export class ScenarioEngine {
 
         // Pass 'age' to TaxCalculator for Altersentlastungsbetrag
         const est = TaxCalculator2026.calculateIncomeTax(zvE, taxFactor, age);
-        const soli = TaxCalculator2026.calculateSoli(est, false, soliFactor);
+
+        // Child Allowance Impact on Soli & Church Tax
+        // The allowance reduces the zvE base for Soli/KiSt, but NOT for the main Lohnsteuer (est).
+        let est_Soli_Base = est;
+        if (req.child_count && req.child_count > 0) {
+            const childAllowance = req.child_count * TaxCalculator2026.KINDERFREIBETRAG_2026;
+            const zvE_Soli = Math.max(0, zvE - childAllowance);
+            est_Soli_Base = TaxCalculator2026.calculateIncomeTax(zvE_Soli, taxFactor, age);
+        }
+
+        const soli = TaxCalculator2026.calculateSoli(est_Soli_Base, false, soliFactor);
         let kist = 0.0;
         if (req.church_tax) {
-            kist = TaxCalculator2026.calculateChurchTax(est, req.state);
+            // Church tax also uses the reduced base
+            kist = TaxCalculator2026.calculateChurchTax(est_Soli_Base, req.state);
         }
 
         const totalTax = est + soli + kist;

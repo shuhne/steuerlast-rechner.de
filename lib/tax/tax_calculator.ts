@@ -9,6 +9,9 @@ export class TaxCalculator2026 {
     static readonly SOLI_FREIGRENZE_SINGLE = 20350;  // Tax amount, not income
     static readonly SOLI_FREIGRENZE_MARRIED = 40700;
 
+    // Child Allowance 2026 (Annual: Child 6828 + BEA 2928 = 9756)
+    static readonly KINDERFREIBETRAG_2026 = 9756;
+
     /**
      * Calculates the German Income Tax (ESt) for 2026 based on §32a EStG.
      * Input: zu versteuerndes Einkommen (zvE)

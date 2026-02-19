@@ -132,6 +132,24 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
     const [simPv, setSimPv] = useState(3.6); // Total rate
     const [simTaxFactor, setSimTaxFactor] = useState(1.0);
 
+    // PKV Logic 2026
+    const JAEG_2026_EST = 77400; // Estimated 2026
+    const [healthInsuranceType, setHealthInsuranceType] = useState<'statutory' | 'private'>('statutory');
+    const [privateKvAmount, setPrivateKvAmount] = useState<number>(0);
+
+    // Check availability of PKV based on gross salary
+    const currentGrossVal = parseGermanNumber(grossSalary);
+    // If monthly period selected, we project to year for JAEG check
+    const projectedYearlyGross = period === 'monthly' ? currentGrossVal * 12 : currentGrossVal;
+    const canHavePKV = projectedYearlyGross >= JAEG_2026_EST;
+
+    // Reset PKV if falling below JAEG
+    useEffect(() => {
+        if (!canHavePKV && healthInsuranceType === 'private') {
+            setHealthInsuranceType('statutory');
+        }
+    }, [canHavePKV, healthInsuranceType]);
+
     // Update displayed salary when slider inputs change (no auto-calc here, handled by debounced effect below)
     useEffect(() => {
         if (baseSalary === 0) return;
@@ -160,7 +178,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario]);
+    }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario, healthInsuranceType, privateKvAmount]);
 
     // Handle Manual Input
     const handleManualInput = (val: string) => {
@@ -234,7 +252,9 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
             has_children: hasChildren,
             child_count: hasChildren ? childCount : 0,
             age: age,
-            simulation_settings: settings
+            simulation_settings: settings,
+            health_insurance_type: healthInsuranceType,
+            private_kv_amount: healthInsuranceType === 'private' ? privateKvAmount : undefined
         }, isBaseCalculation);
 
         // Update Base Salary on explicit calculation if sliders are at default
@@ -558,7 +578,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                         <label className="text-sm font-medium text-slate-400 block">Kinder</label>
                         {!hasChildren ? (
                             <button
-                                onClick={() => { setHasChildren(true); setChildCount(1); }}
+                                onClick={() => { setHasChildren(true); setChildCount(1.0); }}
                                 className="w-full py-2.5 px-3 rounded-lg border border-slate-800 text-slate-400 text-base sm:text-sm font-medium hover:bg-slate-900 transition-all bg-slate-950"
                             >
                                 Keine
@@ -566,16 +586,16 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                         ) : (
                             <div className="flex items-center gap-2">
                                 <button
-                                    onClick={() => setChildCount(Math.max(0, childCount - 1))}
+                                    onClick={() => setChildCount(Math.max(0, childCount - 0.5))}
                                     className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white"
                                 >
                                     -
                                 </button>
                                 <div className="flex-1 text-center font-mono text-white text-lg font-medium">
-                                    {childCount}
+                                    {childCount.toFixed(1)}
                                 </div>
                                 <button
-                                    onClick={() => setChildCount(Math.min(10, childCount + 1))}
+                                    onClick={() => setChildCount(Math.min(10, childCount + 0.5))}
                                     className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white"
                                 >
                                     +
@@ -584,7 +604,71 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                         )}
                     </div>
                 </div>
+
+                {/* Private Health Insurance Option (Condition: Above JAEG) */}
+                {canHavePKV && (
+                    <div className="pt-2 pb-2 animate-in fade-in slide-in-from-top-1 border-t border-slate-800/50">
+                        <div className="space-y-3">
+                            <label className="text-sm font-medium text-white block flex justify-between">
+                                <span>Krankenversicherung</span>
+                                <span className="text-[10px] bg-emerald-950 text-emerald-500 px-1.5 py-0.5 rounded border border-emerald-900/50">
+                                    Freie Wahl
+                                </span>
+                            </label>
+
+                            <div className="grid grid-cols-2 gap-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                                <button
+                                    onClick={() => setHealthInsuranceType('statutory')}
+                                    className={cn(
+                                        "py-2 px-3 rounded-lg text-xs font-bold transition-all",
+                                        healthInsuranceType === 'statutory'
+                                            ? "bg-slate-800 text-white shadow"
+                                            : "text-slate-400 hover:text-slate-300"
+                                    )}
+                                >
+                                    Gesetzlich
+                                </button>
+                                <button
+                                    onClick={() => setHealthInsuranceType('private')}
+                                    className={cn(
+                                        "py-2 px-3 rounded-lg text-xs font-bold transition-all",
+                                        healthInsuranceType === 'private'
+                                            ? "bg-white text-slate-950 shadow-lg shadow-slate-900/20"
+                                            : "text-slate-400 hover:text-slate-300"
+                                    )}
+                                >
+                                    Privat
+                                </button>
+                            </div>
+
+                            {healthInsuranceType === 'private' && (
+                                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
+                                    <label htmlFor="pkv-amount" className="text-sm font-medium text-slate-400 block">
+                                        Monatlicher Beitrag (PKV + PV)
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                                            <Euro className="w-4 h-4" />
+                                        </div>
+                                        <input
+                                            id="pkv-amount"
+                                            type="number"
+                                            value={privateKvAmount || ''}
+                                            onChange={(e) => setPrivateKvAmount(parseFloat(e.target.value))}
+                                            placeholder="z.B. 500"
+                                            className="w-full bg-slate-950 border border-slate-800 text-white pl-9 pr-3 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 leading-tight">
+                                        Der Arbeitgeberzuschuss wird automatisch berücksichtigt (max. 50% vom GKV-Höchstsatz).
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
+
 
             {/* Collapsible Simulation / Expert Settings */}
             <div className="border border-slate-800 rounded-xl overflow-hidden">
@@ -688,26 +772,26 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                         Bitte zuerst ein Gehalt eingeben
                     </div>
                 )}
-            <button
-                onClick={handleCalculate}
-                disabled={isLoading}
-                className={cn(
-                    "w-full text-white font-bold py-4 sm:py-3.5 px-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 group",
-                    mode === 'future'
-                        ? "bg-rose-600 hover:bg-rose-500 shadow-rose-900/20"
-                        : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-900/20"
-                )}
-            >
-                {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                    <>
-                        <span>{mode === 'future' ? 'Szenario simulieren' : 'Jetzt berechnen'}</span>
-                        <CheckCircle2 className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-                    </>
-                )}
-            </button>
+                <button
+                    onClick={handleCalculate}
+                    disabled={isLoading}
+                    className={cn(
+                        "w-full text-white font-bold py-4 sm:py-3.5 px-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 group",
+                        mode === 'future'
+                            ? "bg-rose-600 hover:bg-rose-500 shadow-rose-900/20"
+                            : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-900/20"
+                    )}
+                >
+                    {isLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                        <>
+                            <span>{mode === 'future' ? 'Szenario simulieren' : 'Jetzt berechnen'}</span>
+                            <CheckCircle2 className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                        </>
+                    )}
+                </button>
             </div>
-        </div>
+        </div >
     );
 }

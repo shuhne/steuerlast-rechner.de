@@ -98,7 +98,8 @@ export class SocialSecurity2026 {
         // Surcharge (Zuschlag für Kinderlose)
         const age = 2026 - yearOfBirth;
         let isChildlessSurcharge = false;
-        if (!hasChildren && age > 23) {
+        // 2026 Logic: Any child (even 0.5) exempts from surcharge
+        if ((!hasChildren || childCount <= 0) && age > 23) {
             isChildlessSurcharge = true;
         }
 
@@ -108,14 +109,19 @@ export class SocialSecurity2026 {
 
         // Relief (Abschlag)
         let relief = 0.0;
-        if (hasChildren && childCount >= 2) {
-            const eligibleChildrenForRelief = Math.min(childCount, this.PV_CHILD_RELIEF_MAX_CHILDREN) - 1;
+        // Relief applies from 2nd child onwards. Use integer part of childCount.
+        // e.g. 1.5 -> 1 child -> no relief. 2.5 -> 2 children -> relief for 1 child (2nd).
+        const childCountInt = Math.floor(childCount);
+        if (hasChildren && childCountInt >= 2) {
+            const eligibleChildrenForRelief = Math.min(childCountInt, this.PV_CHILD_RELIEF_MAX_CHILDREN) - 1;
             relief = eligibleChildrenForRelief * this.PV_CHILD_RELIEF;
         }
 
         const pvAnFinalRate = Math.max(0, pvAnBaseRate - relief);
 
         let pvEmployee = 0.0;
+        // If Private KV -> Statutory PV is also 0 (User pays PV via PKV bill usually or separate private PV)
+        // We assume the user input for PKV includes PV or they want it that way.
         if (!isPrivateKv) {
             pvEmployee = pvBasis * pvAnFinalRate;
         }
