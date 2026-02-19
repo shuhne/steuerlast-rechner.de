@@ -6,7 +6,7 @@ export function ProtectedAddress() {
     const [content, setContent] = useState<React.ReactNode>(null);
 
     useEffect(() => {
-        // Base64 encoded parts to avoid plain text in source
+        // Adresse als Base64 kodiert (einfacher Bot-Schutz, kein Sicherheitsmechanismus)
         // "Sascha Huhne (B.Sc. Wirtschaftsinformatik)"
         const p1 = "U2FzY2hhIEh1aG5lIChCLlNjLiBXaXJ0c2NoYWZ0c2luZm9ybWF0aWsp";
         // "Fischerinsel 9"
