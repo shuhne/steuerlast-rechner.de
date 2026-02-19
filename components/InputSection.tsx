@@ -329,6 +329,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
         setMode('current');
         setSelectedScenario('pessimist_2035');
         setShowCustomSettings(false);
+        setShowSalaryHint(false);
 
         // Custom Simulation Values
         setSimRv(18.6);
