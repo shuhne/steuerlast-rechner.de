@@ -306,6 +306,46 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
         performCalculation();
     };
 
+    const handleReset = () => {
+        // Basic States
+        setGrossSalary('');
+        setPeriod('yearly');
+        setTaxClass('1');
+        setChurchTax(false);
+        setState('be');
+
+        // Slider logic
+        setBaseSalary(0);
+        setWageRaise(0);
+        setWorkLoad(100);
+
+        // Age and Children
+        setAge(30);
+        setAgeInput('30');
+        setHasChildren(false);
+        setChildCount(0);
+
+        // Future Mode
+        setMode('current');
+        setSelectedScenario('pessimist_2035');
+        setShowCustomSettings(false);
+
+        // Custom Simulation Values
+        setSimRv(18.6);
+        setSimAv(2.6);
+        setSimKvAdd(2.9);
+        setSimPv(3.6);
+        setSimTaxFactor(1.0);
+
+        // PKV
+        setHealthInsuranceType('statutory');
+        setPrivateKvAmount(0);
+
+        // Clear results and sync display period
+        onCalculate(null);
+        onDisplayPeriodChange('yearly');
+    };
+
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-xl shadow-slate-950/50 space-y-6">
 
@@ -318,7 +358,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                     </div>
                     {grossSalary && parseGermanNumber(grossSalary) > 0 && (
                         <button
-                            onClick={() => window.location.reload()}
+                            onClick={handleReset}
                             className="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded hover:bg-slate-800"
                             aria-label="Alle Eingaben zurücksetzen"
                             title="Zurücksetzen"
