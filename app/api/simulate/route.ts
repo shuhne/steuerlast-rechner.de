@@ -18,10 +18,15 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(simulationResult);
     } catch (error) {
-        console.error('Simulation Error:', error);
+        const message = error instanceof Error ? error.message : String(error);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('Simulation Error:', error);
+        } else {
+            console.error('Simulation Error:', message);
+        }
         return NextResponse.json(
             { error: 'Failed to run simulation' },
-            { status: 400 }
+            { status: 500 }
         );
     }
 }

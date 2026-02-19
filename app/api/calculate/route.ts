@@ -18,10 +18,15 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(taxResult);
     } catch (error) {
-        console.error('Calculation Error:', error);
+        const message = error instanceof Error ? error.message : String(error);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('Calculation Error:', error);
+        } else {
+            console.error('Calculation Error:', message);
+        }
         return NextResponse.json(
             { error: 'Failed to calculate tax' },
-            { status: 400 }
+            { status: 500 }
         );
     }
 }

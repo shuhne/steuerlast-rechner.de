@@ -18,10 +18,15 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(curveResult);
     } catch (error) {
-        console.error('Curve Generation Error:', error);
+        const message = error instanceof Error ? error.message : String(error);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('Curve Generation Error:', error);
+        } else {
+            console.error('Curve Generation Error:', message);
+        }
         return NextResponse.json(
             { error: 'Failed to generate curve' },
-            { status: 400 }
+            { status: 500 }
         );
     }
 }
