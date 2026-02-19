@@ -1,6 +1,12 @@
 import React from 'react';
 
 interface StructuredDataProps {
+    /**
+     * Optional structured data override. Must NEVER contain user-supplied strings.
+     * Only pass hardcoded, trusted values (e.g. legal/Impressum metadata).
+     * User input here would bypass XSS protections since this renders into a
+     * script tag via dangerouslySetInnerHTML.
+     */
     data?: Record<string, any>;
 }
 
@@ -23,10 +29,14 @@ export function StructuredData({ data }: StructuredDataProps) {
 
     const structuredData = data || defaultData;
 
+    // Escape </script> sequences to prevent premature script-tag termination (XSS).
+    // JSON.stringify does not escape these sequences on its own.
+    const safeJson = JSON.stringify(structuredData).replace(/<\/script>/gi, '<\\/script>');
+
     return (
         <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+            dangerouslySetInnerHTML={{ __html: safeJson }}
         />
     );
 }
