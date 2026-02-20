@@ -21,7 +21,7 @@ export const TaxRequestSchema = z.object({
     state: z.enum(GERMAN_STATE_CODES),
     period: z.enum(['yearly', 'monthly']),
     has_children: z.boolean().optional(),
-    child_count: z.number().int().min(0).max(20).optional(),
+    child_count: z.number().min(0).max(20).optional(),
     age: z.number().int().min(0).max(120).optional(),
     year_of_birth: z.number().int().min(1900).max(new Date().getFullYear()).optional(),
     health_insurance_type: z.enum(['statutory', 'private']).optional(),
