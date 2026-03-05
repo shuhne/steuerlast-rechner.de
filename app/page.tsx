@@ -13,6 +13,7 @@ export default function Home() {
   const [referenceNetIncome, setReferenceNetIncome] = useState<number | null>(null);
   const [baseNetIncome, setBaseNetIncome] = useState<number | null>(null); // Base value for slider comparison (0% raise, 100% workload)
   const [userAge, setUserAge] = useState<number>(30);
+  const [weeklyHours, setWeeklyHours] = useState<number>(40);
   const [loading, setLoading] = useState(false);
   const [displayPeriod, setDisplayPeriod] = useState<DisplayPeriod>('yearly');
 
@@ -130,10 +131,10 @@ export default function Home() {
 
   return (
     <CalculatorLayout
-      sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />}
+      sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} weeklyHours={weeklyHours} onWeeklyHoursChange={setWeeklyHours} />}
       results={
         <div ref={resultsRef} className="scroll-mt-6">
-          <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} baseNetIncome={baseNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} />
+          <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} baseNetIncome={baseNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} weeklyHours={weeklyHours} />
         </div>
       }
       content={seoContent}

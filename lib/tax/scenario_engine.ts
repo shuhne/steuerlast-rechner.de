@@ -44,46 +44,35 @@ export class ScenarioEngine {
 
         const totalSv = sv.rv + sv.av + sv.kv + sv.pv;
 
-        // 2. Taxable Income (Simplified)
+        // 2. Taxable Income (Simplified for Display KPI only)
         // zvE = Gross - SV (Employee Share) - Werbungskosten (Standard 1230€) - Sonderausgaben (Pauschal 36€)
-        // Note: Vorsorgeaufwendungen are deductible. 
-        // Simplified: Deductible SV = KV (minus claim for sick pay ~4%) + PV + RV. 
-
-        const deductibleRv = sv.rv;
-        const deductibleKvPv = (sv.kv + sv.pv); // Simplified
-
         const WERBUNGSKOSTEN = 1230.0;
         const SONDERAUSGABEN = 36.0;
-
-        const deductions = deductibleRv + deductibleKvPv + WERBUNGSKOSTEN + SONDERAUSGABEN;
+        const deductions = sv.rv + sv.kv + sv.pv + WERBUNGSKOSTEN + SONDERAUSGABEN;
         const zvE = Math.max(0, gross - deductions);
 
-        // 3. Taxes
-        // Modifiers
-        let taxFactor = 1.0;
-        let soliFactor = 1.0;
-        if (simSettings) {
-            taxFactor = simSettings.income_tax_factor;
-            soliFactor = simSettings.soli_factor;
-        }
+        // 3. Taxes (Official BMF Lohnsteuer 2026)
+        let taxFactor = simSettings?.income_tax_factor || 1.0;
+        let soliFactor = simSettings?.soli_factor || 1.0;
 
-        // Pass 'age' to TaxCalculator for Altersentlastungsbetrag
-        const est = TaxCalculator2026.calculateIncomeTax(zvE, taxFactor, age);
+        const lstResult = TaxCalculator2026.calculateLohnsteuer(
+            gross,
+            req.tax_class || 1,
+            req.has_children || false,
+            req.child_count || 0,
+            age,
+            req.state,
+            req.health_insurance_type === "private",
+            req.kv_add_rate || 2.9,
+            req.private_kv_amount || 0
+        );
 
-        // Child Allowance Impact on Soli & Church Tax
-        // The allowance reduces the zvE base for Soli/KiSt, but NOT for the main Lohnsteuer (est).
-        let est_Soli_Base = est;
-        if (req.child_count && req.child_count > 0) {
-            const childAllowance = req.child_count * TaxCalculator2026.KINDERFREIBETRAG_2026;
-            const zvE_Soli = Math.max(0, zvE - childAllowance);
-            est_Soli_Base = TaxCalculator2026.calculateIncomeTax(zvE_Soli, taxFactor, age);
-        }
+        let est = lstResult.incomeTax * taxFactor;
+        let soli = lstResult.soli * soliFactor;
 
-        const soli = TaxCalculator2026.calculateSoli(est_Soli_Base, false, soliFactor);
         let kist = 0.0;
         if (req.church_tax) {
-            // Church tax also uses the reduced base
-            kist = TaxCalculator2026.calculateChurchTax(est_Soli_Base, req.state);
+            kist = TaxCalculator2026.calculateChurchTax(lstResult.churchBase, req.state);
         }
 
         const totalTax = est + soli + kist;

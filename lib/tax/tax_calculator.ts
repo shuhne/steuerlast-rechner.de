@@ -1,3 +1,6 @@
+import { Lohnsteuer2026Big } from './Lohnsteuer2026';
+import Big from 'big.js';
+
 export class TaxCalculator2026 {
     // 2026 Constants
     static readonly GRUNDFREIBETRAG = 12348;
@@ -12,6 +15,91 @@ export class TaxCalculator2026 {
     // Child Allowance 2026 (Annual: Child 6828 + BEA 2928 = 9756)
     static readonly KINDERFREIBETRAG_2026 = 9756;
 
+    // Helper to run full Lohnsteuer calculation using official BMF 2026 PAP
+    static calculateLohnsteuer(
+        grossYearly: number,
+        taxClass: number,
+        hasChildren: boolean,
+        childCount: number,
+        age: number,
+        state: string,
+        isPrivateKv: boolean,
+        kvZusatz: number,
+        privateKvMonthly: number
+    ): { incomeTax: number; soli: number; churchBase: number } {
+        let lst: any = new Lohnsteuer2026Big();
+
+        // Init expected inputs
+        lst.VBEZ = new Big(0);
+        lst.VBEZM = new Big(0);
+        lst.VBEZS = new Big(0);
+        lst.LZZFREIB = new Big(0);
+        lst.LZZHINZU = new Big(0);
+        lst.VKAPA = new Big(0);
+        lst.VMT = new Big(0);
+        lst.ZMVB = 0;
+        lst.JRE4 = new Big(0);
+        lst.JVBEZ = new Big(0);
+        lst.SONSTB = new Big(0);
+        lst.STERBE = new Big(0);
+        lst.VKVSONST = new Big(0);
+        lst.ENTSCH = new Big(0);
+        lst.VJAHR = 0;
+        lst.PKPV = new Big(0);
+        lst.SONSTENT = new Big(0);
+        lst.JRE4ENT = new Big(0);
+        lst.MBV = new Big(0);
+        lst.JFREIB = new Big(0);
+        lst.JHINZU = new Big(0);
+        lst.af = 1;
+        lst.f = 1.0;
+        lst.R = 0;
+        lst.PVS = 0;
+        lst.PVZ = 0;
+        lst.KVZ = new Big(0);
+
+        lst.RE4 = new Big(grossYearly).mul(100);
+        lst.STKL = taxClass;
+        lst.LZZ = 1;
+
+        if (age > 64) {
+            lst.ALTER1 = 1;
+            lst.AJAHR = 2026 - age + 64;
+        } else {
+            lst.ALTER1 = 0;
+        }
+
+        lst.ZKF = new Big(childCount);
+
+        if (state === 'SN') {
+            lst.PVS = 1;
+        }
+
+        if (!isPrivateKv) {
+            lst.KRV = 0;
+            lst.PKV = 0;
+            lst.KVZ = new Big(kvZusatz);
+            if (age > 23 && !hasChildren) {
+                lst.PVZ = 1;
+            }
+        } else {
+            lst.KRV = 0;
+            lst.PKV = 1;
+            lst.PKPV = new Big(privateKvMonthly).mul(100);
+        }
+
+        lst.calculate();
+
+        return {
+            incomeTax: lst.LSTLZZ.toNumber() / 100,
+            soli: lst.SOLZLZZ.toNumber() / 100,
+            churchBase: lst.BK.toNumber() / 100  // Bemessungsgrundlage for church tax
+        };
+    }
+
+    /**
+     * @deprecated Used for pure ESt calculation without Lohnsteuer rules
+     */
     /**
      * Calculates the German Income Tax (ESt) for 2026 based on §32a EStG.
      * Input: zu versteuerndes Einkommen (zvE)

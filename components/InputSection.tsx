@@ -52,6 +52,8 @@ interface InputSectionProps {
     hasResult?: boolean;
     displayPeriod: DisplayPeriod;
     onDisplayPeriodChange: (period: DisplayPeriod) => void;
+    weeklyHours: number;
+    onWeeklyHoursChange: (hours: number) => void;
 }
 
 const SCENARIOS = {
@@ -96,7 +98,7 @@ const SCENARIOS = {
     },
 };
 
-export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod, onDisplayPeriodChange }: InputSectionProps) {
+export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod, onDisplayPeriodChange, weeklyHours, onWeeklyHoursChange }: InputSectionProps) {
     // Basic States
     // Initialize with formatted string
     const [grossSalary, setGrossSalary] = useState<string>('');
@@ -178,7 +180,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario, healthInsuranceType, privateKvAmount]);
+    }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario, healthInsuranceType, privateKvAmount, weeklyHours]);
 
     // Handle Manual Input
     const handleManualInput = (val: string) => {
@@ -318,6 +320,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
         setBaseSalary(0);
         setWageRaise(0);
         setWorkLoad(100);
+        onWeeklyHoursChange(40);
 
         // Age and Children
         setAge(30);
@@ -526,6 +529,39 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                                 {cls}
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                {/* Wochenstunden */}
+                <div className="space-y-2">
+                    <label htmlFor="weekly-hours" className="text-sm font-medium text-slate-400 block">Wochenstunden</label>
+                    <div className="relative group">
+                        <input
+                            id="weekly-hours"
+                            type="number"
+                            min="1" max="168" step="0.5"
+                            value={weeklyHours || ''}
+                            onChange={(e) => onWeeklyHoursChange(parseFloat(e.target.value) || 0)}
+                            onBlur={() => {
+                                const val = Math.max(1, Math.min(168, weeklyHours || 40));
+                                onWeeklyHoursChange(val);
+                            }}
+                            className="w-full bg-slate-950 border border-slate-800 text-white px-3 py-2.5 rounded-lg text-base sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <div className="absolute right-1 top-1 bottom-1 w-10 flex flex-col gap-0.5 bg-slate-900 rounded p-0.5 border border-slate-800">
+                            <button
+                                onClick={() => onWeeklyHoursChange(Math.min(168, (weeklyHours || 40) + 1))}
+                                className="flex-1 text-[10px] font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                            >
+                                +
+                            </button>
+                            <button
+                                onClick={() => onWeeklyHoursChange(Math.max(1, (weeklyHours || 40) - 1))}
+                                className="flex-1 text-[10px] font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                            >
+                                −
+                            </button>
+                        </div>
                     </div>
                 </div>
 
