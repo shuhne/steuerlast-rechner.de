@@ -38,9 +38,6 @@ export default function Home() {
     }
 
     setLoading(true);
-    setResult(null);
-    setScenarios(null);
-    setCurve(null);
     // Store user age for comparison
     setUserAge(data.age || 30);
 

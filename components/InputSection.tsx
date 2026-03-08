@@ -218,7 +218,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
     };
 
     const getSimulationSettings = (): SimulationSettings | null => {
-        if (mode === 'future' || showCustomSettings) {
+        if (mode === 'future') {
             return {
                 rv_rate_total: simRv / 100,
                 av_rate_total: simAv / 100,
@@ -240,7 +240,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
         }
 
         // Use explicit settings if provided, otherwise derive from current state
-        let settings = explicitSettings ?? getSimulationSettings();
+        let settings = explicitSettings !== undefined ? explicitSettings : getSimulationSettings();
 
         // Determine if this is a base calculation (no slider adjustments, current mode)
         const isBaseCalculation = mode === 'current' && wageRaise === 0 && workLoad === 100;
