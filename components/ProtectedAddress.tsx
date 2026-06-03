@@ -17,19 +17,16 @@ export function ProtectedAddress() {
         const decode = (str: string) => {
             try {
                 return atob(str);
-            } catch (e) {
+            } catch {
                 return "Fehler beim Laden";
             }
         };
 
-        setContent(
-            <div className="select-none" onCopy={(e) => e.preventDefault()}>
-                <span>{decode(p1)}</span><br />
-                <span>{decode(p2)}</span><br />
-                <span>{decode(p3)}</span><br />
-                <span>Deutschland</span>
-            </div>
-        );
+        setContent({
+            p1: decode(p1),
+            p2: decode(p2),
+            p3: decode(p3),
+        });
     }, []);
 
     // Placeholder during SSR / initial load (bot sees this)
@@ -37,5 +34,12 @@ export function ProtectedAddress() {
         return <div className="h-20 w-48 bg-slate-800/50 animate-pulse rounded" aria-hidden="true" />;
     }
 
-    return content;
+    return (
+        <div className="select-none" onCopy={(e) => e.preventDefault()}>
+            <span>{(content as any).p1}</span><br />
+            <span>{(content as any).p2}</span><br />
+            <span>{(content as any).p3}</span><br />
+            <span>Deutschland</span>
+        </div>
+    );
 }
