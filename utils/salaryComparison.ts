@@ -1,4 +1,5 @@
 import salaryData from '../data/salary_stats_2025.json';
+import { TaxCalculator1958 } from '../lib/tax/tax_calculator_1958';
 
 // Extend Math interface for the polyfill
 declare global {
@@ -26,9 +27,23 @@ const SIGMA_LOG_NORMAL = 0.5; // Assumed standard deviation for income distribut
 /**
  * Returns the estimated annual gross median salary for a specific age and gender.
  */
-function getEstimatedMedian(age: number, gender: 'male' | 'female' | 'all'): number {
-    const anchors = salaryData.anchors;
+function getEstimatedMedian(
+    age: number, 
+    gender: 'male' | 'female' | 'all',
+    historicalMode?: 'wage' | 'price' | null
+): number {
     const factors = salaryData.curve_factors as Record<string, number>;
+
+    let anchors = salaryData.anchors;
+    if (historicalMode) {
+        const dmToEurFactor = TaxCalculator1958.getScalingFactors(historicalMode).dmToEurFactor;
+        anchors = {
+            median_all: Math.round(4660 * dmToEurFactor),
+            median_male: Math.round(5360 * dmToEurFactor),
+            median_female: Math.round(3140 * dmToEurFactor),
+            average_all: Math.round(5330 * dmToEurFactor)
+        };
+    }
 
     // Linear interpolation between defined age points
     const ages = Object.keys(factors).map(Number).sort((a, b) => a - b);
@@ -70,13 +85,13 @@ function getEstimatedMedian(age: number, gender: 'male' | 'female' | 'all'): num
 /**
  * Generates data for the Dual-Line Chart (Male/Female trends over age range).
  */
-export function getChartData(): ComparisonData[] {
+export function getChartData(historicalMode?: 'wage' | 'price' | null): ComparisonData[] {
     const data: ComparisonData[] = [];
     for (let age = 18; age <= 67; age++) {
         data.push({
             age,
-            medianMale: getEstimatedMedian(age, 'male'),
-            medianFemale: getEstimatedMedian(age, 'female')
+            medianMale: getEstimatedMedian(age, 'male', historicalMode),
+            medianFemale: getEstimatedMedian(age, 'female', historicalMode)
         });
     }
     return data;
@@ -88,10 +103,11 @@ export function getChartData(): ComparisonData[] {
 export function getUserComparison(
     annualGross: number,
     age: number,
-    gender: 'male' | 'female' | 'all' = 'all'
+    gender: 'male' | 'female' | 'all' = 'all',
+    historicalMode?: 'wage' | 'price' | null
 ): UserComparisonResult {
 
-    const peerMedian = getEstimatedMedian(age, gender);
+    const peerMedian = getEstimatedMedian(age, gender, historicalMode);
 
     // 2. Calculate Percentile using Log-Normal CDF approximation
     // mu = ln(median)

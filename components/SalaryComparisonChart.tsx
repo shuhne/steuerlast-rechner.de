@@ -12,25 +12,26 @@ interface SalaryComparisonChartProps {
     annualGross: number; // Yearly gross income
     age: number;
     displayPeriod: DisplayPeriod;
+    historicalMode?: 'wage' | 'price' | null;
 }
 
-export function SalaryComparisonChart({ annualGross, age, displayPeriod }: SalaryComparisonChartProps) {
+export function SalaryComparisonChart({ annualGross, age, displayPeriod, historicalMode }: SalaryComparisonChartProps) {
     const gender = 'all';
 
     // Load Chart Data (Memoized as it's static/calculated once)
     const chartData = useMemo(() => {
-        const rawData = getChartData();
+        const rawData = getChartData(historicalMode);
         return rawData.map(point => ({
             ...point,
             medianMale: convertToDisplayPeriod(point.medianMale, displayPeriod),
             medianFemale: convertToDisplayPeriod(point.medianFemale, displayPeriod),
         }));
-    }, [displayPeriod]);
+    }, [displayPeriod, historicalMode]);
 
     // Calculate User Comparison
     const comparison = useMemo(() => {
-        return getUserComparison(annualGross, age, gender);
-    }, [annualGross, age, gender]);
+        return getUserComparison(annualGross, age, gender, historicalMode);
+    }, [annualGross, age, gender, historicalMode]);
 
     // Formatter for currency
     const formatCurrency = (val: number) => new Intl.NumberFormat('de-DE', {
@@ -42,6 +43,23 @@ export function SalaryComparisonChart({ annualGross, age, displayPeriod }: Salar
     // X-Axis Ticks (every 5 years)
     const xTicks = [18, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 67];
 
+    // Dynamic titles and tooltips based on historical mode
+    const chartTitle = historicalMode
+        ? `Gehaltsvergleich (1958, ${historicalMode === 'wage' ? 'Lohnbereinigt' : 'Preisbereinigt'})`
+        : 'Gehaltsvergleich';
+
+    const chartSubtitle = historicalMode
+        ? (historicalMode === 'wage'
+            ? 'Vergleich mit lohnbereinigten Werten aus 1958 (heutiges Lohnniveau)'
+            : 'Vergleich mit kaufkraftbereinigten Werten aus 1958 (inkl. Inflation)')
+        : 'Vergleich mit Daten aus 2025 (Prognose Stepstone)';
+
+    const tooltipText = historicalMode
+        ? (historicalMode === 'wage'
+            ? 'Datenbasis: Durchschnittliches Einkommen 1958 (5.330 DM) hochgerechnet auf das heutige Niveau. Die Kurven zeigen die geschätzten Mediane basierend auf damaligen Einkommensverhältnissen (Männer/Frauen).'
+            : 'Datenbasis: Durchschnittliches Einkommen 1958 (5.330 DM) kaufkraftbereinigt basierend auf der VPI-Preisentwicklung. Da die Reallöhne 1958 deutlich niedriger waren, liegst du mit heutigen Einkommen im Vergleich sehr hoch.')
+        : 'Datenbasis: Stepstone Gehaltsreport 2025, Destatis Verdienststrukturen, Extrapolation über Alterskoeffizienten. Die Werte sind statistische Näherungen (Median) und dienen der Orientierung.';
+
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-6 shadow-sm">
             {/* Header Section */}
@@ -50,12 +68,12 @@ export function SalaryComparisonChart({ annualGross, age, displayPeriod }: Salar
                     <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                             <Users className="w-5 h-5 text-indigo-400" />
-                            Gehaltsvergleich
+                            {chartTitle}
                         </h3>
-                        <InfoTooltip text="Datenbasis: Stepstone Gehaltsreport 2025, Destatis Verdienststrukturen, Extrapolation über Alterskoeffizienten. Die Werte sind statistische Näherungen (Median) und dienen der Orientierung." />
+                        <InfoTooltip text={tooltipText} />
                     </div>
                     <p className="text-sm text-slate-400 mt-1">
-                        Vergleich mit Daten aus 2025 (Prognose Stepstone)
+                        {chartSubtitle}
                     </p>
                 </div>
 
