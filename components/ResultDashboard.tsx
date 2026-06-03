@@ -86,18 +86,18 @@ export function ResultDashboard({
                 </div>
 
                 {showInfoDetails && (
-                    <div className="mt-4 pt-4 border-t border-slate-800/80 text-xs text-slate-400 space-y-3 leading-relaxed animate-fadeIn">
+                    <div className="mt-4 pt-4 border-t border-slate-800/80 text-sm text-slate-400 space-y-4 leading-relaxed animate-fadeIn">
                         <div>
-                            <span className="font-semibold text-slate-200 block mb-1">1. Deutlich geringere Sozialabgaben damals</span>
-                            Im Jahr 1958 lag die gesamte Belastung der Sozialabgaben für Arbeitnehmer bei nur ca. <strong className="text-emerald-400">10,75 %</strong> (Rentenversicherung: 7%, Arbeitslosenversicherung: 0,5%, Krankenversicherung: ca. 3,25% im Durchschnitt, Pflegeversicherung: 0%). Heute zahlen Arbeitnehmer über <strong className="text-rose-400">20 %</strong> an Sozialabgaben. Die Pflegeversicherung existierte damals noch gar nicht und wurde erst 1995 eingeführt.
+                            <span className="font-semibold text-slate-200 block mb-1">1. Geringere Sozialabgaben</span>
+                            Die Gesamtbelastung durch Sozialabgaben für Arbeitnehmer lag 1958 bei nur ca. <strong className="text-emerald-400">10,75 %</strong> (RV: 7%, KV: ca. 3,25%, AV: 0,5%). Heute zahlen Arbeitnehmer über <strong className="text-rose-400">20 %</strong>. Die Pflegeversicherung existierte damals noch gar nicht.
                         </div>
                         <div>
-                            <span className="font-semibold text-slate-200 block mb-1">2. Verschiebung der Steuerprogression (Kalte Progression & Mittelstandsbauch)</span>
-                            Der Spitzensteuersatz von 53 % griff 1958 erst ab einem zu versteuernden Einkommen von 110.040 DM. Das entsprach dem <strong className="text-emerald-400">20-fachen Durchschnittslohn</strong> damals (heute lohnbereinigt über 1 Million €!). Heute greift der Spitzensteuersatz (42%) bereits ab ca. 66.000 € (nur dem 1,3-fachen Durchschnittsgehalt). Die Steuerkurve wurde im Laufe der Zeit extrem nach links verschoben, wodurch mittlere und kleinere Einkommen heute prozentual viel früher und stärker belastet werden.
+                            <span className="font-semibold text-slate-200 block mb-1">2. Die Rolle der Vermögensteuer</span>
+                            1958 trug die <strong className="text-indigo-300">Vermögensteuer</strong> noch als wichtige Substanzsteuer zur Staatsfinanzierung bei. Weil Vermögen stärker zur Kasse gebeten wurden, konnte der Staat die Einkommensteuer für Normalverdiener moderater gestalten. Erst 1997 wurde die Vermögensteuer ausgesetzt.
                         </div>
                         <div>
-                            <span className="font-semibold text-slate-200 block mb-1">Wann und wie wurde das System umgebaut?</span>
-                            Das deutsche Steuersystem wurde in mehreren großen Reformen umstrukturiert, insbesondere mit der Einführung des linear-progressiven Tarifs **1990** und den darauffolgenden Reformen der **Schröder-Fischer-Regierung (2000–2005)**. Während der Spitzensteuersatz gesenkt wurde, wurden gleichzeitig die Progressionsstufen gestaucht. Durch die Demografie und den medizinischen Fortschritt stiegen die Sozialabgaben seit den 1970er Jahren kontinuierlich an, was den Netto-Lohnanteil für den Durchschnittsverdiener bis heute stetig reduziert hat.
+                            <span className="font-semibold text-slate-200 block mb-1">3. Steuerprogression: Der „Mittelstandsbauch“</span>
+                            Der damalige Spitzensteuersatz von 53 % griff erst beim <strong className="text-emerald-400">20-fachen Durchschnittslohn</strong> (heute lohnbereinigt &gt;1 Mio. €). Heute greift der Spitzensteuersatz (42%) bereits beim 1,3-fachen Durchschnittsgehalt. Die Steuerkurve hat sich über die Jahrzehnte stark zulasten mittlerer Einkommen verschoben.
                         </div>
                     </div>
                 )}
@@ -189,20 +189,20 @@ export function ResultDashboard({
                 <div className="md:col-span-2 lg:col-span-2 bg-gradient-to-br from-indigo-900/50 to-slate-900 border border-indigo-500/30 rounded-xl p-4 sm:p-5 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/20 transition-all duration-700"></div>
 
-                    <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-4 w-full h-full">
-                        <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
-                                <Wallet className="w-5 h-5 text-indigo-400" />
-                                <h3 className="text-lg font-semibold text-white">Dein Nettogehalt{historicalMode ? ' (1958)' : ''}</h3>
+                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 w-full h-full">
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Wallet className="w-6 h-6 text-indigo-400" />
+                                <h3 className="text-xl font-semibold text-white">Dein Nettogehalt{historicalMode ? ' (1958)' : ''}</h3>
                             </div>
                             <div>
-                                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-none mt-1">
+                                <div className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-none">
                                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayPeriod === 'monthly' ? net_income_monthly : net_income)}
                                 </div>
-                                <div className="flex items-center gap-1 text-sm mt-3.5">
+                                <div className="flex items-center gap-1.5 text-sm mt-4">
                                     <button
                                         onClick={() => onDisplayPeriodChange('monthly')}
-                                        className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${displayPeriod === 'monthly'
+                                        className={`px-3 py-1 rounded text-xs font-bold transition-colors ${displayPeriod === 'monthly'
                                             ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
                                             : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
                                             }`}
@@ -211,7 +211,7 @@ export function ResultDashboard({
                                     </button>
                                     <button
                                         onClick={() => onDisplayPeriodChange('yearly')}
-                                        className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${displayPeriod === 'yearly'
+                                        className={`px-3 py-1 rounded text-xs font-bold transition-colors ${displayPeriod === 'yearly'
                                             ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
                                             : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
                                             }`}
@@ -223,7 +223,7 @@ export function ResultDashboard({
                         </div>
 
                         {compElement && (
-                            <div className="shrink-0 mt-1 sm:mt-0">
+                            <div className="shrink-0 w-full md:w-auto bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
                                 {compElement}
                             </div>
                         )}
