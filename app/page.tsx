@@ -165,7 +165,7 @@ export default function Home() {
       sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} weeklyHours={weeklyHours} onWeeklyHoursChange={setWeeklyHours} />}
       results={
         <div ref={resultsRef} className="scroll-mt-6">
-          <ResultDashboard result={result} currentResult={currentResult} historicalMode={historicalMode} scenarios={scenarios} referenceNetIncome={referenceNetIncome} baseNetIncome={baseNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} weeklyHours={weeklyHours} />
+          <ResultDashboard result={result} currentResult={currentResult} historicalMode={historicalMode} scenarios={scenarios} referenceNetIncome={referenceNetIncome} baseNetIncome={baseNetIncome} curve={curve} age={userAge} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} weeklyHours={weeklyHours} />
         </div>
       }
       content={seoContent}

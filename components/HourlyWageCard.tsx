@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 interface HourlyWageCardProps {
     gross_income: number;
@@ -20,10 +20,10 @@ export function calculateHourlyWages(gross_income: number, net_income: number, w
     return { grossHourly, netHourly, isBelowMinimumWage, minimumWage2026 };
 }
 
-export function HourlyWageCard({ gross_income, net_income, weeklyHours, displayPeriod }: HourlyWageCardProps) {
+export function HourlyWageCard({ gross_income, net_income, weeklyHours, displayPeriod: _displayPeriod }: HourlyWageCardProps) {
     if (!gross_income || !weeklyHours) return null;
 
-    const { grossHourly, netHourly, isBelowMinimumWage, minimumWage2026 } = calculateHourlyWages(gross_income, net_income, weeklyHours);
+    const { grossHourly, netHourly, isBelowMinimumWage } = calculateHourlyWages(gross_income, net_income, weeklyHours);
 
     const formattedGrossHourly = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(grossHourly);
     const formattedNetHourly = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(netHourly);

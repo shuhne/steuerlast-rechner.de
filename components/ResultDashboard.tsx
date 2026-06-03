@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { Wallet, Building2, HeartPulse, History, AlertTriangle, Info, Scale, ArrowRight, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { Wallet, Building2, HeartPulse, History, ChevronDown, ChevronUp } from 'lucide-react';
 import { TaxResult, ScenarioResult, CurvePoint, DisplayPeriod } from '../types/api';
 import { convertToDisplayPeriod } from '../utils/periodConverter';
 import { ScenarioChart } from './ScenarioChart';

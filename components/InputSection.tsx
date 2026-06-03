@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Euro, Calculator, MapPin, CheckCircle2, ChevronDown, ChevronUp, Settings2, AlertTriangle, Timer, Trash2, History } from 'lucide-react';
+import { Euro, Calculator, CheckCircle2, ChevronDown, ChevronUp, Settings2, AlertTriangle, Timer, Trash2, History } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { TaxRequest, SimulationSettings, DisplayPeriod } from '../types/api';
@@ -29,7 +29,7 @@ const formatGermanNumber = (num: number): string => {
 // We only format the integer part with dots, leave decimal part alone for typing
 const formatLiveInput = (val: string): string => {
     // Remove non-numeric/comma chars
-    let clean = val.replace(/[^0-9,]/g, '');
+    const clean = val.replace(/[^0-9,]/g, '');
 
     // Split integer and decimal
     const parts = clean.split(',');
@@ -98,7 +98,7 @@ const SCENARIOS = {
     },
 };
 
-export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod, onDisplayPeriodChange, weeklyHours, onWeeklyHoursChange }: InputSectionProps) {
+export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod: _displayPeriod, onDisplayPeriodChange, weeklyHours, onWeeklyHoursChange }: InputSectionProps) {
     // Basic States
     // Initialize with formatted string
     const [grossSalary, setGrossSalary] = useState<string>('');
@@ -145,6 +145,55 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
     // If monthly period selected, we project to year for JAEG check
     const projectedYearlyGross = period === 'monthly' ? currentGrossVal * 12 : currentGrossVal;
     const canHavePKV = projectedYearlyGross >= JAEG_2026_EST;
+
+    const getSimulationSettings = (): SimulationSettings | null => {
+        if (mode === 'future') {
+            return {
+                rv_rate_total: simRv / 100,
+                av_rate_total: simAv / 100,
+                kv_rate_add: simKvAdd / 100,
+                pv_rate_total: simPv / 100,
+                income_tax_factor: simTaxFactor,
+                soli_factor: simTaxFactor
+            };
+        }
+        return null;
+    };
+
+    const performCalculation = (explicitSettings?: SimulationSettings | null) => {
+        const finalGross = parseGermanNumber(grossSalary);
+
+        if (finalGross <= 0) {
+            onCalculate(null);
+            return;
+        }
+
+        // Use explicit settings if provided, otherwise derive from current state
+        const settings = explicitSettings !== undefined ? explicitSettings : getSimulationSettings();
+
+        // Determine if this is a base calculation (no slider adjustments, current mode)
+        const isBaseCalculation = mode === 'current' && wageRaise === 0 && workLoad === 100;
+
+        onCalculate({
+            gross_income: period === 'monthly' ? finalGross * 12 : finalGross,
+            period: 'yearly',
+            tax_class: parseInt(taxClass),
+            church_tax: churchTax,
+            state: state.toUpperCase(),
+            has_children: hasChildren,
+            child_count: hasChildren ? childCount : 0,
+            age: age,
+            simulation_settings: settings,
+            historical_mode: mode === 'historical' ? historicalAdjustment : undefined,
+            health_insurance_type: healthInsuranceType,
+            private_kv_amount: healthInsuranceType === 'private' ? privateKvAmount : undefined
+        }, isBaseCalculation);
+
+        // Update Base Salary on explicit calculation if sliders are at default
+        if (wageRaise === 0 && workLoad === 100) {
+            setBaseSalary(parseGermanNumber(grossSalary));
+        }
+    };
 
     // Reset PKV if falling below JAEG
     useEffect(() => {
@@ -218,54 +267,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
         onDisplayPeriodChange(newPeriod);
     };
 
-    const getSimulationSettings = (): SimulationSettings | null => {
-        if (mode === 'future') {
-            return {
-                rv_rate_total: simRv / 100,
-                av_rate_total: simAv / 100,
-                kv_rate_add: simKvAdd / 100,
-                pv_rate_total: simPv / 100,
-                income_tax_factor: simTaxFactor,
-                soli_factor: simTaxFactor
-            };
-        }
-        return null;
-    };
 
-    const performCalculation = (explicitSettings?: SimulationSettings | null) => {
-        let finalGross = parseGermanNumber(grossSalary);
-
-        if (finalGross <= 0) {
-            onCalculate(null);
-            return;
-        }
-
-        // Use explicit settings if provided, otherwise derive from current state
-        let settings = explicitSettings !== undefined ? explicitSettings : getSimulationSettings();
-
-        // Determine if this is a base calculation (no slider adjustments, current mode)
-        const isBaseCalculation = mode === 'current' && wageRaise === 0 && workLoad === 100;
-
-        onCalculate({
-            gross_income: period === 'monthly' ? finalGross * 12 : finalGross,
-            period: 'yearly',
-            tax_class: parseInt(taxClass),
-            church_tax: churchTax,
-            state: state.toUpperCase(),
-            has_children: hasChildren,
-            child_count: hasChildren ? childCount : 0,
-            age: age,
-            simulation_settings: settings,
-            historical_mode: mode === 'historical' ? historicalAdjustment : undefined,
-            health_insurance_type: healthInsuranceType,
-            private_kv_amount: healthInsuranceType === 'private' ? privateKvAmount : undefined
-        }, isBaseCalculation);
-
-        // Update Base Salary on explicit calculation if sliders are at default
-        if (wageRaise === 0 && workLoad === 100) {
-            setBaseSalary(parseGermanNumber(grossSalary));
-        }
-    };
 
     // Effect: Update sim values AND trigger calculation when scenario/mode changes
     useEffect(() => {
@@ -378,6 +380,18 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                 {/* Mode Switcher */}
                 <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
                     <button
+                        onClick={() => { setMode('historical'); setShowCustomSettings(false); }}
+                        className={cn(
+                            "py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all",
+                            mode === 'historical' ? "bg-amber-600 text-white shadow-lg shadow-amber-900/20" : "text-slate-400 hover:text-white"
+                        )}
+                        aria-pressed={mode === 'historical'}
+                        aria-label="Modus: Historisch (1958)"
+                    >
+                        <History className="w-3.5 h-3.5" />
+                        <span>Historisch</span>
+                    </button>
+                    <button
                         onClick={() => setMode('current')}
                         className={cn(
                             "py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all",
@@ -400,18 +414,6 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                     >
                         <Timer className="w-3.5 h-3.5" />
                         <span>Zukunft</span>
-                    </button>
-                    <button
-                        onClick={() => { setMode('historical'); setShowCustomSettings(false); }}
-                        className={cn(
-                            "py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all",
-                            mode === 'historical' ? "bg-amber-600 text-white shadow-lg shadow-amber-900/20" : "text-slate-400 hover:text-white"
-                        )}
-                        aria-pressed={mode === 'historical'}
-                        aria-label="Modus: Historisch (1958)"
-                    >
-                        <History className="w-3.5 h-3.5" />
-                        <span>Historisch</span>
                     </button>
                 </div>
             </div>
