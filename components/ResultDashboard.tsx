@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Wallet, Building2, HeartPulse } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
+import { Wallet, Building2, HeartPulse, History, AlertTriangle, Info, Scale, ArrowRight, TrendingDown } from 'lucide-react';
 import { TaxResult, ScenarioResult, CurvePoint, DisplayPeriod } from '../types/api';
 import { convertToDisplayPeriod } from '../utils/periodConverter';
 import { ScenarioChart } from './ScenarioChart';
@@ -13,6 +13,8 @@ import { HourlyWageCard } from './HourlyWageCard';
 
 interface ResultDashboardProps {
     result: TaxResult | null;
+    currentResult?: TaxResult | null; // For historical mode comparison
+    historicalMode?: 'wage' | 'price' | null; // For historical mode comparison
     scenarios?: ScenarioResult | null;
     curve?: CurvePoint[] | null;
     referenceNetIncome?: number | null; // Reference for future scenario comparison (2026 base)
@@ -23,22 +25,58 @@ interface ResultDashboardProps {
     weeklyHours: number;
 }
 
-export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, baseNetIncome, age = 30, displayPeriod, onDisplayPeriodChange, weeklyHours }: ResultDashboardProps) {
-    if (!result) {
-        return (
-            <div className="flex flex-col items-center justify-center p-8 sm:p-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400">
-                <Wallet className="w-12 h-12 mb-4 text-slate-600" />
-                <h3 className="text-lg font-medium text-white">Noch keine Berechnung</h3>
-                <p className="text-sm mt-1">Bitte gib deine Daten <span className="lg:hidden">oben</span><span className="hidden lg:inline">links</span> ein.</p>
-            </div>
-        );
-    }
+export function ResultDashboard({ 
+    result, 
+    currentResult, 
+    historicalMode, 
+    scenarios, 
+    curve, 
+    referenceNetIncome, 
+    baseNetIncome, 
+    age = 30, 
+    displayPeriod, 
+    onDisplayPeriodChange, 
+    weeklyHours 
+}: ResultDashboardProps) {
+
+    if (!result) return null;
 
     const {
         net_income, net_income_monthly, total_tax, total_social_security,
         income_tax, church_tax, kv_employee, pv_employee, rv_employee, av_employee,
         gross_income
     } = result;
+
+    // Historical mode explanation banner (shown above the standard layout)
+    const historicalBanner = (historicalMode && currentResult) ? (() => {
+        const isWage = historicalMode === 'wage';
+        const factor = isWage ? (5330 / 51944) : (1 / 2.86);
+        const gross_1958_DM = gross_income * factor;
+        const formatDM = (val: number) =>
+            new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'DEM' }).format(val).replace('DEM', 'DM');
+        const formatEUR = (val: number) =>
+            new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val);
+
+        return (
+            <div className="bg-amber-950/20 border border-amber-500/20 rounded-xl p-4 flex gap-3 text-sm text-amber-200">
+                <History className="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
+                <div>
+                    <h4 className="font-bold text-white mb-1">
+                        Historischer Vergleich (1958): {isWage ? 'Lohnbereinigt' : 'Preisbereinigt'}
+                    </h4>
+                    <p className="leading-relaxed">
+                        {isWage ? (
+                            `Dein Gehalt von ${formatEUR(gross_income)} entspricht lohnbereinigt ${formatDM(gross_1958_DM)} im Jahr 1958. Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
+                        ) : (
+                            `Dein Gehalt von ${formatEUR(gross_income)} entspricht kaufkraftbereinigt ${formatDM(gross_1958_DM)} im Jahr 1958 (1 DM ≈ 2,86 € heute). Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
+                        )}
+                    </p>
+                </div>
+            </div>
+        );
+    })() : null;
+
+    // result has already been destructured at the top of the function
 
     // Calculate Comparison
     // Priority 1: Future scenario comparison (referenceNetIncome differs from current)
@@ -84,6 +122,24 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                 </div>
             </div>
         );
+    } else if (historicalMode && currentResult) {
+        // Historical mode - compare 1958 net against 2026 current net
+        const diff = net_income - currentResult.net_income;
+        const displayDiff = convertToDisplayPeriod(diff, displayPeriod);
+        const percent = (diff / currentResult.net_income) * 100;
+        const isPositive = diff > 0;
+
+        compElement = (
+            <div className="absolute top-6 right-6 text-right">
+                <div className={`text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
+                    <span className="text-xs text-slate-400 ml-1 font-normal block md:inline md:ml-2">gegenüber 2026</span>
+                </div>
+                <div className={`text-sm font-medium ${isPositive ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
+                    {isPositive ? '+' : ''}{percent.toFixed(1).replace('.', ',')} %
+                </div>
+            </div>
+        );
     }
 
     const data = [
@@ -96,6 +152,8 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
 
     return (
         <div className="space-y-4">
+            {/* Historical mode explanation banner */}
+            {historicalBanner}
             {/* Top Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Main Result Card */}
@@ -107,7 +165,7 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
                     <div className="relative z-10 flex flex-col h-full items-start justify-center py-1 lg:py-2 gap-1.5">
                         <div className="flex items-center gap-2">
                             <Wallet className="w-5 h-5 text-indigo-400" />
-                            <h3 className="text-lg font-semibold text-white">Dein Nettogehalt</h3>
+                            <h3 className="text-lg font-semibold text-white">Dein Nettogehalt{historicalMode ? ' (1958er Tarif)' : ''}</h3>
                         </div>
                         <div>
                             <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
@@ -251,7 +309,7 @@ export function ResultDashboard({ result, scenarios, curve, referenceNetIncome, 
             {(scenarios || curve || result) && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div className="lg:col-span-2">
-                        <SalaryComparisonChart annualGross={gross_income} age={age} displayPeriod={displayPeriod} />
+                        <SalaryComparisonChart annualGross={gross_income} age={age} displayPeriod={displayPeriod} historicalMode={historicalMode} />
                     </div>
                     {scenarios && <ScenarioChart scenarios={scenarios} displayPeriod={displayPeriod} />}
                     {curve && <OptimizationChart data={curve} displayPeriod={displayPeriod} />}

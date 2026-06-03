@@ -8,6 +8,8 @@ import { TaxRequest, TaxResult, ScenarioResult, CurvePoint, DisplayPeriod } from
 
 export default function Home() {
   const [result, setResult] = useState<TaxResult | null>(null);
+  const [currentResult, setCurrentResult] = useState<TaxResult | null>(null); // For comparing 1958 with 2026
+  const [historicalMode, setHistoricalMode] = useState<'wage' | 'price' | null>(null);
   const [scenarios, setScenarios] = useState<ScenarioResult | null>(null);
   const [curve, setCurve] = useState<CurvePoint[] | null>(null);
   const [referenceNetIncome, setReferenceNetIncome] = useState<number | null>(null);
@@ -32,6 +34,8 @@ export default function Home() {
   const handleCalculate = async (data: TaxRequest | null, isBaseCalculation?: boolean) => {
     if (!data) {
       setResult(null);
+      setCurrentResult(null);
+      setHistoricalMode(null);
       setScenarios(null);
       setCurve(null);
       return;
@@ -40,27 +44,57 @@ export default function Home() {
     setLoading(true);
     // Store user age for comparison
     setUserAge(data.age || 30);
+    setHistoricalMode(data.historical_mode || null);
 
     try {
       // 1. Main Calculation
-      const response = await fetch('/api/calculate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      let resultData: TaxResult;
+      
+      if (data.historical_mode) {
+        // Parallel fetch for both 1958 and 2026
+        const [resp1958, resp2026] = await Promise.all([
+          fetch('/api/calculate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          }),
+          fetch('/api/calculate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...data, historical_mode: undefined }),
+          })
+        ]);
 
-      if (!response.ok) throw new Error('Calculation failed');
-      const resultData: TaxResult = await response.json();
-      setResult(resultData);
+        if (!resp1958.ok || !resp2026.ok) throw new Error('Calculation failed');
+        
+        resultData = await resp1958.json();
+        const currentResultData: TaxResult = await resp2026.json();
+        
+        setResult(resultData);
+        setCurrentResult(currentResultData);
+        setBaseNetIncome(currentResultData.net_income); // Compare 1958 net to 2026 net
+      } else {
+        const response = await fetch('/api/calculate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
 
-      // Store reference if this is a standard calculation (no custom settings)
-      if (!data.simulation_settings) {
-        setReferenceNetIncome(resultData.net_income);
-      }
+        if (!response.ok) throw new Error('Calculation failed');
+        
+        resultData = await response.json();
+        setResult(resultData);
+        setCurrentResult(resultData);
 
-      // Store base net income for slider comparison (0% raise, 100% workload in current mode)
-      if (isBaseCalculation) {
-        setBaseNetIncome(resultData.net_income);
+        // Store reference if this is a standard calculation (no custom settings)
+        if (!data.simulation_settings) {
+          setReferenceNetIncome(resultData.net_income);
+        }
+
+        // Store base net income for slider comparison (0% raise, 100% workload in current mode)
+        if (isBaseCalculation) {
+          setBaseNetIncome(resultData.net_income);
+        }
       }
 
       // 2. Fetch Advanced Data (Parallel)
@@ -131,7 +165,7 @@ export default function Home() {
       sidebar={<InputSection onCalculate={handleCalculate} isLoading={loading} hasResult={!!result} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} weeklyHours={weeklyHours} onWeeklyHoursChange={setWeeklyHours} />}
       results={
         <div ref={resultsRef} className="scroll-mt-6">
-          <ResultDashboard result={result} scenarios={scenarios} referenceNetIncome={referenceNetIncome} baseNetIncome={baseNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} weeklyHours={weeklyHours} />
+          <ResultDashboard result={result} currentResult={currentResult} historicalMode={historicalMode} scenarios={scenarios} referenceNetIncome={referenceNetIncome} baseNetIncome={baseNetIncome} curve={curve} displayPeriod={displayPeriod} onDisplayPeriodChange={setDisplayPeriod} weeklyHours={weeklyHours} />
         </div>
       }
       content={seoContent}

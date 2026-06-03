@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Euro, Calculator, MapPin, CheckCircle2, ChevronDown, ChevronUp, Settings2, AlertTriangle, Timer, Trash2 } from 'lucide-react';
+import { Euro, Calculator, MapPin, CheckCircle2, ChevronDown, ChevronUp, Settings2, AlertTriangle, Timer, Trash2, History } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { TaxRequest, SimulationSettings, DisplayPeriod } from '../types/api';
@@ -119,9 +119,10 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
     const [hasChildren, setHasChildren] = useState<boolean>(false);
     const [childCount, setChildCount] = useState<number>(0);
 
-    // Future Mode States
-    const [mode, setMode] = useState<'current' | 'future'>('current');
+    // Future/Historical Mode States
+    const [mode, setMode] = useState<'current' | 'future' | 'historical'>('current');
     const [selectedScenario, setSelectedScenario] = useState<string>('pessimist_2035');
+    const [historicalAdjustment, setHistoricalAdjustment] = useState<'wage' | 'price'>('wage');
     const [showCustomSettings, setShowCustomSettings] = useState(false);
 
     // Validation message
@@ -180,7 +181,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario, healthInsuranceType, privateKvAmount, weeklyHours]);
+    }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario, historicalAdjustment, healthInsuranceType, privateKvAmount, weeklyHours]);
 
     // Handle Manual Input
     const handleManualInput = (val: string) => {
@@ -255,6 +256,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
             child_count: hasChildren ? childCount : 0,
             age: age,
             simulation_settings: settings,
+            historical_mode: mode === 'historical' ? historicalAdjustment : undefined,
             health_insurance_type: healthInsuranceType,
             private_kv_amount: healthInsuranceType === 'private' ? privateKvAmount : undefined
         }, isBaseCalculation);
@@ -272,10 +274,8 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
         if (mode === 'current') {
             const v = SCENARIOS['current'].values;
             setSimRv(v.rv); setSimAv(v.av); setSimKvAdd(v.kv_add); setSimPv(v.pv); setSimTaxFactor(v.tax);
-            // In current mode, we usually don't send settings unless custom mode is active.
-            // But if switching TO current, we should force standard calculation (null settings).
             newSettings = null;
-        } else {
+        } else if (mode === 'future') {
             // Future mode - Load selected scenario
             // @ts-ignore
             const v = SCENARIOS[selectedScenario].values;
@@ -291,13 +291,15 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                     soli_factor: v.tax
                 };
             }
+        } else if (mode === 'historical') {
+            newSettings = null;
         }
 
         // Trigger calculation with the NEW settings immediately
         // We pass the new settings explicitly to avoid waiting for state updates
         performCalculation(newSettings);
 
-    }, [mode, selectedScenario]);
+    }, [mode, selectedScenario, historicalAdjustment]);
 
     const handleCalculate = () => {
         if (!grossSalary || parseGermanNumber(grossSalary) === 0) {
@@ -328,9 +330,10 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
         setHasChildren(false);
         setChildCount(0);
 
-        // Future Mode
+        // Future / Historical Mode
         setMode('current');
         setSelectedScenario('pessimist_2035');
+        setHistoricalAdjustment('wage');
         setShowCustomSettings(false);
         setShowSalaryHint(false);
 
@@ -373,33 +376,77 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod,
                 </div>
 
                 {/* Mode Switcher */}
-                <div className="grid grid-cols-2 gap-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
                     <button
                         onClick={() => setMode('current')}
                         className={cn(
-                            "py-2.5 sm:py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all",
+                            "py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all",
                             mode === 'current' ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20" : "text-slate-400 hover:text-white"
                         )}
                         aria-pressed={mode === 'current'}
                         aria-label="Modus: Aktuell (2026)"
                     >
-                        <CheckCircle2 className="w-4 h-4" />
-                        Aktuell (2026)
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Aktuell</span>
                     </button>
                     <button
                         onClick={() => { setMode('future'); setShowCustomSettings(true); }}
                         className={cn(
-                            "py-2.5 sm:py-2 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all",
+                            "py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all",
                             mode === 'future' ? "bg-rose-600 text-white shadow-lg shadow-rose-900/20" : "text-slate-400 hover:text-white"
                         )}
                         aria-pressed={mode === 'future'}
                         aria-label="Modus: Zukunftsszenario"
                     >
-                        <Timer className="w-4 h-4" />
-                        Zukunftsszenario
+                        <Timer className="w-3.5 h-3.5" />
+                        <span>Zukunft</span>
+                    </button>
+                    <button
+                        onClick={() => { setMode('historical'); setShowCustomSettings(false); }}
+                        className={cn(
+                            "py-2 px-1 rounded-lg text-xs font-bold flex flex-col sm:flex-row items-center justify-center gap-1 transition-all",
+                            mode === 'historical' ? "bg-amber-600 text-white shadow-lg shadow-amber-900/20" : "text-slate-400 hover:text-white"
+                        )}
+                        aria-pressed={mode === 'historical'}
+                        aria-label="Modus: Historisch (1958)"
+                    >
+                        <History className="w-3.5 h-3.5" />
+                        <span>Historisch</span>
                     </button>
                 </div>
             </div>
+
+            {/* Historical Selector */}
+            {mode === 'historical' && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300 space-y-2">
+                    <label className="text-xs font-medium text-slate-400 block">Bereinigungsart wählen</label>
+                    <div className="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                        <button
+                            onClick={() => setHistoricalAdjustment('wage')}
+                            className={cn(
+                                "py-1.5 px-2 rounded-md text-xs font-bold transition-all text-center",
+                                historicalAdjustment === 'wage' ? "bg-amber-600 text-white shadow" : "text-slate-400 hover:text-white"
+                            )}
+                        >
+                            Relative Position (Lohn)
+                        </button>
+                        <button
+                            onClick={() => setHistoricalAdjustment('price')}
+                            className={cn(
+                                "py-1.5 px-2 rounded-md text-xs font-bold transition-all text-center",
+                                historicalAdjustment === 'price' ? "bg-amber-600 text-white shadow" : "text-slate-400 hover:text-white"
+                            )}
+                        >
+                            Kaufkraft (Inflation)
+                        </button>
+                    </div>
+                    <p className="text-[10px] text-amber-200/70 leading-relaxed bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg">
+                        {historicalAdjustment === 'wage' 
+                            ? 'Lohnbereinigt: Vergleicht deine relative Position auf der Einkommensskala gegenüber dem Durchschnittslohn von damals (5.330 DM) zu heute (51.944 €). Entspricht den Striewe-Zahlen.'
+                            : 'Preisbereinigt: Vergleicht die absolute Kaufkraft basierend auf der VPI-Preisentwicklung der Bundesbank (1 DM 1958 entspricht ca. 2,86 € heute).'}
+                    </p>
+                </div>
+            )}
 
             {/* Future Scenario Selector */}
             {mode === 'future' && (
