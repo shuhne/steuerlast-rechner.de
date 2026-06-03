@@ -123,10 +123,10 @@ export function ResultDashboard({
         const isPositive = diff > 0;
 
         compElement = (
-            <div className="absolute top-6 right-6 text-right">
-                <div className={`text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className="text-left sm:text-right">
+                <div className={`text-lg sm:text-xl font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
-                    <span className="text-xs text-slate-400 ml-1 font-normal block md:inline md:ml-2">gegenüber 2026</span>
+                    <span className="text-xs text-slate-400 ml-1.5 font-normal block sm:inline sm:ml-2">gegenüber 2026</span>
                 </div>
                 <div className={`text-sm font-medium ${isPositive ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
                     {isPositive ? '+' : ''}{percent.toFixed(1).replace('.', ',')} %
@@ -141,10 +141,10 @@ export function ResultDashboard({
         const isPositive = diff > 0;
 
         compElement = (
-            <div className="absolute top-6 right-6 text-right">
-                <div className={`text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className="text-left sm:text-right">
+                <div className={`text-lg sm:text-xl font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
-                    <span className="text-xs text-slate-400 ml-1 font-normal block md:inline md:ml-2">gegenüber Basis</span>
+                    <span className="text-xs text-slate-400 ml-1.5 font-normal block sm:inline sm:ml-2">gegenüber Basis</span>
                 </div>
                 <div className={`text-sm font-medium ${isPositive ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
                     {isPositive ? '+' : ''}{percent.toFixed(1).replace('.', ',')} %
@@ -159,10 +159,10 @@ export function ResultDashboard({
         const isPositive = diff > 0;
 
         compElement = (
-            <div className="absolute top-6 right-6 text-right">
-                <div className={`text-lg font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <div className="text-left sm:text-right">
+                <div className={`text-lg sm:text-xl font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
-                    <span className="text-xs text-slate-400 ml-1 font-normal block md:inline md:ml-2">gegenüber 2026</span>
+                    <span className="text-xs text-slate-400 ml-1.5 font-normal block sm:inline sm:ml-2">gegenüber 2026</span>
                 </div>
                 <div className={`text-sm font-medium ${isPositive ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
                     {isPositive ? '+' : ''}{percent.toFixed(1).replace('.', ',')} %
@@ -186,41 +186,47 @@ export function ResultDashboard({
             {/* Top Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Main Result Card */}
-                <div className="md:col-span-2 lg:col-span-2 bg-gradient-to-br from-indigo-900/50 to-slate-900 border border-indigo-500/30 rounded-xl p-3 sm:p-4 relative overflow-hidden group">
+                <div className="md:col-span-2 lg:col-span-2 bg-gradient-to-br from-indigo-900/50 to-slate-900 border border-indigo-500/30 rounded-xl p-4 sm:p-5 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/20 transition-all duration-700"></div>
 
-                    {compElement}
+                    <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-4 w-full h-full">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                                <Wallet className="w-5 h-5 text-indigo-400" />
+                                <h3 className="text-lg font-semibold text-white">Dein Nettogehalt{historicalMode ? ' (1958er Tarif)' : ''}</h3>
+                            </div>
+                            <div>
+                                <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-none mt-1">
+                                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayPeriod === 'monthly' ? net_income_monthly : net_income)}
+                                </div>
+                                <div className="flex items-center gap-1 text-sm mt-3.5">
+                                    <button
+                                        onClick={() => onDisplayPeriodChange('monthly')}
+                                        className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${displayPeriod === 'monthly'
+                                            ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
+                                            : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
+                                            }`}
+                                    >
+                                        Monatlich
+                                    </button>
+                                    <button
+                                        onClick={() => onDisplayPeriodChange('yearly')}
+                                        className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${displayPeriod === 'yearly'
+                                            ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
+                                            : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
+                                            }`}
+                                    >
+                                        Jährlich
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div className="relative z-10 flex flex-col h-full items-start justify-center py-1 lg:py-2 gap-1.5">
-                        <div className="flex items-center gap-2">
-                            <Wallet className="w-5 h-5 text-indigo-400" />
-                            <h3 className="text-lg font-semibold text-white">Dein Nettogehalt{historicalMode ? ' (1958er Tarif)' : ''}</h3>
-                        </div>
-                        <div>
-                            <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-                                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayPeriod === 'monthly' ? net_income_monthly : net_income)}
+                        {compElement && (
+                            <div className="shrink-0 mt-1 sm:mt-0">
+                                {compElement}
                             </div>
-                            <div className="flex items-center gap-1 text-sm mt-3">
-                                <button
-                                    onClick={() => onDisplayPeriodChange('monthly')}
-                                    className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${displayPeriod === 'monthly'
-                                        ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
-                                        : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
-                                        }`}
-                                >
-                                    Monatlich
-                                </button>
-                                <button
-                                    onClick={() => onDisplayPeriodChange('yearly')}
-                                    className={`px-2 py-0.5 rounded text-xs font-bold transition-colors ${displayPeriod === 'yearly'
-                                        ? 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/50'
-                                        : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
-                                        }`}
-                                >
-                                    Jährlich
-                                </button>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
