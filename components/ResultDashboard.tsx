@@ -193,7 +193,7 @@ export function ResultDashboard({
                         <div className="flex flex-col gap-2">
                             <div className="flex items-center gap-2">
                                 <Wallet className="w-5 h-5 text-indigo-400" />
-                                <h3 className="text-lg font-semibold text-white">Dein Nettogehalt{historicalMode ? ' (1958er Tarif)' : ''}</h3>
+                                <h3 className="text-lg font-semibold text-white">Dein Nettogehalt{historicalMode ? ' (1958)' : ''}</h3>
                             </div>
                             <div>
                                 <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-none mt-1">
