@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { Wallet, Building2, HeartPulse, History, AlertTriangle, Info, Scale, ArrowRight, TrendingDown } from 'lucide-react';
+import { Wallet, Building2, HeartPulse, History, AlertTriangle, Info, Scale, ArrowRight, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { TaxResult, ScenarioResult, CurvePoint, DisplayPeriod } from '../types/api';
 import { convertToDisplayPeriod } from '../utils/periodConverter';
 import { ScenarioChart } from './ScenarioChart';
@@ -39,6 +39,8 @@ export function ResultDashboard({
     weeklyHours 
 }: ResultDashboardProps) {
 
+    const [showInfoDetails, setShowInfoDetails] = useState(false);
+
     if (!result) return null;
 
     const {
@@ -58,20 +60,47 @@ export function ResultDashboard({
             new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val);
 
         return (
-            <div className="bg-amber-950/20 border border-amber-500/20 rounded-xl p-4 flex gap-3 text-sm text-amber-200">
-                <History className="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
-                <div>
-                    <h4 className="font-bold text-white mb-1">
-                        Historischer Vergleich (1958): {isWage ? 'Lohnbereinigt' : 'Preisbereinigt'}
-                    </h4>
-                    <p className="leading-relaxed">
-                        {isWage ? (
-                            `Dein Gehalt von ${formatEUR(gross_income)} entspricht lohnbereinigt ${formatDM(gross_1958_DM)} im Jahr 1958. Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
-                        ) : (
-                            `Dein Gehalt von ${formatEUR(gross_income)} entspricht kaufkraftbereinigt ${formatDM(gross_1958_DM)} im Jahr 1958 (1 DM ≈ 2,86 € heute). Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
-                        )}
-                    </p>
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 text-sm text-slate-300">
+                <div className="flex gap-3 items-start">
+                    <History className="w-5 h-5 shrink-0 mt-0.5 text-indigo-400" />
+                    <div className="flex-1">
+                        <h4 className="font-bold text-white mb-1">
+                            Historischer Vergleich (1958): {isWage ? 'Lohnbereinigt' : 'Preisbereinigt'}
+                        </h4>
+                        <p className="leading-relaxed text-slate-300">
+                            {isWage ? (
+                                `Dein Gehalt von ${formatEUR(gross_income)} entspricht lohnbereinigt ${formatDM(gross_1958_DM)} im Jahr 1958. Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
+                            ) : (
+                                `Dein Gehalt von ${formatEUR(gross_income)} entspricht kaufkraftbereinigt ${formatDM(gross_1958_DM)} im Jahr 1958 (1 DM ≈ 2,86 € heute). Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
+                            )}
+                        </p>
+                        
+                        <button 
+                            onClick={() => setShowInfoDetails(!showInfoDetails)}
+                            className="mt-3 flex items-center gap-1 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                        >
+                            {showInfoDetails ? 'Weniger anzeigen' : 'Mehr über die Unterschiede erfahren'}
+                            {showInfoDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+                    </div>
                 </div>
+
+                {showInfoDetails && (
+                    <div className="mt-4 pt-4 border-t border-slate-800/80 text-xs text-slate-400 space-y-3 leading-relaxed animate-fadeIn">
+                        <div>
+                            <span className="font-semibold text-slate-200 block mb-1">1. Deutlich geringere Sozialabgaben damals</span>
+                            Im Jahr 1958 lag die gesamte Belastung der Sozialabgaben für Arbeitnehmer bei nur ca. <strong className="text-emerald-400">10,75 %</strong> (Rentenversicherung: 7%, Arbeitslosenversicherung: 0,5%, Krankenversicherung: ca. 3,25% im Durchschnitt, Pflegeversicherung: 0%). Heute zahlen Arbeitnehmer über <strong className="text-rose-400">20 %</strong> an Sozialabgaben. Die Pflegeversicherung existierte damals noch gar nicht und wurde erst 1995 eingeführt.
+                        </div>
+                        <div>
+                            <span className="font-semibold text-slate-200 block mb-1">2. Verschiebung der Steuerprogression (Kalte Progression & Mittelstandsbauch)</span>
+                            Der Spitzensteuersatz von 53 % griff 1958 erst ab einem zu versteuernden Einkommen von 110.040 DM. Das entsprach dem <strong className="text-emerald-400">20-fachen Durchschnittslohn</strong> damals (heute lohnbereinigt über 1 Million €!). Heute greift der Spitzensteuersatz (42%) bereits ab ca. 66.000 € (nur dem 1,3-fachen Durchschnittsgehalt). Die Steuerkurve wurde im Laufe der Zeit extrem nach links verschoben, wodurch mittlere und kleinere Einkommen heute prozentual viel früher und stärker belastet werden.
+                        </div>
+                        <div>
+                            <span className="font-semibold text-slate-200 block mb-1">Wann und wie wurde das System umgebaut?</span>
+                            Das deutsche Steuersystem wurde in mehreren großen Reformen umstrukturiert, insbesondere mit der Einführung des linear-progressiven Tarifs **1990** und den darauffolgenden Reformen der **Schröder-Fischer-Regierung (2000–2005)**. Während der Spitzensteuersatz gesenkt wurde, wurden gleichzeitig die Progressionsstufen gestaucht. Durch die Demografie und den medizinischen Fortschritt stiegen die Sozialabgaben seit den 1970er Jahren kontinuierlich an, was den Netto-Lohnanteil für den Durchschnittsverdiener bis heute stetig reduziert hat.
+                        </div>
+                    </div>
+                )}
             </div>
         );
     })() : null;
