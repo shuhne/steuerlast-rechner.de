@@ -20,6 +20,7 @@ export default function Home() {
   const [displayPeriod, setDisplayPeriod] = useState<DisplayPeriod>('yearly');
 
   const resultsRef = useRef<HTMLDivElement>(null);
+  const requestCountRef = useRef(0);
 
   // Auto-scroll to results on mobile when calculation finishes
   useEffect(() => {
@@ -42,6 +43,8 @@ export default function Home() {
     }
 
     setLoading(true);
+    const reqId = ++requestCountRef.current;
+
     // Store user age for comparison
     setUserAge(data.age || 30);
     setHistoricalMode(data.historical_mode || null);
@@ -65,6 +68,8 @@ export default function Home() {
           })
         ]);
 
+        if (reqId !== requestCountRef.current) return;
+
         if (!resp1958.ok || !resp2026.ok) throw new Error('Calculation failed');
         
         resultData = await resp1958.json();
@@ -79,6 +84,8 @@ export default function Home() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
+
+        if (reqId !== requestCountRef.current) return;
 
         if (!response.ok) throw new Error('Calculation failed');
         
@@ -104,19 +111,27 @@ export default function Home() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
-        }).then(res => res.json()).then(data => setScenarios(data)),
+        }).then(res => res.json()).then(data => {
+          if (reqId === requestCountRef.current) setScenarios(data);
+        }),
 
         fetch('/api/curve', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
-        }).then(res => res.json()).then(data => setCurve(data))
+        }).then(res => res.json()).then(data => {
+          if (reqId === requestCountRef.current) setCurve(data);
+        })
       ]).catch(err => console.error("Error fetching advanced data", err));
 
     } catch (error) {
-      console.error('Error calculating tax:', error);
+      if (reqId === requestCountRef.current) {
+        console.error('Error calculating tax:', error);
+      }
     } finally {
-      setLoading(false);
+      if (reqId === requestCountRef.current) {
+        setLoading(false);
+      }
     }
   };
 

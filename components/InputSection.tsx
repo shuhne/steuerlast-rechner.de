@@ -124,6 +124,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
     const [selectedScenario, setSelectedScenario] = useState<string>('pessimist_2035');
     const [historicalAdjustment, setHistoricalAdjustment] = useState<'wage' | 'price'>('wage');
     const [showCustomSettings, setShowCustomSettings] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
 
     // Validation message
     const [showSalaryHint, setShowSalaryHint] = useState(false);
@@ -204,11 +205,31 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
 
     // Update displayed salary when slider inputs change (no auto-calc here, handled by debounced effect below)
     useEffect(() => {
+        if (isFocused) return; // Do not overwrite while typing
         if (baseSalary === 0) return;
         const raised = baseSalary * (1 + wageRaise / 100);
         const final = raised * (workLoad / 100);
         setGrossSalary(formatGermanNumber(final));
-    }, [wageRaise, workLoad]);
+    }, [baseSalary, wageRaise, workLoad, isFocused]);
+
+    // Sync displayPeriod prop to local period state
+    useEffect(() => {
+        if (_displayPeriod !== period) {
+            if (grossSalary) {
+                const currentVal = parseGermanNumber(grossSalary);
+                let newVal = currentVal;
+                if (period === 'yearly' && _displayPeriod === 'monthly') {
+                    newVal = currentVal / 12;
+                } else if (period === 'monthly' && _displayPeriod === 'yearly') {
+                    newVal = currentVal * 12;
+                }
+                setGrossSalary(formatGermanNumber(newVal));
+                setBaseSalary(newVal);
+            }
+            setPeriod(_displayPeriod);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [_displayPeriod]);
 
     // Auto-reset children to "Keine" when count reaches 0
     useEffect(() => {
@@ -230,7 +251,12 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, mode, selectedScenario, historicalAdjustment, healthInsuranceType, privateKvAmount, weeklyHours]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        grossSalary, age, hasChildren, childCount, wageRaise, workLoad, taxClass, churchTax, state, 
+        healthInsuranceType, privateKvAmount, weeklyHours,
+        simRv, simAv, simKvAdd, simPv, simTaxFactor
+    ]);
 
     // Handle Manual Input
     const handleManualInput = (val: string) => {
@@ -279,8 +305,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
             newSettings = null;
         } else if (mode === 'future') {
             // Future mode - Load selected scenario
-            // @ts-ignore
-            const v = SCENARIOS[selectedScenario].values;
+            const v = SCENARIOS[selectedScenario as keyof typeof SCENARIOS]?.values;
             if (v) {
                 setSimRv(v.rv); setSimAv(v.av); setSimKvAdd(v.kv_add); setSimPv(v.pv); setSimTaxFactor(v.tax);
 
@@ -301,6 +326,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
         // We pass the new settings explicitly to avoid waiting for state updates
         performCalculation(newSettings);
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mode, selectedScenario, historicalAdjustment]);
 
     const handleCalculate = () => {
@@ -482,10 +508,8 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                                         selectedScenario.includes('realist') ? "text-orange-500" : "text-emerald-500"
                                 )} />
                                 <div className="space-y-1 w-full">
-                                    {/* @ts-ignore */}
                                     <p className={cn("font-medium", selectedScenario.includes('pessimist') ? "text-rose-200" : selectedScenario.includes('realist') ? "text-orange-200" : "text-emerald-200")}>
-                                        {/* @ts-ignore */}
-                                        {SCENARIOS[selectedScenario]?.desc}
+                                        {SCENARIOS[selectedScenario as keyof typeof SCENARIOS]?.desc}
                                     </p>
 
                                     <details className="group">
@@ -494,8 +518,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                                             <ChevronDown className="w-3 h-3 group-open:rotate-180 transition-transform" />
                                         </summary>
                                         <ul className="mt-2 text-xs space-y-1.5 pl-4 list-disc marker:text-current/50 opacity-90 pb-1">
-                                            {/* @ts-ignore */}
-                                            {SCENARIOS[selectedScenario]?.details?.map((detail, idx) => (
+                                            {SCENARIOS[selectedScenario as keyof typeof SCENARIOS]?.details?.map((detail, idx) => (
                                                 <li key={idx} className={cn(selectedScenario.includes('pessimist') ? "text-rose-100" : selectedScenario.includes('realist') ? "text-orange-100" : "text-emerald-100")}>
                                                     {detail}
                                                 </li>
@@ -525,8 +548,9 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                             type="text"
                             value={grossSalary}
                             onChange={(e) => handleManualInput(e.target.value)}
+                            onFocus={() => setIsFocused(true)}
                             onBlur={() => {
-                                // optional: format strictly on blur
+                                setIsFocused(false);
                                 const val = parseGermanNumber(grossSalary);
                                 setGrossSalary(formatGermanNumber(val));
                                 if (wageRaise === 0 && workLoad === 100) setBaseSalary(val);
