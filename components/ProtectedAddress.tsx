@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 
 export function ProtectedAddress() {
-    const [content, setContent] = useState<React.ReactNode>(null);
+    const [content, setContent] = useState<{p1: string, p2: string, p3: string} | null>(null);
 
     useEffect(() => {
         // Adresse als Base64 kodiert (einfacher Bot-Schutz, kein Sicherheitsmechanismus)
