@@ -28,7 +28,15 @@
 - **Effizienz-Check**: Visualisiert die Auswirkungen von Stundenreduzierungen (z.B. 80%) auf das Netto.
 - **Fairer Vergleich**: Basiert auf einer echten 100%-Hochrechnung für präzise Stunden-Netto-Werte.
 
-### 5. Optimierte UX
+### 5. Historischer Steuer- & Gehaltsvergleich (1958 vs. 2026)
+- **1958er Steuertarif**: Exakte historische Einkommensteuerformeln (§ 32a EStG in DM) inkl. Ehegattensplitting und historischer Sozialabgaben (RV, AV, KV; keine PV).
+- **Zwei Bereinigungsmodi**:
+  - *Lohnbereinigt (Lebensstandard)*: Anpassung an das durchschnittliche Gehaltsniveau (Rentenversicherungs-Durchschnittsentgelt). Visualisiert die Verschiebung der Steuerprogression ("Mittelstandsbauch").
+  - *Preisbereinigt (Kaufkraft)*: Anpassung basierend auf der historischen Inflation (1 DM 1958 ≈ 2,86 € heute).
+- **Historischer Gehaltsvergleich**: Visualisiert die historische Einkommensverteilung von 1958 (Männer/Frauen) hochgerechnet auf heutiges Niveau.
+- **Interaktiver Infobereich**: Ausklappbarer, geschichtlicher Exkurs zur Entwicklung von Steuern und Sozialabgaben in der Bundesrepublik.
+
+### 6. Optimierte UX
 - **Performance**: Debounced Inputs verhindern unnötige Neuberechnungen (besonders auf Mobile).
 - **Smart Inputs**: Slider und Eingabefelder arbeiten synchron für intuitive Bedienung.
 
