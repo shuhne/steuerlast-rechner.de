@@ -28,6 +28,7 @@ export const TaxRequestSchema = z.object({
     kv_add_rate: z.number().min(0).max(10).optional(),
     private_kv_amount: z.number().min(0).max(10_000).optional(),
     simulation_settings: SimulationSettingsSchema.nullable().optional(),
+    historical_mode: z.enum(['wage', 'price']).nullable().optional(),
 });
 
 export type ValidatedTaxRequest = z.infer<typeof TaxRequestSchema>;

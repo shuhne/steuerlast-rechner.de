@@ -53,7 +53,7 @@ export class TaxCalculator2026 {
         lst.JHINZU = new Big(0);
         lst.af = 1;
         lst.f = 1.0;
-        lst.R = 0;
+        lst.R = 1; // Set to 1 to compute church tax base (BK)
         lst.PVS = 0;
         lst.PVZ = 0;
         lst.KVZ = new Big(0);

@@ -1,6 +1,7 @@
 import { TaxRequest, TaxResult, CurvePoint, ScenarioResult } from './types';
 import { TaxCalculator2026 } from './tax_calculator';
 import { SocialSecurity2026 } from './social_security';
+import { TaxCalculator1958 } from './tax_calculator_1958';
 
 export class ScenarioEngine {
 
@@ -8,6 +9,16 @@ export class ScenarioEngine {
      * Runs the full tax calculation for a single request.
      */
     static calculateTaxRequest(req: TaxRequest): TaxResult {
+        if (req.historical_mode) {
+            return TaxCalculator1958.calculate1958(
+                req.gross_income,
+                req.tax_class || 1,
+                req.church_tax || false,
+                req.state || 'BE',
+                req.historical_mode
+            );
+        }
+
         const gross = req.gross_income;
 
         // 0. Settings

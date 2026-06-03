@@ -21,6 +21,7 @@ export interface TaxRequest {
     kv_add_rate?: number;
     private_kv_amount?: number;
     simulation_settings?: SimulationSettings | null;
+    historical_mode?: 'wage' | 'price' | null;
 }
 
 export interface TaxResult {

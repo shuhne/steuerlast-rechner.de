@@ -848,8 +848,8 @@ describe('Regression Tests - Known Values', () => {
         // RV: 80000 * 9.3% = 7440
         expect(result.rv_employee).toBeCloseTo(7440, 0);
 
-        // Church tax should be 8% (Bavaria)
-        expect(result.church_tax).toBeCloseTo(result.income_tax * 0.08, 2);
+        // Church tax should be 8% of church base (reduced due to Kinderfreibetrag)
+        expect(result.church_tax).toBeCloseTo(720.40, 2);
 
         // PV with child relief: (1.8% - 0.25% relief) = 1.55%
         // 69750 (BBG) * 1.55% = 1081.125
