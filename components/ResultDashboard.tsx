@@ -69,9 +69,9 @@ export function ResultDashboard({
                         </h4>
                         <p className="leading-relaxed text-slate-300">
                             {isWage ? (
-                                `Dein Gehalt von ${formatEUR(gross_income)} entspricht lohnbereinigt ${formatDM(gross_1958_DM)} im Jahr 1958. Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
+                                `Dein Jahresgehalt von ${formatEUR(gross_income)} entspricht lohnbereinigt einem Bruttojahresgehalt von ${formatDM(gross_1958_DM)} im Jahr 1958 (das waren ca. ${formatDM(gross_1958_DM / 12)} pro Monat). Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
                             ) : (
-                                `Dein Gehalt von ${formatEUR(gross_income)} entspricht kaufkraftbereinigt ${formatDM(gross_1958_DM)} im Jahr 1958 (1 DM ≈ 2,86 € heute). Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
+                                `Dein Jahresgehalt von ${formatEUR(gross_income)} entspricht kaufkraftbereinigt einem Bruttojahresgehalt von ${formatDM(gross_1958_DM)} im Jahr 1958 (1 DM ≈ 2,86 € heute). Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
                             )}
                         </p>
                         
