@@ -100,9 +100,6 @@ export function OptimizationChart({ data, displayPeriod }: OptimizationChartProp
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
-            <p className="text-xs text-slate-500 mt-4 text-center">
-                Entwicklung von Netto-Gehalt und Grenzsteuerbelastung bei Gehaltsänderungen ({displayPeriod === 'monthly' ? 'monatlich' : 'jährlich'}).
-            </p>
         </div>
     );
 }

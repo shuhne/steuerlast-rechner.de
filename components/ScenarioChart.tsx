@@ -41,7 +41,7 @@ export function ScenarioChart({ scenarios, displayPeriod }: ScenarioChartProps) 
                 <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                         <ArrowRightLeft className="w-5 h-5 text-indigo-400" />
-                        Lohnentwicklung Teilzeit
+                        Teilzeit-Szenarien
                     </h3>
                     <InfoTooltip text="Zeigt, wie sich dein Nettogehalt verhält, wenn du deine Arbeitszeit reduzierst (z.B. auf 80% oder 50%). Da die Steuerbelastung progressiv ist, sinkt das Netto oft weniger stark als das Brutto." />
                 </div>
@@ -74,9 +74,6 @@ export function ScenarioChart({ scenarios, displayPeriod }: ScenarioChartProps) 
                     </BarChart>
                 </ResponsiveContainer>
             </div>
-            <p className="text-xs text-slate-500 mt-4 text-center">
-                Vergleich Brutto vs. Netto bei verschiedenen Teilzeitmodellen ({displayPeriod === 'monthly' ? 'monatlich' : 'jährlich'}).
-            </p>
         </div>
     );
 }

@@ -52,7 +52,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                 <header className="mb-8 sm:mb-12 flex flex-col md:flex-row md:items-start justify-between gap-4 sm:gap-6">
                     <div className="text-center md:text-left">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-                            <a href="/" className="hover:text-emerald-400 transition-colors">steuerlast-rechner.de</a>
+                            <a href="/" className="hover:text-indigo-400 transition-colors">steuerlast-rechner.de</a>
                         </h1>
                         <p className="text-slate-400 text-base sm:text-lg mt-2 sm:mt-3 max-w-3xl leading-relaxed">
                             Dein Gehalt im Detail: Berechne dein Netto 2026, prüfe Auswirkungen von Stundenreduzierungen oder simuliere steigende Sozialabgaben.
@@ -100,7 +100,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
 
                 <div className="flex flex-col lg:grid lg:grid-cols-[400px_1fr] gap-4 sm:gap-6 lg:gap-8 lg:items-start">
                     {/* Input Panel (Sidebar) */}
-                    <aside className="w-full shrink-0">
+                    <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
                         {sidebar}
                     </aside>
 
@@ -139,7 +139,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                         <span className="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1 group-hover:bg-indigo-500/20">OPEN SOURCE</span>
                     </a>
                     <span className="text-slate-500 text-[10px] uppercase tracking-wider px-2">
-                        Entwickelt von <a href="https://shuhne.de" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-emerald-400 transition-colors">Sascha Huhne</a>
+                        Entwickelt von <a href="https://shuhne.de" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-indigo-400 transition-colors">Sascha Huhne</a>
                     </span>
                 </div>
             </footer>

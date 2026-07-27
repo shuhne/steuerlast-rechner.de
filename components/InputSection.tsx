@@ -74,7 +74,7 @@ const SCENARIOS = {
         ],
         values: { rv: 22.5, av: 3.0, kv_add: 7.0, pv: 7.0, tax: 1.1, soli: 1.1 }
     },
-    'realist_2030': {
+    'realist_2035': {
         label: 'Realistisches Szenario (2035)',
         desc: 'Moderate Anpassungen zur Stabilisierung',
         details: [
@@ -85,7 +85,7 @@ const SCENARIOS = {
         ],
         values: { rv: 20.5, av: 2.8, kv_add: 4.5, pv: 5.0, tax: 1.05, soli: 1.0 }
     },
-    'optimist_2030': {
+    'optimist_2035': {
         label: 'Optimistisches Szenario (2035)',
         desc: 'Umfassende Strukturreformen',
         details: [
@@ -468,7 +468,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                             Kaufkraft (Inflation)
                         </button>
                     </div>
-                    <p className="text-[10px] text-amber-200/70 leading-relaxed bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg">
+                    <p className="text-xs text-amber-100/90 leading-relaxed bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg">
                         {historicalAdjustment === 'wage' 
                             ? 'Lohnbereinigt: Vergleicht deine relative Position auf der Einkommensskala gegenüber dem Durchschnittslohn von damals (5.330 DM) zu heute (51.944 €). Entspricht den Striewe-Zahlen.'
                             : 'Preisbereinigt: Vergleicht die absolute Kaufkraft basierend auf der VPI-Preisentwicklung der Bundesbank (1 DM 1958 entspricht ca. 2,86 € heute).'}
@@ -488,8 +488,8 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                             className="w-full bg-slate-950 border border-rose-500/50 text-white pl-4 pr-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 appearance-none cursor-pointer"
                         >
                             <option value="pessimist_2035">Pessimistisches Szenario (2035)</option>
-                            <option value="realist_2030">Realistisches Szenario (2035)</option>
-                            <option value="optimist_2030">Optimistisches Szenario (2035)</option>
+                            <option value="realist_2035">Realistisches Szenario (2035)</option>
+                            <option value="optimist_2035">Optimistisches Szenario (2035)</option>
                             <option value="custom" disabled className="text-slate-500">Eigenes Szenario jederzeit im Expertenmodus unten</option>
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -556,14 +556,14 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                                 if (wageRaise === 0 && workLoad === 100) setBaseSalary(val);
                             }}
                             className="w-full bg-slate-950 border border-slate-800 text-white pl-10 pr-24 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono text-lg"
-                            placeholder="50.000,00"
+                            placeholder="z. B. 50.000"
                         />
                         {/* Vertical Toggle Switch */}
                         <div className="absolute right-1 top-1 bottom-1 w-20 flex flex-col gap-0.5 bg-slate-900 rounded p-0.5 border border-slate-800">
                             <button
                                 onClick={() => handlePeriodChange('yearly')}
                                 className={cn(
-                                    "flex-1 text-[10px] uppercase font-bold rounded flex items-center justify-center transition-colors",
+                                    "flex-1 text-xs uppercase font-bold rounded flex items-center justify-center transition-colors",
                                     period === 'yearly' ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
                                 )}
                             >
@@ -572,7 +572,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                             <button
                                 onClick={() => handlePeriodChange('monthly')}
                                 className={cn(
-                                    "flex-1 text-[10px] uppercase font-bold rounded flex items-center justify-center transition-colors",
+                                    "flex-1 text-xs uppercase font-bold rounded flex items-center justify-center transition-colors",
                                     period === 'monthly' ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
                                 )}
                             >
@@ -624,13 +624,13 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                         <div className="absolute right-1 top-1 bottom-1 w-10 flex flex-col gap-0.5 bg-slate-900 rounded p-0.5 border border-slate-800">
                             <button
                                 onClick={() => onWeeklyHoursChange(Math.min(168, (weeklyHours || 40) + 1))}
-                                className="flex-1 text-[10px] font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                                className="flex-1 text-xs font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
                             >
                                 +
                             </button>
                             <button
                                 onClick={() => onWeeklyHoursChange(Math.max(1, (weeklyHours || 40) - 1))}
-                                className="flex-1 text-[10px] font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                                className="flex-1 text-xs font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
                             >
                                 −
                             </button>
@@ -709,13 +709,13 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                             <div className="absolute right-1 top-1 bottom-1 w-10 flex flex-col gap-0.5 bg-slate-900 rounded p-0.5 border border-slate-800">
                                 <button
                                     onClick={() => { const v = Math.min(100, age + 1); setAge(v); setAgeInput(String(v)); }}
-                                    className="flex-1 text-[10px] font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                                    className="flex-1 text-xs font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
                                 >
                                     +
                                 </button>
                                 <button
                                     onClick={() => { const v = Math.max(15, age - 1); setAge(v); setAgeInput(String(v)); }}
-                                    className="flex-1 text-[10px] font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
+                                    className="flex-1 text-xs font-bold rounded flex items-center justify-center transition-colors text-slate-500 hover:text-slate-300 hover:bg-slate-800"
                                 >
                                     −
                                 </button>
@@ -809,7 +809,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                                             className="w-full bg-slate-950 border border-slate-800 text-white pl-9 pr-3 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono"
                                         />
                                     </div>
-                                    <p className="text-[10px] text-slate-500 leading-tight">
+                                    <p className="text-xs text-slate-500 leading-tight">
                                         Der Arbeitgeberzuschuss wird automatisch berücksichtigt (max. 50% vom GKV-Höchstsatz).
                                     </p>
                                 </div>
@@ -918,7 +918,7 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
 
             <div className="relative">
                 {showSalaryHint && (
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[11px] text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700/40 whitespace-nowrap animate-in fade-in duration-200">
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded border border-slate-700/40 whitespace-nowrap animate-in fade-in duration-200">
                         Bitte zuerst ein Gehalt eingeben
                     </div>
                 )}
@@ -929,14 +929,16 @@ export function InputSection({ onCalculate, isLoading, hasResult, displayPeriod:
                         "w-full text-white font-bold py-4 sm:py-3.5 px-4 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 group",
                         mode === 'future'
                             ? "bg-rose-600 hover:bg-rose-500 shadow-rose-900/20"
-                            : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-900/20"
+                            : mode === 'historical'
+                                ? "bg-amber-600 hover:bg-amber-500 shadow-amber-900/20"
+                                : "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-900/20"
                     )}
                 >
                     {isLoading ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                         <>
-                            <span>{mode === 'future' ? 'Szenario simulieren' : 'Jetzt berechnen'}</span>
+                            <span>{mode === 'future' ? 'Szenario simulieren' : mode === 'historical' ? 'Mit Tarif 1958 berechnen' : 'Jetzt berechnen'}</span>
                             <CheckCircle2 className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
                         </>
                     )}

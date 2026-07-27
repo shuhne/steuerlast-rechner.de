@@ -85,7 +85,7 @@ export function SalaryComparisonChart({ annualGross, age, displayPeriod, histori
                         </div>
                         <div className="flex-1">
                             <div className="text-slate-300 font-medium text-sm leading-snug">
-                                Du verdienst mehr als <span className="text-emerald-400 font-bold">{comparison.percentile.toFixed(0)}%</span>
+                                Du verdienst mehr als <span className="text-emerald-400 font-bold">{Math.min(99, comparison.percentile).toFixed(0)}%</span>
                                 {' '}der Beschäftigten in deinem Alter.
                             </div>
                         </div>

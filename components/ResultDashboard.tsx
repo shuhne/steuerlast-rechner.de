@@ -41,7 +41,19 @@ export function ResultDashboard({
 
     const [showInfoDetails, setShowInfoDetails] = useState(false);
 
-    if (!result) return null;
+    if (!result) {
+        return (
+            <div className="bg-slate-900 border border-dashed border-slate-700/70 rounded-xl p-8 sm:p-12 flex flex-col items-center justify-center text-center min-h-[320px] lg:min-h-[480px]">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-5">
+                    <Wallet className="w-7 h-7 text-indigo-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Deine Auswertung erscheint hier</h3>
+                <p className="text-sm text-slate-400 max-w-xs leading-relaxed">
+                    Gib dein Bruttogehalt ein und starte die Berechnung – Netto, Abzüge und Vergleiche werden dann hier angezeigt.
+                </p>
+            </div>
+        );
+    }
 
     const {
         net_income, net_income_monthly, total_tax, total_social_security,
@@ -60,9 +72,9 @@ export function ResultDashboard({
             new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val);
 
         return (
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 text-sm text-slate-300">
+            <div className="bg-slate-900 border border-amber-500/20 rounded-xl p-4 sm:p-5 text-sm text-slate-300">
                 <div className="flex gap-3 items-start">
-                    <History className="w-5 h-5 shrink-0 mt-0.5 text-indigo-400" />
+                    <History className="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
                     <div className="flex-1">
                         <h4 className="font-bold text-white mb-1">
                             Historischer Vergleich (1958): {isWage ? 'Lohnbereinigt' : 'Preisbereinigt'}
@@ -74,30 +86,33 @@ export function ResultDashboard({
                                 `Dein Jahresgehalt von ${formatEUR(gross_income)} entspricht kaufkraftbereinigt einem Bruttojahresgehalt von ${formatDM(gross_1958_DM)} im Jahr 1958 (1 DM ≈ 2,86 € heute). Die Berechnung unten zeigt, was du mit dem 1958er Steuertarif netto erhalten hättest.`
                             )}
                         </p>
-                        
-                        <button 
+
+                        <button
                             onClick={() => setShowInfoDetails(!showInfoDetails)}
-                            className="mt-3 flex items-center gap-1 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                            className="mt-3 flex items-center gap-1 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
                         >
-                            {showInfoDetails ? 'Weniger anzeigen' : 'Mehr über die Unterschiede erfahren'}
+                            {showInfoDetails ? 'Weniger anzeigen' : 'Warum war damals mehr netto?'}
                             {showInfoDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         </button>
                     </div>
                 </div>
 
                 {showInfoDetails && (
-                    <div className="mt-4 pt-4 border-t border-slate-800/80 text-sm text-slate-400 space-y-4 leading-relaxed animate-fadeIn">
-                        <div>
-                            <span className="font-semibold text-slate-200 block mb-1">1. Geringere Sozialabgaben</span>
-                            Die Gesamtbelastung durch Sozialabgaben für Arbeitnehmer lag 1958 bei nur ca. <strong className="text-emerald-400">10,75 %</strong> (RV: 7%, KV: ca. 3,25%, AV: 0,5%). Heute zahlen Arbeitnehmer über <strong className="text-rose-400">20 %</strong>. Die Pflegeversicherung existierte damals noch gar nicht.
+                    <div className="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fadeIn">
+                        <div className="bg-slate-950/40 border border-slate-800/60 rounded-lg p-3">
+                            <div className="text-amber-400 font-bold text-lg leading-none mb-1.5">~10,75 %</div>
+                            <div className="text-slate-200 font-medium text-xs mb-1">Sozialabgaben 1958</div>
+                            <p className="text-slate-400 text-xs leading-relaxed">Heute über 20 %. Eine Pflegeversicherung gab es damals noch gar nicht.</p>
                         </div>
-                        <div>
-                            <span className="font-semibold text-slate-200 block mb-1">2. Die Rolle der Vermögensteuer</span>
-                            1958 trug die <strong className="text-indigo-300">Vermögensteuer</strong> noch als wichtige Substanzsteuer zur Staatsfinanzierung bei. Weil Vermögen stärker zur Kasse gebeten wurden, konnte der Staat die Einkommensteuer für Normalverdiener moderater gestalten. Erst 1997 wurde die Vermögensteuer ausgesetzt.
+                        <div className="bg-slate-950/40 border border-slate-800/60 rounded-lg p-3">
+                            <div className="text-amber-400 font-bold text-lg leading-none mb-1.5">bis 1997</div>
+                            <div className="text-slate-200 font-medium text-xs mb-1">Vermögensteuer aktiv</div>
+                            <p className="text-slate-400 text-xs leading-relaxed">Sie finanzierte den Staat mit und hielt die Einkommensteuer für Normalverdiener niedriger.</p>
                         </div>
-                        <div>
-                            <span className="font-semibold text-slate-200 block mb-1">3. Steuerprogression: Der „Mittelstandsbauch“</span>
-                            Der damalige Spitzensteuersatz von 53 % griff erst beim <strong className="text-emerald-400">20-fachen Durchschnittslohn</strong> (heute lohnbereinigt &gt;1 Mio. €). Heute greift der Spitzensteuersatz (42%) bereits beim 1,3-fachen Durchschnittsgehalt. Die Steuerkurve hat sich über die Jahrzehnte stark zulasten mittlerer Einkommen verschoben.
+                        <div className="bg-slate-950/40 border border-slate-800/60 rounded-lg p-3">
+                            <div className="text-amber-400 font-bold text-lg leading-none mb-1.5">20-facher Lohn</div>
+                            <div className="text-slate-200 font-medium text-xs mb-1">Grenze Spitzensteuersatz</div>
+                            <p className="text-slate-400 text-xs leading-relaxed">1958 griff der Spitzensatz (53 %) erst sehr spät – heute schon ab dem 1,3-fachen Durchschnitt.</p>
                         </div>
                     </div>
                 )}
@@ -123,7 +138,7 @@ export function ResultDashboard({
         const isPositive = diff > 0;
 
         compElement = (
-            <div className="text-left sm:text-right">
+            <div className="text-left">
                 <div className={`text-lg sm:text-xl font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
                     <span className="text-xs text-slate-400 ml-1.5 font-normal block sm:inline sm:ml-2">gegenüber 2026</span>
@@ -141,7 +156,7 @@ export function ResultDashboard({
         const isPositive = diff > 0;
 
         compElement = (
-            <div className="text-left sm:text-right">
+            <div className="text-left">
                 <div className={`text-lg sm:text-xl font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
                     <span className="text-xs text-slate-400 ml-1.5 font-normal block sm:inline sm:ml-2">gegenüber Basis</span>
@@ -159,7 +174,7 @@ export function ResultDashboard({
         const isPositive = diff > 0;
 
         compElement = (
-            <div className="text-left sm:text-right">
+            <div className="text-left">
                 <div className={`text-lg sm:text-xl font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {isPositive ? '+' : ''} {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(displayDiff)}
                     <span className="text-xs text-slate-400 ml-1.5 font-normal block sm:inline sm:ml-2">gegenüber 2026</span>
@@ -186,13 +201,13 @@ export function ResultDashboard({
             {/* Top Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Main Result Card */}
-                <div className="md:col-span-2 lg:col-span-2 bg-gradient-to-br from-indigo-900/50 to-slate-900 border border-indigo-500/30 rounded-xl p-4 sm:p-5 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/20 transition-all duration-700"></div>
+                <div className={`md:col-span-2 lg:col-span-2 bg-gradient-to-br to-slate-900 border rounded-xl p-4 sm:p-5 relative overflow-hidden group ${historicalMode ? 'from-amber-900/40 border-amber-500/30' : 'from-indigo-900/50 border-indigo-500/30'}`}>
+                    <div className={`absolute top-0 right-0 w-64 h-64 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/2 transition-all duration-700 ${historicalMode ? 'bg-amber-500/10 group-hover:bg-amber-500/20' : 'bg-indigo-500/10 group-hover:bg-indigo-500/20'}`}></div>
 
-                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 w-full h-full">
+                    <div className="relative z-10 flex flex-col gap-6 w-full h-full">
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-2 mb-1">
-                                <Wallet className="w-6 h-6 text-indigo-400" />
+                                <Wallet className={`w-6 h-6 ${historicalMode ? 'text-amber-400' : 'text-indigo-400'}`} />
                                 <h3 className="text-xl font-semibold text-white">Dein Nettogehalt{historicalMode ? ' (1958)' : ''}</h3>
                             </div>
                             <div>
@@ -223,7 +238,7 @@ export function ResultDashboard({
                         </div>
 
                         {compElement && (
-                            <div className="shrink-0 w-full md:w-auto bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
+                            <div className="w-full sm:max-w-sm bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
                                 {compElement}
                             </div>
                         )}

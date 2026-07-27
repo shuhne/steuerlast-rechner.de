@@ -21,7 +21,7 @@ export const FAQ_ITEMS: FAQItem[] = [
         category: 'general'
     },
     {
-        question: "Was bedeutet das 'Pessimistische Szenario 2036'?",
+        question: "Was bedeutet das 'Pessimistische Szenario 2035'?",
         answer: "Dieses Szenario zeigt, wie sich deine Abgaben entwickeln könnten, wenn keine grundlegenden Reformen stattfinden und die Kosten für Rente und Pflege durch die alternde Gesellschaft stark ansteigen. Es nimmt an, dass Beitragssätze deutlich erhöht werden müssen, um das System zu finanzieren.",
         category: 'future'
     },
