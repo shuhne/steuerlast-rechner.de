@@ -8,6 +8,7 @@ import type { RechnerErgebnis } from '../../lib/tax';
 import { PAP_META, SV_2026 } from '../../lib/tax';
 import { formatEuro, formatProzent, useRechner } from './useRechner';
 import { RechtsstatusChip } from './EingabePanel';
+import { Donut } from './Donut';
 
 const cn = (...i: ClassValue[]) => twMerge(clsx(i));
 
@@ -42,13 +43,16 @@ function Zeile({
 }
 
 export function ErgebnisPanel(p: Props) {
-    const [monatlich, setMonatlich] = useState(true);
+    // Die Anzeigeeinheit liegt im gemeinsamen Zustand. Frueher hatte dieses
+    // Panel einen eigenen Umschalter, sodass man "Jaehrlich" eingeben und
+    // "Monatlich" angezeigt bekommen konnte.
+    const { monatlich, setMonatlich } = p;
     const [methodikOffen, setMethodikOffen] = useState(false);
     const [agOffen, setAgOffen] = useState(false);
 
     if (!p.hatEingabe || !p.ergebnis) {
         return (
-            <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-700/70 bg-slate-900 p-8 text-center lg:min-h-[480px]">
+            <div id="ergebnis" className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-700/70 bg-slate-900 p-8 text-center lg:min-h-[480px]">
                 <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10">
                     <Wallet className="h-7 w-7 text-indigo-400" />
                 </div>
@@ -67,8 +71,23 @@ export function ErgebnisPanel(p: Props) {
         st.lohnsteuer + st.soli + st.kirchensteuer +
         st.lohnsteuerSonstigeBezuege + st.soliSonstigeBezuege + st.kirchensteuerSonstigeBezuege;
 
+    // Die Ergebniskarte traegt die Farbe des Rechtsstands. Frueher war der
+    // Modus an der Faerbung der ganzen Karte erkennbar; ein kleiner Chip
+    // allein geht im Ueberflug unter.
+    const istSzenario = e.rechtsstand.rechtsstatus !== 'geltendes_recht';
+    const kartenFarbe = istSzenario
+        ? 'border-rose-500/30 from-rose-900/40'
+        : 'border-indigo-500/30 from-indigo-900/50';
+    const akzent = istSzenario ? 'text-rose-400' : 'text-indigo-400';
+
+    const zusammensetzung = [
+        { name: 'Netto', wert: e.netto.jahr, farbe: '#4f46e5' },
+        { name: 'Steuern', wert: steuernSumme, farbe: '#94a3b8' },
+        { name: 'Sozialabgaben', wert: sv.summe, farbe: '#64748b' },
+    ];
+
     return (
-        <div className="space-y-4">
+        <div id="ergebnis" className="scroll-mt-4 space-y-4">
             {/* Szenario-Warnung */}
             {e.rechtsstand.rechtsstatus !== 'geltendes_recht' && (
                 <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
@@ -104,11 +123,16 @@ export function ErgebnisPanel(p: Props) {
             )}
 
             {/* Netto */}
-            <div className="relative overflow-hidden rounded-xl border border-indigo-500/30 bg-gradient-to-br from-indigo-900/50 to-slate-900 p-5">
+            <div className={cn('relative overflow-hidden rounded-xl border bg-gradient-to-br to-slate-900 p-5', kartenFarbe)}>
                 <div className="relative z-10">
-                    <div className="mb-3 flex items-center gap-2">
-                        <Wallet className="h-6 w-6 text-indigo-400" />
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <Wallet className={cn('h-6 w-6', akzent)} />
                         <h3 className="text-xl font-semibold text-white">Dein Nettogehalt</h3>
+                        {istSzenario && (
+                            <span className="text-sm font-normal text-rose-200/80">
+                                {p.rechtsstand.kurz}
+                            </span>
+                        )}
                     </div>
                     <div className="text-4xl font-bold leading-none tracking-tight text-white sm:text-5xl">
                         {formatEuro(monatlich ? e.netto.monat : e.netto.jahr)}
@@ -129,6 +153,34 @@ export function ErgebnisPanel(p: Props) {
                             </button>
                         ))}
                     </div>
+
+                    {p.basisErgebnis && (
+                        <div className="mt-5 rounded-xl border border-slate-800/50 bg-slate-950/40 p-3">
+                            <div
+                                className={cn(
+                                    'text-lg font-bold',
+                                    e.netto.jahr >= p.basisErgebnis.netto.jahr
+                                        ? 'text-emerald-400'
+                                        : 'text-rose-400'
+                                )}
+                            >
+                                {e.netto.jahr >= p.basisErgebnis.netto.jahr ? '+' : ''}
+                                {formatEuro(
+                                    monatlich
+                                        ? e.netto.monat - p.basisErgebnis.netto.monat
+                                        : e.netto.jahr - p.basisErgebnis.netto.jahr
+                                )}
+                                <span className="ml-2 text-xs font-normal text-slate-400">
+                                    gegenüber deiner Eingabe
+                                </span>
+                            </div>
+                            <div className="mt-0.5 text-xs text-slate-500">
+                                {p.z.lohnerhoehungProzent > 0 && `+${p.z.lohnerhoehungProzent} % Gehalt`}
+                                {p.z.lohnerhoehungProzent > 0 && p.z.arbeitszeitProzent !== 100 && ' · '}
+                                {p.z.arbeitszeitProzent !== 100 && `${p.z.arbeitszeitProzent} % Arbeitszeit`}
+                            </div>
+                        </div>
+                    )}
 
                     {p.referenz && (
                         <div className="mt-5 rounded-xl border border-slate-800/50 bg-slate-950/40 p-3">
@@ -167,6 +219,39 @@ export function ErgebnisPanel(p: Props) {
                         <div className="mt-0.5 text-[11px] leading-tight text-slate-600">{k.hinweis}</div>
                     </div>
                 ))}
+            </div>
+
+            {/* Zusammensetzung - der schnelle Blick auf die Anteile */}
+            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
+                <h3 className="mb-4 text-lg font-semibold text-white">Zusammensetzung</h3>
+                <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center sm:gap-10">
+                    <Donut
+                        segmente={zusammensetzung}
+                        titel="Brutto"
+                        wert={formatEuro(monatlich ? e.brutto / 12 : e.brutto, 0)}
+                    />
+                    <ul className="w-full max-w-xs space-y-2 sm:w-auto">
+                        {zusammensetzung.map((eintrag) => (
+                            <li key={eintrag.name} className="flex items-center justify-between gap-4 text-sm">
+                                <span className="flex items-center gap-2 text-slate-300">
+                                    <span
+                                        className="h-3 w-3 shrink-0 rounded-full"
+                                        style={{ backgroundColor: eintrag.farbe }}
+                                    />
+                                    {eintrag.name}
+                                </span>
+                                <span className="flex items-baseline gap-3 font-mono">
+                                    <span className="text-slate-500">
+                                        {e.brutto > 0 ? formatProzent((eintrag.wert / e.brutto) * 100) : '–'}
+                                    </span>
+                                    <span className="w-24 text-right text-white">
+                                        {formatEuro(monatlich ? eintrag.wert / 12 : eintrag.wert, 0)}
+                                    </span>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
 
             {/* Abzüge */}

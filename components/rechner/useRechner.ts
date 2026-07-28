@@ -47,6 +47,10 @@ export interface RechnerZustand {
     kirchensteuerKappungProzent: number | null;
     szenarioId: string;
     bereinigung1958: 'lohn' | 'preis';
+    /** Was-waere-wenn: Gehaltserhoehung in Prozent auf das eingegebene Brutto. */
+    lohnerhoehungProzent: number;
+    /** Was-waere-wenn: Arbeitszeitanteil in Prozent. Wirkt auf Brutto und Stunden. */
+    arbeitszeitProzent: number;
 }
 
 export const STANDARD: RechnerZustand = {
@@ -66,6 +70,8 @@ export const STANDARD: RechnerZustand = {
     kirchensteuerKappungProzent: null,
     szenarioId: RECHTSSTAND_GELTEND.id,
     bereinigung1958: 'lohn',
+    lohnerhoehungProzent: 0,
+    arbeitszeitProzent: 100,
 };
 
 export function parseZahl(text: string): number {
@@ -101,12 +107,36 @@ export function useRechner() {
         setAnsicht('rechner');
     };
 
-    const bruttoJahr = useMemo(() => {
+    /** Das eingegebene Gehalt, ohne die Was-waere-wenn-Regler. */
+    const bruttoBasisJahr = useMemo(() => {
         const v = parseZahl(z.bruttoEingabe);
         return z.periode === 'monat' ? v * 12 : v;
     }, [z.bruttoEingabe, z.periode]);
 
+    /**
+     * Die Regler veraendern nicht das Eingabefeld, sondern nur das Ergebnis.
+     * Frueher wurde der berechnete Wert in das Feld zurueckgeschrieben - damit
+     * ging die urspruengliche Eingabe verloren und ein Zuruecksetzen der Regler
+     * fuehrte nicht mehr zum Ausgangswert.
+     */
+    const hatAnpassung = z.lohnerhoehungProzent !== 0 || z.arbeitszeitProzent !== 100;
+
+    const bruttoJahr = useMemo(
+        () =>
+            bruttoBasisJahr *
+            (1 + z.lohnerhoehungProzent / 100) *
+            (z.arbeitszeitProzent / 100),
+        [bruttoBasisJahr, z.lohnerhoehungProzent, z.arbeitszeitProzent]
+    );
+
+    /** Wochenstunden, auf die sich der Stundenlohn bezieht. */
+    const wochenstundenEffektiv = z.wochenstunden * (z.arbeitszeitProzent / 100);
+
     const hatEingabe = bruttoJahr > 0;
+
+    /** Anzeigeeinheit - geteilt zwischen Eingabe und Ergebnis. */
+    const monatlich = z.periode === 'monat';
+    const setMonatlich = (m: boolean) => setzen('periode', m ? 'monat' : 'jahr');
 
     const eingabe: RechnerEingabe = useMemo(
         () => ({
@@ -143,17 +173,26 @@ export function useRechner() {
         [hatEingabe, eingabe, z.szenarioId]
     );
 
+    /** Ergebnis ohne die Regler, als Vergleichsmassstab. */
+    const basisErgebnis = useMemo(
+        () =>
+            hatAnpassung && bruttoBasisJahr > 0
+                ? berechne({ ...eingabe, bruttoJahr: bruttoBasisJahr })
+                : null,
+        [hatAnpassung, bruttoBasisJahr, eingabe]
+    );
+
     const teilzeit = useMemo(
         () =>
             hatEingabe
                 ? teilzeitanalyse(
                       eingabe,
-                      z.wochenstunden,
+                      wochenstundenEffektiv,
                       [100, 90, 80, 70, 60, 50],
                       svWerte(SV_2026).durchschnittsentgelt
                   )
                 : null,
-        [hatEingabe, eingabe, z.wochenstunden]
+        [hatEingabe, eingabe, wochenstundenEffektiv]
     );
 
     const kurve = useMemo(
@@ -164,9 +203,9 @@ export function useRechner() {
     const stunden = useMemo(
         () =>
             ergebnis
-                ? stundenlohn(ergebnis, z.wochenstunden, svWerte(SV_2026).mindestlohn)
+                ? stundenlohn(ergebnis, wochenstundenEffektiv, svWerte(SV_2026).mindestlohn)
                 : null,
-        [ergebnis, z.wochenstunden]
+        [ergebnis, wochenstundenEffektiv]
     );
 
     const einordnung = useMemo(
@@ -208,6 +247,12 @@ export function useRechner() {
         ansicht,
         setAnsicht,
         bruttoJahr,
+        bruttoBasisJahr,
+        wochenstundenEffektiv,
+        hatAnpassung,
+        basisErgebnis,
+        monatlich,
+        setMonatlich,
         hatEingabe,
         ergebnis,
         referenz,
