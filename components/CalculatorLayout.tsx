@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { ShieldCheck, Lock, Check, Github } from 'lucide-react';
 
 interface CalculatorLayoutProps {
@@ -52,10 +53,11 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                 <header className="mb-8 sm:mb-12 flex flex-col md:flex-row md:items-start justify-between gap-4 sm:gap-6">
                     <div className="text-center md:text-left">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-                            <a href="/" className="hover:text-indigo-400 transition-colors">steuerlast-rechner.de</a>
+                            <Link href="/" className="hover:text-indigo-400 transition-colors">steuerlast-rechner.de</Link>
                         </h1>
                         <p className="text-slate-400 text-base sm:text-lg mt-2 sm:mt-3 max-w-3xl leading-relaxed">
-                            Dein Gehalt im Detail: Berechne dein Netto 2026, prüfe Auswirkungen von Stundenreduzierungen oder simuliere steigende Sozialabgaben.
+                            Netto 2026 nach dem amtlichen Programmablaufplan des BMF. Mit Teilzeit-Analyse,
+                            Grenzabgabenquote und klar gekennzeichneten Zukunftsszenarien.
                         </p>
                     </div>
 
@@ -81,11 +83,17 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                                 Deine Daten sind sicher
                             </h3>
                             <ul className="space-y-3 text-sm text-slate-300">
-                                <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Keine Analytics & Tracker</li>
+                                <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Keine Analytics und keine Tracker</li>
                                 <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Keine Cookies</li>
-                                <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Lokale In-Browser-Verarbeitung</li>
-                                <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Keine Speicherung von Eingabedaten</li>
+                                <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Die Berechnung läuft vollständig in deinem Browser</li>
+                                <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Gehalt und Steuerklasse verlassen dein Gerät nicht</li>
                             </ul>
+
+                            <p className="mt-4 text-xs leading-relaxed text-slate-500">
+                                Wie bei jedem Seitenaufruf verarbeitet der Hosting-Anbieter technisch notwendige
+                                Verbindungsdaten wie die IP-Adresse. Deine Eingaben sind davon nicht betroffen:
+                                Sie werden weder übertragen noch gespeichert.
+                            </p>
 
                             <div className="mt-5 pt-4 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
                                 <span>Privatsphäre by Design.</span>
@@ -121,8 +129,8 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                 <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
                     <span>&copy; 2026 steuerlast-rechner.de</span>
                     <nav className="flex gap-6">
-                        <a href="/impressum" className="hover:text-slate-300 transition-colors">Impressum</a>
-                        <a href="/faq" className="hover:text-slate-300 transition-colors">FAQ</a>
+                        <Link href="/impressum" className="hover:text-slate-300 transition-colors">Impressum</Link>
+                        <Link href="/faq" className="hover:text-slate-300 transition-colors">FAQ</Link>
                         <button onClick={handleFooterPrivacyClick} className="hover:text-slate-300 transition-colors">Datenschutz</button>
                     </nav>
                 </div>

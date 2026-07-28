@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Kopien des Repos aus Agent-Sitzungen, deployte Build-Artefakte und
+    // generierter Code. Ohne diese Eintraege pruefte ESLint zehntausende
+    // Zeilen fremden bzw. veralteten Codes mit.
+    ".claude/**",
+    ".firebase/**",
+    ".worktrees/**",
+    "frontend/**",
+    "lib/tax/generated/**",
   ]),
 ]);
 

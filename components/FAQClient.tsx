@@ -103,7 +103,7 @@ export function FAQClient() {
                     ) : (
                         <div className="text-center py-12 text-slate-500">
                             <Search className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                            <p>Keine Ergebnisse für "{searchQuery}" gefunden.</p>
+                            <p>Keine Ergebnisse für &bdquo;{searchQuery}&ldquo; gefunden.</p>
                             <button onClick={() => { setSearchQuery(''); setActiveFilter(null) }} className="text-indigo-400 hover:text-indigo-300 mt-2 text-sm font-bold">Suche zurücksetzen</button>
                         </div>
                     )}
