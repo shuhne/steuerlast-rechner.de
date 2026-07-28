@@ -7,7 +7,7 @@ interface StructuredDataProps {
      * User input here would bypass XSS protections since this renders into a
      * script tag via dangerouslySetInnerHTML.
      */
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
 }
 
 export function StructuredData({ data }: StructuredDataProps) {

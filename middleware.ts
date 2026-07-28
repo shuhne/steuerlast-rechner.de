@@ -1,47 +1,84 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
-const rateLimitMap = new Map<string, number[]>();
-const WINDOW_MS = 60_000; // 1 minute
-const MAX_REQUESTS = 30;
+/**
+ * Einfache Missbrauchsbremse fuer die oeffentliche Rechen-API.
+ *
+ * GELTUNGSBEREICH
+ * Die Oberflaeche selbst rechnet im Browser und ruft diese Route nicht auf.
+ * Betroffen sind ausschliesslich Zugriffe Dritter auf /api/calculate.
+ *
+ * BEKANNTE GRENZE
+ * Der Zaehler liegt im Arbeitsspeicher der jeweiligen Instanz. In einer
+ * serverlosen Umgebung gibt es mehrere Instanzen, und kalte Starts setzen den
+ * Zaehler zurueck. Das Limit wirkt daher nur je Instanz und ist eine Bremse,
+ * kein Schutz. Fuer echten Schutz braeuchte es einen gemeinsamen Speicher
+ * (z. B. Redis) oder die Ratenbegrenzung des vorgelagerten CDN.
+ *
+ * DATENSCHUTZ
+ * Es wird kein Klartext gespeichert. Aus der IP wird ein Hash gebildet, und
+ * die Eintraege verfallen mit dem Zeitfenster. Es gibt keine Persistenz und
+ * kein Logging der Anfragen.
+ */
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = rateLimitMap.get(ip) ?? [];
-  const recent = timestamps.filter((t) => now - t < WINDOW_MS);
-  if (recent.length >= MAX_REQUESTS) return true;
-  rateLimitMap.set(ip, [...recent, now]);
-  return false;
+const ZEITFENSTER_MS = 60_000;
+const MAX_ANFRAGEN = 30;
+/** Obergrenze gegen unbegrenztes Wachstum der Map bei vielen verschiedenen IPs. */
+const MAX_EINTRAEGE = 5_000;
+
+const zaehler = new Map<string, number[]>();
+
+/**
+ * Nicht kryptografischer Hash. Zweck ist ausschliesslich, die IP nicht im
+ * Klartext im Speicher zu halten; fuer eine Bremse reicht das.
+ */
+function schluessel(ip: string): string {
+    let h = 2166136261;
+    for (let i = 0; i < ip.length; i++) {
+        h ^= ip.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0).toString(36);
 }
 
-function getClientIp(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    // x-forwarded-for may contain a comma-separated list; the first is the client IP
-    return forwarded.split(",")[0].trim();
-  }
-  // request.ip is available in some Next.js/Edge environments but not typed in all versions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (request as any).ip ?? "unknown";
+function clientKennung(request: NextRequest): string {
+    const weitergeleitet = request.headers.get('x-forwarded-for');
+    const ip = weitergeleitet
+        ? weitergeleitet.split(',')[0].trim()
+        : (request.headers.get('x-real-ip') ?? 'unbekannt');
+    return schluessel(ip);
+}
+
+function ueberLimit(kennung: string): boolean {
+    const jetzt = Date.now();
+
+    if (zaehler.size > MAX_EINTRAEGE) {
+        for (const [k, zeiten] of zaehler) {
+            if (zeiten.every((t) => jetzt - t >= ZEITFENSTER_MS)) zaehler.delete(k);
+        }
+        if (zaehler.size > MAX_EINTRAEGE) zaehler.clear();
+    }
+
+    const aktuell = (zaehler.get(kennung) ?? []).filter((t) => jetzt - t < ZEITFENSTER_MS);
+    if (aktuell.length >= MAX_ANFRAGEN) {
+        zaehler.set(kennung, aktuell);
+        return true;
+    }
+
+    aktuell.push(jetzt);
+    zaehler.set(kennung, aktuell);
+    return false;
 }
 
 export function middleware(request: NextRequest): NextResponse {
-  const ip = getClientIp(request);
-
-  if (isRateLimited(ip)) {
-    return NextResponse.json(
-      { error: "Zu viele Anfragen. Bitte warte kurz." },
-      {
-        status: 429,
-        headers: {
-          "Retry-After": "60",
-        },
-      }
-    );
-  }
-
-  return NextResponse.next();
+    if (ueberLimit(clientKennung(request))) {
+        return NextResponse.json(
+            { fehler: 'Zu viele Anfragen. Bitte warte kurz.' },
+            { status: 429, headers: { 'Retry-After': '60' } }
+        );
+    }
+    return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/api/calculate", "/api/curve", "/api/simulate"],
+    matcher: ['/api/calculate'],
 };

@@ -54,3 +54,6 @@ __pycache__/
 
 # Git worktrees
 .worktrees/
+# Lokaler Audit-Workspace (Prüfbericht, Rohquellen, Arbeitsnotizen)
+# Bewusst NICHT versioniert - siehe docs/ fuer die versionierte Doku.
+.audit/

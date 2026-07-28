@@ -1,4 +1,4 @@
-# Steuerlast-Rechner.de
+# steuerlast-rechner.de
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
@@ -6,93 +6,85 @@
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8)
 ![Vitest](https://img.shields.io/badge/Test-Vitest-yellow)
 
-**Steuerlast-Rechner.de** ist eine Open-Source-Plattform zur Analyse von Netto-Einkommen, Steuerlast und Sozialabgaben in Deutschland. 
+Brutto-Netto-Rechner für Deutschland. Die Lohnsteuer wird nach dem amtlichen
+Programmablaufplan des Bundesfinanzministeriums berechnet — demselben Verfahren,
+das Lohnabrechnungsprogramme verwenden.
 
-## ✨ Hauptfunktionen
+## Was ihn unterscheidet
 
-### 1. Detaillierte Steuerberechnung 2026
-- **Exakte Algorithmen**: Implementiert die offiziellen Formeln für 2026, inkl. neuem Grundfreibetrag (12.348 €) und aktuellen Beitragsbemessungsgrenzen.
-- **Erweiterte Parameter**: Berücksichtigung von **Alter** (Altersentlastungsbetrag) und **Kinderzahl** (PV-Abschläge).
-- **Vollständige Abgabenanalyse**: Aufschlüsselung von Lohnsteuer, Kirchensteuer, Soli, sowie RV, AV, KV und PV.
+**Der Rechenkern wird nicht geschrieben, sondern erzeugt.** Aus der vom BMF
+veröffentlichten XML-Fassung des Programmablaufplans generiert
+`npm run gen:lohnsteuer` eine 1:1-Portierung nach TypeScript. Von Hand wird
+daran nichts geändert.
 
-### 2. Visuelle Analysen & Charts
-- **Inflations-Diagramm**: Visualisiere die reale Kaufkraftentwicklung über die Jahre.
-- **Gehaltsvergleich**: Vergleiche verschiedene Einkommensszenarien direkt miteinander.
-- **Grenzbelastung**: Interaktive Kurve zeigt die Abzüge für den *nächsten* verdienten Euro.
+**Geprüft gegen die amtliche Referenz.** Der zentrale Test vergleicht 516 Werte
+aus den beiden Prüftabellen des BMF-Schreibens — 43 Bruttostufen, sechs
+Steuerklassen, beide Tabellen — mit einer Toleranz von null Euro.
 
-### 3. Zukunftssimulator & Expertenmodus
-- **Szenario-Analyse**: Simuliere demografische Entwicklungen (z.B. "Pessimistisch 2035") und deren Auswirkung auf das Netto.
-- **Custom-Engine**: Passe im Expertenmodus Parameter wie KV-Zusatzbeitrag, Rentenwert oder Steuerprogression manuell an.
+**Jede Zahl trägt ihre Quelle.** Werte aus Gesetzen und Verordnungen liegen in
+`lib/tax/parameter/` und führen Quelle, Rechtsstatus, Belastbarkeit und
+Gültigkeitszeitraum mit. Die Oberfläche liest diese Metadaten direkt aus.
 
-### 4. Intelligente Teilzeit-Analyse
-- **Effizienz-Check**: Visualisiert die Auswirkungen von Stundenreduzierungen (z.B. 80%) auf das Netto.
-- **Fairer Vergleich**: Basiert auf einer echten 100%-Hochrechnung für präzise Stunden-Netto-Werte.
+**Szenarien statt Prognosen.** Zukunftsszenarien zeigen ihren rechtlichen Status
+— geltendes Recht, Referentenentwurf, amtliche Vorausberechnung oder eigene
+Annahme — und benennen, was sie bewusst nicht abbilden. Eine politische
+Ankündigung wird nicht als künftige Rechtslage dargestellt.
 
-### 5. Historischer Steuer- & Gehaltsvergleich (1958 vs. 2026)
-- **1958er Steuertarif**: Exakte historische Einkommensteuerformeln (§ 32a EStG in DM) inkl. Ehegattensplitting und historischer Sozialabgaben (RV, AV, KV; keine PV).
-- **Zwei Bereinigungsmodi**:
-  - *Lohnbereinigt (Lebensstandard)*: Anpassung an das durchschnittliche Gehaltsniveau (Rentenversicherungs-Durchschnittsentgelt). Visualisiert die Verschiebung der Steuerprogression ("Mittelstandsbauch").
-  - *Preisbereinigt (Kaufkraft)*: Anpassung basierend auf der historischen Inflation (1 DM 1958 ≈ 2,86 € heute).
-- **Historischer Gehaltsvergleich**: Visualisiert die historische Einkommensverteilung von 1958 (Männer/Frauen) hochgerechnet auf heutiges Niveau.
-- **Interaktiver Infobereich**: Ausklappbarer, geschichtlicher Exkurs zur Entwicklung von Steuern und Sozialabgaben in der Bundesrepublik.
+**Die Berechnung läuft im Browser.** Gehalt, Steuerklasse und die übrigen
+Angaben verlassen das Gerät nicht.
 
-### 6. Optimierte UX
-- **Performance**: Debounced Inputs verhindern unnötige Neuberechnungen (besonders auf Mobile).
-- **Smart Inputs**: Slider und Eingabefelder arbeiten synchron für intuitive Bedienung.
+## Funktionen
 
----
+- Netto nach geltendem Recht 2026, wahlweise nach einem anderen Rechtsstand
+- Vollständige Abzugsliste: Lohnsteuer, Solidaritätszuschlag, Kirchensteuer,
+  Renten-, Arbeitslosen-, Kranken- und Pflegeversicherung
+- Arbeitgeberanteile und Gesamtkosten der Stelle
+- Grenzabgabenquote inklusive Sozialabgaben, mit den Sprüngen an den
+  Beitragsbemessungsgrenzen
+- Teilzeitanalyse mit Netto je Arbeitsstunde und erworbenen Entgeltpunkten
+- Übergangsbereich bei Midijobs, Einmalzahlungen, ELStAM-Freibetrag,
+  private Krankenversicherung mit Arbeitgeberzuschuss
+- Einordnung in die amtliche Verdienstverteilung
+- Kaufkraftentwicklung
+- Steuerklassenvergleich für Paare
+- Zeitreise: Vergleich mit dem Steuerrecht von 1958
 
-## 🛠 Tech Stack
-
-Das Projekt ist eine moderne Next.js Applikation (Single Repo):
-
-*   **Framework**: [Next.js 16](https://nextjs.org/) (App Router).
-*   **Core**: React 19.
-*   **Sprache**: TypeScript (Rechenlogik & UI).
-*   **Styling**: TailwindCSS 4.
-*   **Testing**: Vitest.
-*   **Charts**: Recharts.
-*   **API**: Next.js Route Handlers (`app/api/*`).
-*   **Hosting**: Firebase Hosting, Vercel oder Netlify (Static/Serverless-Ready).
-
-## 🚀 Installation & Entwicklung
-
-### Voraussetzungen
-*   Node.js 18+
-*   Git
-
-### 1. Repository klonen
-
-```bash
-git clone https://github.com/shuhne/steuerlast-rechner.de.git
-cd steuerlast-rechner.de
-```
-
-### 2. Dependencies installieren & Starten
+## Entwicklung
 
 ```bash
 npm install
 npm run dev
 ```
 
-Die Anwendung ist nun unter `http://localhost:3000` erreichbar.
+```bash
+npm test                 # alle Tests
+npm test -- pruftabelle  # nur der amtliche Abgleich
+npm run gen:lohnsteuer   # Rechenkern aus der XML neu erzeugen
+npm run lint
+npx tsc --noEmit
+```
 
-## 🔒 Datenschutz
+## Dokumentation
 
-Das Projekt folgt einem strikten "Privacy by Design"-Ansatz:
-- **Keine Cookies**: Es werden keine technsichen oder Tracking-Cookies gesetzt.
-- **Lokale Verarbeitung**: Die Berechnungslogik läuft stateless; Eingaben werden nicht gespeichert.
-- **Kein Logging**: Personenbezogene Daten (Gehalt, Steuerklasse) werden nicht persistiert.
+| Wofür | Wo |
+|---|---|
+| Arbeitsanweisung für Agenten und Beitragende | [`AGENTS.md`](AGENTS.md) |
+| Codeaufbau | [`docs/architektur.md`](docs/architektur.md) |
+| Primärquellen und ihr Turnus | [`docs/wissensspeicher/quellenregister.md`](docs/wissensspeicher/quellenregister.md) |
+| Jahreswechsel durchführen | [`docs/wissensspeicher/runbook-jahreswechsel.md`](docs/wissensspeicher/runbook-jahreswechsel.md) |
+| Stand der Reformvorhaben | [`docs/wissensspeicher/reformmonitor.md`](docs/wissensspeicher/reformmonitor.md) |
+| Was nicht abgebildet ist | [`docs/wissensspeicher/offene-punkte.md`](docs/wissensspeicher/offene-punkte.md) |
 
-## 🤝 Contributing
+## Grenzen
 
-Beiträge sind willkommen!
+Der Rechner bildet den laufenden Lohnsteuerabzug ab. Die endgültige Steuer
+ergibt sich erst aus der Einkommensteuerveranlagung. Nicht abgebildet sind unter
+anderem betriebliche Altersvorsorge, geldwerte Vorteile, das Faktorverfahren und
+Mehrfachbeschäftigung. Die vollständige Liste steht in
+[`offene-punkte.md`](docs/wissensspeicher/offene-punkte.md).
 
-1.  Öffne ein [Issue](https://github.com/shuhne/steuerlast-rechner.de/issues).
-2.  Forke das Repository.
-3.  Erstelle einen Feature-Branch.
-4.  Öffne einen Pull Request.
+Keine Steuerberatung.
 
-## 📄 Lizenz
+## Lizenz
 
-Dieses Projekt ist unter der MIT-Lizenz veröffentlicht.
+MIT.

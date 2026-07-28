@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "gen:lohnsteuer": "node tools/lohnsteuer/generate.mjs",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
