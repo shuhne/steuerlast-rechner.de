@@ -67,12 +67,10 @@ export function useStickyWennPasst({
     // Messung. Wenn useEffect laeuft, ist das Layout bereits geschrieben,
     // `offsetHeight` also belastbar.
     //
-    // Die Regel set-state-in-effect warnt vor kaskadierenden Rendern. Hier ist
-    // die Kaskade begrenzt: `pruefen` setzt nur bei echter Aenderung, und der
+    // Die Kaskade ist begrenzt: `pruefen` setzt nur bei echter Aenderung, der
     // Folgerender misst denselben Wert erneut und bricht ab. Ein Ausweichen auf
     // requestAnimationFrame waere schlechter - in nicht sichtbaren Tabs feuert
     // es nicht, die Seitenleiste bliebe dort dauerhaft unbeklebt.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(pruefen);
 
     // Aenderungen ohne Render: Fenstergroesse, nachgeladene Schriften.
