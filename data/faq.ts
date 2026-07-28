@@ -44,12 +44,16 @@ export const FAQ_ITEMS: FAQItem[] = [
     {
         question: 'Was ist die Grenzabgabenquote?',
         answer:
-            'Sie gibt an, welcher Anteil des nächsten verdienten Euro als Steuern und ' +
-            'Sozialversicherungsbeiträge abgeht. Sie ist deutlich höher als der oft genannte ' +
-            'Grenzsteuersatz, weil dieser nur die Einkommensteuer betrachtet. Bei 60.000 € Brutto ' +
-            'liegt der Grenzsteuersatz bei rund 34 %, die tatsächliche Grenzabgabenquote aber bei ' +
-            'rund 50 %. Oberhalb der Beitragsbemessungsgrenzen fällt sie sprunghaft, weil dort ' +
-            'keine weiteren Sozialbeiträge mehr anfallen.',
+            'Sie gibt an, welcher Anteil des nächsten verdienten Euro Brutto als Steuern und ' +
+            'Sozialversicherungsbeiträge abgeht. Bei 60.000 € Brutto in Steuerklasse I sind das ' +
+            'rund 49 % — davon etwa 27 Prozentpunkte Steuern und 22 Prozentpunkte Sozialabgaben. ' +
+            'Von 100 € mehr Brutto bleiben also rund 51 € netto. ' +
+            'Nicht zu verwechseln mit dem oft genannten Grenzsteuersatz von 42 %: Der bezieht sich ' +
+            'auf das zu versteuernde Einkommen, nicht auf das Bruttogehalt, und lässt die ' +
+            'Sozialabgaben außen vor. Beide Zahlen sind richtig, sie beantworten nur ' +
+            'verschiedene Fragen. ' +
+            'Oberhalb der Beitragsbemessungsgrenzen fällt die Grenzabgabenquote sprunghaft, weil ' +
+            'dort keine weiteren Sozialbeiträge mehr anfallen.',
         category: 'general',
     },
     {
