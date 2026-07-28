@@ -43,5 +43,5 @@ export function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ["/api/calculate", "/api/curve", "/api/simulate"],
+  matcher: ["/api/calculate"],
 };

@@ -1,34 +1,48 @@
 import { z } from 'zod';
+import { RECHTSSTAENDE } from './parameter/rechtsstaende';
 
-const GERMAN_STATE_CODES = [
-    'BB', 'BE', 'BW', 'BY', 'HB', 'HE', 'HH', 'MV',
-    'NI', 'NW', 'RP', 'SH', 'SL', 'SN', 'ST', 'TH',
+/**
+ * Eingabevalidierung fuer die oeffentliche API.
+ *
+ * Die Oberflaeche rechnet seit dem Umbau lokal im Browser; die API-Routen
+ * bleiben als dokumentierte oeffentliche Schnittstelle bestehen.
+ */
+
+export const BUNDESLAENDER = [
+    'BW', 'BY', 'BE', 'BB', 'HB', 'HH', 'HE', 'MV',
+    'NI', 'NW', 'RP', 'SL', 'SN', 'ST', 'SH', 'TH',
 ] as const;
 
-export const SimulationSettingsSchema = z.object({
-    rv_rate_total: z.number().min(0).max(1.0).nullable().optional(),
-    av_rate_total: z.number().min(0).max(1.0).nullable().optional(),
-    kv_rate_add: z.number().min(0).max(0.20).nullable().optional(),
-    pv_rate_total: z.number().min(0).max(1.0).nullable().optional(),
-    income_tax_factor: z.number().min(0.5).max(3.0),
-    soli_factor: z.number().min(0.5).max(3.0),
+const szenarioIds = RECHTSSTAENDE.map((r) => r.id) as [string, ...string[]];
+
+export const RechnerEingabeSchema = z.object({
+    bruttoJahr: z.number().min(0).max(10_000_000),
+    steuerklasse: z.number().int().min(1).max(6),
+    bundesland: z.enum(BUNDESLAENDER),
+    kirchensteuer: z.boolean(),
+    kirchensteuerKappungProzent: z.number().min(0).max(10).nullable().optional(),
+    alter: z.number().int().min(14).max(120),
+    kinderfreibetraege: z.number().min(0).max(20),
+    kinderFuerPflege: z.number().min(0).max(20),
+    krankenversicherung: z.enum(['gesetzlich', 'privat']),
+    kvZusatzProzent: z.number().min(0).max(15),
+    pkvMonatsbeitrag: z.number().min(0).max(10_000).optional(),
+    pkvArbeitgeberzuschussMonat: z
+        .union([z.number().min(0).max(10_000), z.literal('maximal')])
+        .optional(),
+    jahresfreibetrag: z.number().min(0).max(1_000_000).optional(),
+    sonstigeBezuege: z.number().min(0).max(10_000_000).optional(),
+    rentenversicherungspflichtig: z.boolean().optional(),
+    arbeitslosenversicherungspflichtig: z.boolean().optional(),
+    szenarioId: z.enum(szenarioIds).nullable().optional(),
 });
 
-export const TaxRequestSchema = z.object({
-    gross_income: z.number().min(0).max(2_000_000),
-    tax_class: z.number().int().min(1).max(6),
-    church_tax: z.boolean(),
-    state: z.enum(GERMAN_STATE_CODES),
-    period: z.enum(['yearly', 'monthly']),
-    has_children: z.boolean().optional(),
-    child_count: z.number().min(0).max(20).optional(),
-    age: z.number().int().min(0).max(120).optional(),
-    year_of_birth: z.number().int().min(1900).max(new Date().getFullYear()).optional(),
-    health_insurance_type: z.enum(['statutory', 'private']).optional(),
-    kv_add_rate: z.number().min(0).max(10).optional(),
-    private_kv_amount: z.number().min(0).max(10_000).optional(),
-    simulation_settings: SimulationSettingsSchema.nullable().optional(),
-    historical_mode: z.enum(['wage', 'price']).nullable().optional(),
+export const Eingabe1958Schema = z.object({
+    bruttoJahrEur: z.number().min(0).max(10_000_000),
+    bereinigung: z.enum(['lohn', 'preis']),
+    veranlagung: z.enum(['einzel', 'zusammen']),
+    kirchensteuer: z.boolean(),
+    bundesland: z.enum(BUNDESLAENDER),
 });
 
-export type ValidatedTaxRequest = z.infer<typeof TaxRequestSchema>;
+export type ValidierteEingabe = z.infer<typeof RechnerEingabeSchema>;
