@@ -18,6 +18,9 @@ components/
     ErgebnisPanel.tsx   Netto, Abzüge, Arbeitgeberkosten, Methodenkasten
     Analysen.tsx        Teilzeit, Grenzbelastung, Einordnung, Kaufkraft, Paare
     Zeitreise1958.tsx   historischer Vergleich
+    Donut.tsx           Ringdiagramm, von Hand gezeichnet
+    InfoTooltip.tsx     Erklärungen auf Abruf
+    useStickyWennPasst.ts  Sticky nur, wenn das Panel ins Fenster passt
   CalculatorLayout.tsx  Rahmen
 
 lib/
@@ -81,6 +84,29 @@ Die frühere Kennzahl war der Grenz-Einkommensteuersatz auf ein vereinfachtes zu
 versteuerndes Einkommen nach Grundtabelle — ohne Sozialabgaben, ohne
 Splittingberücksichtigung. Bei 60.000 € Brutto wies sie 34 % aus, während die
 tatsächliche Grenzbelastung bei rund 50 % lag.
+
+## Rechnen mit Geld
+
+Zwei Verfahren, absichtlich getrennt.
+
+**Im Rechenkern:** `big.js` mit einer eigenen Instanz (`PapBig`, `DP = 40`).
+Der Programmablaufplan rundet ausschließlich explizit an definierten Stellen;
+jede vorzeitige Rundung verfälscht das Ergebnis. Die globale
+`Big`-Konfiguration anderer Module bleibt unberührt.
+
+**Außerhalb:** `euroRunden` aus `lib/tax/runden.ts`. Das naheliegende
+`Math.round(v * 100) / 100` ist für Geldbeträge unbrauchbar, weil viele
+Zwischenergebnisse binär nicht exakt darstellbar sind:
+
+```
+5812.50 * 0.018                      = 104.62499999999999
+Math.round(104.6249... * 100) / 100  = 104.62   // falsch
+euroRunden(104.62499999999999)       = 104.63   // richtig
+```
+
+`euroRunden` normalisiert vor dem Runden auf zehn Nachkommastellen. Das
+entfernt den Darstellungsfehler, ohne fachlich relevante Stellen zu verlieren —
+Beitragssätze haben höchstens sechs.
 
 ## Tests
 

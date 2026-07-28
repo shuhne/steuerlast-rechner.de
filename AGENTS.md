@@ -82,7 +82,8 @@ Ist er rot, ist der Rechenkern falsch. **Niemals die Erwartungswerte anpassen.**
 | Offene Punkte finden | [`offene-punkte.md`](docs/wissensspeicher/offene-punkte.md) |
 
 Verzeichnisspezifische Anweisungen: [`lib/tax/AGENTS.md`](lib/tax/AGENTS.md),
-[`lib/statistik/AGENTS.md`](lib/statistik/AGENTS.md).
+[`lib/statistik/AGENTS.md`](lib/statistik/AGENTS.md),
+[`components/AGENTS.md`](components/AGENTS.md).
 
 ---
 

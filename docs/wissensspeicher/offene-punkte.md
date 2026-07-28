@@ -87,6 +87,23 @@ Veranlagung wirkt, nicht beim laufenden Lohnsteuerabzug.
 
 ---
 
+## 2a. Beobachtungen zu Bibliotheken
+
+**recharts 3: `<Pie>` erzeugte leere Sektoren.** In der Zusammensetzungs-Karte
+lieferte `<PieChart><Pie data={...} dataKey="wert"><Cell/></Pie></PieChart>` im
+DOM zwei leere `<g class="recharts-pie-sector">` statt drei gefüllter Segmente —
+ohne Konsolenfehler. Balken- und Liniendiagramme derselben Version arbeiten
+einwandfrei. Statt die API zu erraten, wird der Ring jetzt in
+`components/rechner/Donut.tsx` von Hand gezeichnet. Bei einem Versionswechsel
+von recharts lohnt ein erneuter Blick, ob `<Pie>` wieder brauchbar ist — nötig
+ist es nicht.
+
+**ResizeObserver und requestAnimationFrame in nicht sichtbaren Tabs.** Beide
+sind an den Rendering-Lebenszyklus gekoppelt und liefern dort keine
+Rückmeldung; der ResizeObserver feuerte nicht einmal die laut Spezifikation
+garantierte erste Beobachtung nach `observe`. `useStickyWennPasst` misst
+deshalb direkt nach jedem Render und nutzt beide nur als zusätzliche Auslöser.
+
 ## 3. Bekannte Vereinfachungen
 
 **Alter.** Gerechnet wird mit vollendeten Lebensjahren zu Jahresbeginn. Der
