@@ -51,23 +51,18 @@ type Props = ReturnType<typeof useRechner>;
 function Feld({
     label,
     hinweis,
-    zusatz,
     children,
 }: {
     label: string;
     hinweis?: string;
-    zusatz?: React.ReactNode;
     children: React.ReactNode;
 }) {
     return (
         <div className="space-y-1.5">
-            <div className="flex min-h-5 items-center justify-between gap-2">
-                <span className="flex items-center gap-1 text-sm font-medium text-slate-400">
-                    {label}
-                    {hinweis && <InfoTooltip text={hinweis} />}
-                </span>
-                {zusatz}
-            </div>
+            <span className="flex items-center gap-1 text-sm font-medium text-slate-400">
+                {label}
+                {hinweis && <InfoTooltip text={hinweis} />}
+            </span>
             {children}
         </div>
     );
@@ -260,11 +255,11 @@ export function EingabePanel(p: Props) {
             </Feld>
 
             {/* Rechtsstand */}
-            <Feld
-                label="Rechtsstand"
-                hinweis={p.rechtsstand.beschreibung}
-                zusatz={<RechtsstatusChip status={p.rechtsstand.rechtsstatus} klein />}
-            >
+            {/* Ohne Status-Chip: Der Rechtsstand steht bereits im Namen der
+                Auswahl, und bei Szenarien weist die Ergebniskarte deutlich
+                genug darauf hin. Ein farbiger Chip an jedem Zustand - auch am
+                Normalfall "geltendes Recht" - war visuelles Rauschen. */}
+            <Feld label="Rechtsstand" hinweis={p.rechtsstand.beschreibung}>
                 <div className="relative">
                     <select
                         value={p.z.szenarioId}

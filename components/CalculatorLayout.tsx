@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useStickyWennPasst } from './rechner/useStickyWennPasst';
 import { ShieldCheck, Lock, Check, Github } from 'lucide-react';
 
 interface CalculatorLayoutProps {
@@ -12,6 +13,7 @@ interface CalculatorLayoutProps {
 
 export function CalculatorLayout({ sidebar, results, content }: CalculatorLayoutProps) {
     const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+    const { ref: sidebarRef, klassen: stickyKlassen, stil: stickyStil } = useStickyWennPasst();
     const privacyButtonRef = useRef<HTMLButtonElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -108,11 +110,14 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
 
                 <div className="flex flex-col lg:grid lg:grid-cols-[400px_1fr] gap-4 sm:gap-6 lg:gap-8 lg:items-start">
                     {/* Input Panel (Sidebar) */}
-                    {/* Bewusst ohne eigene Scrollleiste: das Eingabefeld scrollt mit der
-                        Seite. Ein `overflow-y-auto` erzeugte hier eine zweite Scrollleiste
-                        und machte den unteren Teil des Panels bei kleinen Fenstern
-                        unerreichbar, sobald es am oberen Rand klebte. */}
-                    <aside className="w-full shrink-0 lg:self-start">
+                    {/* Klebt nur, wenn das Panel vollstaendig ins Fenster passt.
+                        Sonst scrollt es normal mit - in keinem Fall entsteht eine
+                        zweite Scrollleiste. Siehe useStickyWennPasst. */}
+                    <aside
+                        ref={sidebarRef}
+                        style={stickyStil}
+                        className={`w-full shrink-0 lg:self-start ${stickyKlassen}`}
+                    >
                         {sidebar}
                     </aside>
 
