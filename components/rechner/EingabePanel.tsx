@@ -234,14 +234,7 @@ export function EingabePanel(p: Props) {
                         {(['jahr', 'monat'] as const).map((per) => (
                             <button
                                 key={per}
-                                onClick={() => {
-                                    const v = parseZahl(p.z.bruttoEingabe);
-                                    if (v > 0) {
-                                        const neu = per === 'monat' ? v / 12 : v * 12;
-                                        p.setzen('bruttoEingabe', neu.toLocaleString('de-DE', { maximumFractionDigits: 2 }));
-                                    }
-                                    p.setzen('periode', per);
-                                }}
+                                onClick={() => p.setPeriode(per)}
                                 className={cn(
                                     'flex flex-1 items-center justify-center rounded text-xs font-bold uppercase transition-colors',
                                     p.z.periode === per ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'

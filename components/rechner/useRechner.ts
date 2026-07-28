@@ -79,6 +79,37 @@ export function parseZahl(text: string): number {
     return parseFloat(text.replace(/\./g, '').replace(',', '.')) || 0;
 }
 
+/**
+ * Wechselt die Einheit, in der ueber das Gehalt gesprochen wird.
+ *
+ * Das Gehalt selbst bleibt dabei gleich - nur die Zahl im Eingabefeld wird
+ * umgerechnet. 60.000 EUR jaehrlich und 5.000 EUR monatlich sind dasselbe
+ * Gehalt.
+ *
+ * Als reine Funktion herausgezogen, damit beide Umschalter (Eingabefeld und
+ * Ergebniskarte) zwingend denselben Code benutzen. Genau das war vorher nicht
+ * der Fall: Der Umschalter in der Ergebniskarte setzte nur die Einheit, ohne
+ * den Betrag umzurechnen. Aus 60.000 EUR im Jahr wurden dadurch 60.000 EUR im
+ * Monat - der Rechner rechnete anschliessend mit 720.000 EUR Jahresgehalt.
+ */
+export function periodeWechseln(
+    zustand: RechnerZustand,
+    neuePeriode: 'jahr' | 'monat'
+): RechnerZustand {
+    if (zustand.periode === neuePeriode) return zustand;
+
+    const wert = parseZahl(zustand.bruttoEingabe);
+    if (wert <= 0) return { ...zustand, periode: neuePeriode };
+
+    const umgerechnet = neuePeriode === 'monat' ? wert / 12 : wert * 12;
+
+    return {
+        ...zustand,
+        periode: neuePeriode,
+        bruttoEingabe: umgerechnet.toLocaleString('de-DE', { maximumFractionDigits: 2 }),
+    };
+}
+
 export function formatEuro(v: number, nachkomma = 2): string {
     return new Intl.NumberFormat('de-DE', {
         style: 'currency',
@@ -134,9 +165,13 @@ export function useRechner() {
 
     const hatEingabe = bruttoJahr > 0;
 
-    /** Anzeigeeinheit - geteilt zwischen Eingabe und Ergebnis. */
+    /**
+     * Einheit, in der ueber Betraege gesprochen wird - geteilt zwischen
+     * Eingabefeld und Ergebnis. Beide Umschalter rufen dieselbe Funktion.
+     */
     const monatlich = z.periode === 'monat';
-    const setMonatlich = (m: boolean) => setzen('periode', m ? 'monat' : 'jahr');
+    const setPeriode = (neue: 'jahr' | 'monat') => setZ((alt) => periodeWechseln(alt, neue));
+    const setMonatlich = (m: boolean) => setPeriode(m ? 'monat' : 'jahr');
 
     const eingabe: RechnerEingabe = useMemo(
         () => ({
@@ -252,6 +287,7 @@ export function useRechner() {
         hatAnpassung,
         basisErgebnis,
         monatlich,
+        setPeriode,
         setMonatlich,
         hatEingabe,
         ergebnis,
