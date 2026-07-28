@@ -57,6 +57,79 @@ const inputKlasse =
     'w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2.5 text-base text-white ' +
     'focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm';
 
+// Zahlenfelder ohne die nativen Spinner des Browsers - die sind je nach
+// Browser unterschiedlich gross und lassen sich nicht gestalten.
+const ohneSpinner =
+    '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none ' +
+    '[&::-webkit-inner-spin-button]:appearance-none';
+
+/**
+ * Zahlenfeld mit eigenen Plus/Minus-Schaltflaechen.
+ *
+ * Die nativen Spinner sind auf Touch-Geraeten kaum treffbar und in Firefox gar
+ * nicht vorhanden. Eigene Schaltflaechen sind gross genug und ueberall gleich.
+ */
+function ZahlFeld({
+    wert,
+    setzen,
+    min,
+    max,
+    schritt = 1,
+    suffix,
+    ariaLabel,
+}: {
+    wert: number;
+    setzen: (v: number) => void;
+    min: number;
+    max: number;
+    schritt?: number;
+    suffix?: string;
+    ariaLabel: string;
+}) {
+    const begrenzen = (v: number) => Math.min(max, Math.max(min, v));
+    const runden = (v: number) => Math.round(v / schritt) * schritt;
+
+    return (
+        <div className="group relative">
+            <input
+                type="number"
+                inputMode="decimal"
+                min={min}
+                max={max}
+                step={schritt}
+                value={Number.isFinite(wert) ? wert : ''}
+                onChange={(e) => setzen(parseFloat(e.target.value))}
+                onBlur={(e) => setzen(begrenzen(parseFloat(e.target.value) || min))}
+                aria-label={ariaLabel}
+                className={cn(inputKlasse, 'pr-12 font-mono', ohneSpinner)}
+            />
+            {suffix && (
+                <span className="pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                    {suffix}
+                </span>
+            )}
+            <div className="absolute bottom-1 right-1 top-1 flex w-10 flex-col gap-0.5 rounded border border-slate-800 bg-slate-900 p-0.5">
+                <button
+                    type="button"
+                    onClick={() => setzen(begrenzen(runden(wert + schritt)))}
+                    aria-label={`${ariaLabel} erhöhen`}
+                    className="flex flex-1 items-center justify-center rounded text-xs font-bold text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                >
+                    +
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setzen(begrenzen(runden(wert - schritt)))}
+                    aria-label={`${ariaLabel} verringern`}
+                    className="flex flex-1 items-center justify-center rounded text-xs font-bold text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                >
+                    −
+                </button>
+            </div>
+        </div>
+    );
+}
+
 export function EingabePanel(p: Props) {
     const [expertenmodus, setExpertenmodus] = useState(false);
     const sv = svWerte(SV_2026);
@@ -199,44 +272,55 @@ export function EingabePanel(p: Props) {
                     </button>
                 </Feld>
 
-                <Feld label="Alter">
-                    <input
-                        type="number"
+                <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                        <label className="text-sm font-medium text-slate-400">Alter</label>
+                        {p.z.alter > 64 && (
+                            <span className="rounded border border-emerald-500/20 bg-emerald-900/20 px-1.5 py-0.5 text-[10px] text-emerald-400">
+                                Altersentlastung
+                            </span>
+                        )}
+                    </div>
+                    <ZahlFeld
+                        wert={p.z.alter}
+                        setzen={(v) => p.setzen('alter', v)}
                         min={14}
                         max={100}
-                        value={p.z.alter}
-                        onChange={(e) => p.setzen('alter', parseInt(e.target.value) || 0)}
-                        onBlur={(e) => p.setzen('alter', Math.min(100, Math.max(14, parseInt(e.target.value) || 30)))}
-                        className={inputKlasse}
+                        ariaLabel="Alter"
                     />
-                </Feld>
+                </div>
 
                 <Feld label="Kinder">
-                    <input
-                        type="number"
+                    <ZahlFeld
+                        wert={p.z.kinder}
+                        setzen={(v) => p.setzen('kinder', v)}
                         min={0}
                         max={12}
-                        step={0.5}
-                        value={p.z.kinder}
-                        onChange={(e) => p.setzen('kinder', Math.max(0, parseFloat(e.target.value) || 0))}
-                        className={inputKlasse}
+                        schritt={0.5}
+                        ariaLabel="Zahl der Kinder"
                     />
                 </Feld>
 
                 <Feld label="Wochenstunden">
-                    <input
-                        type="number"
+                    <ZahlFeld
+                        wert={p.z.wochenstunden}
+                        setzen={(v) => p.setzen('wochenstunden', v)}
                         min={1}
                         max={80}
-                        step={0.5}
-                        value={p.z.wochenstunden}
-                        onChange={(e) => p.setzen('wochenstunden', parseFloat(e.target.value) || 0)}
-                        onBlur={(e) => p.setzen('wochenstunden', Math.min(80, Math.max(1, parseFloat(e.target.value) || 40)))}
-                        className={inputKlasse}
+                        schritt={0.5}
+                        ariaLabel="Wochenstunden"
                     />
                 </Feld>
 
-                <Feld label="Krankenversicherung">
+                <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                        <label className="text-sm font-medium text-slate-400">Krankenversicherung</label>
+                        {p.pkvMoeglich && (
+                            <span className="rounded border border-emerald-900/50 bg-emerald-950 px-1.5 py-0.5 text-[10px] text-emerald-500">
+                                Freie Wahl
+                            </span>
+                        )}
+                    </div>
                     <div className="relative">
                         <select
                             value={p.z.krankenversicherung}
@@ -249,7 +333,13 @@ export function EingabePanel(p: Props) {
                         </select>
                         <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500" />
                     </div>
-                </Feld>
+                    {!p.pkvMoeglich && (
+                        <p className="text-xs leading-snug text-slate-500">
+                            Der Wechsel in die private Krankenversicherung ist erst ab 77.400 €
+                            Jahresbrutto möglich (Jahresarbeitsentgeltgrenze 2026).
+                        </p>
+                    )}
+                </div>
             </div>
 
             {/* KV-Zusatzbeitrag: jetzt Hauptfeld statt wirkungslosem Expertenfeld */}
@@ -259,18 +349,15 @@ export function EingabePanel(p: Props) {
                     hinweis={`Standard ist der rechnerische Durchschnitt von ${(sv.kvZusatzDurchschnitt * 100)
                         .toLocaleString('de-DE', { minimumFractionDigits: 1 })} % nach § 242a SGB V. Der tatsächlich gewichtete Kassendurchschnitt lag im Januar 2026 bei rund 3,1 %. Den eigenen Satz findest du auf der Website deiner Kasse.`}
                 >
-                    <div className="relative">
-                        <input
-                            type="number"
-                            min={0}
-                            max={10}
-                            step={0.05}
-                            value={p.z.kvZusatzProzent}
-                            onChange={(e) => p.setzen('kvZusatzProzent', Math.max(0, parseFloat(e.target.value) || 0))}
-                            className={cn(inputKlasse, 'pr-8 font-mono')}
-                        />
-                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">%</span>
-                    </div>
+                    <ZahlFeld
+                        wert={p.z.kvZusatzProzent}
+                        setzen={(v) => p.setzen('kvZusatzProzent', v)}
+                        min={0}
+                        max={10}
+                        schritt={0.1}
+                        suffix="%"
+                        ariaLabel="Zusatzbeitrag der Krankenkasse"
+                    />
                 </Feld>
             ) : (
                 <Feld

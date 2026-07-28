@@ -108,7 +108,11 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
 
                 <div className="flex flex-col lg:grid lg:grid-cols-[400px_1fr] gap-4 sm:gap-6 lg:gap-8 lg:items-start">
                     {/* Input Panel (Sidebar) */}
-                    <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+                    {/* Bewusst ohne eigene Scrollleiste: das Eingabefeld scrollt mit der
+                        Seite. Ein `overflow-y-auto` erzeugte hier eine zweite Scrollleiste
+                        und machte den unteren Teil des Panels bei kleinen Fenstern
+                        unerreichbar, sobald es am oberen Rand klebte. */}
+                    <aside className="w-full shrink-0 lg:self-start">
                         {sidebar}
                     </aside>
 
