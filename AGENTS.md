@@ -101,6 +101,14 @@ npx tsc --noEmit         # Typprüfung
 Vor jedem Commit müssen `npm test`, `npm run lint` und `npx tsc --noEmit`
 sauber durchlaufen.
 
+Vor einem Deployment zusätzlich `rm -rf .next && npm run build` — sonst wandern
+Entwicklungsartefakte aus `.next/dev` mit ins Deploy-Paket. Siehe README.
+
+Neue Laufzeitabhängigkeiten gehören ausdrücklich in `package.json`. Sich auf
+transitiv vorhandene Pakete zu verlassen, geht still gut, bis eine andere
+Abhängigkeit entfernt wird: `big.js` — die Grundlage jeder Betragsrechnung —
+kam lange nur über zwei längst tote Pakete herein.
+
 ## Arbeitsweise
 
 - Kleine, thematisch saubere Commits. Eine Änderung, ein Commit.
