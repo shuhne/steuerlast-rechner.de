@@ -15,7 +15,7 @@ const formatDM = (v: number) =>
     `${v.toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} DM`;
 
 export function Zeitreise1958(p: Props) {
-    if (!p.hatEingabe || !p.historisch || !p.ergebnis) {
+    if (!p.hatEingabe || !p.historisch || !p.ergebnisGeltendesRecht) {
         return (
             <div className="rounded-xl border border-dashed border-amber-700/50 bg-slate-900 p-8 text-center">
                 <History className="mx-auto mb-4 h-8 w-8 text-amber-500" />
@@ -27,7 +27,8 @@ export function Zeitreise1958(p: Props) {
     }
 
     const h = p.historisch;
-    const heute = p.ergebnis;
+    // Immer gegen geltendes Recht, auch wenn oben ein Szenario gewaehlt ist.
+    const heute = p.ergebnisGeltendesRecht;
     const differenz = h.inEuro.netto - heute.netto.jahr;
 
     return (
@@ -136,7 +137,7 @@ export function Zeitreise1958(p: Props) {
             <div className="rounded-xl border border-amber-500/20 bg-amber-950/10 p-4 sm:p-6">
                 <h4 className="mb-3 flex items-center gap-2 text-base font-semibold text-amber-200">
                     <TriangleAlert className="h-4 w-4" />
-                    Was dieser Vergleich nicht zeigt
+                    Was der Vergleich nicht erfasst
                 </h4>
                 <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-400">
                     {GRENZEN_1958.map((t, i) => (
@@ -144,8 +145,8 @@ export function Zeitreise1958(p: Props) {
                     ))}
                 </ul>
                 <p className="mt-4 border-t border-amber-500/20 pt-3 text-xs leading-relaxed text-slate-500">
-                    Die Abweichungen wirken überwiegend in dieselbe Richtung: Das Netto von 1958 wird
-                    hier eher zu hoch als zu niedrig ausgewiesen.
+                    Diese Lücken wirken überwiegend in dieselbe Richtung — das Netto von 1958
+                    fällt hier eher zu günstig aus.
                 </p>
             </div>
 

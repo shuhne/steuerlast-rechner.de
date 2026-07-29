@@ -58,7 +58,7 @@ export function ErgebnisPanel(p: Props) {
                 </div>
                 <h3 className="mb-2 text-lg font-semibold text-white">Deine Auswertung erscheint hier</h3>
                 <p className="max-w-xs text-sm leading-relaxed text-slate-400">
-                    Gib dein Bruttogehalt ein. Alles wird direkt in deinem Browser gerechnet.
+                    Gib dein Bruttogehalt ein — den Rest übernehmen wir.
                 </p>
             </div>
         );
@@ -101,13 +101,13 @@ export function ErgebnisPanel(p: Props) {
                                 <RechtsstatusChip status={e.rechtsstand.rechtsstatus} klein />
                             </div>
                             <p className="text-sm leading-relaxed text-amber-100/90">
-                                Das ist kein geltendes Recht, sondern ein Szenario. Die Zahlen sind
-                                keine Prognose deines künftigen Nettogehalts.
+                                Eine Modellrechnung, keine Vorhersage: So sähe dein Netto aus,
+                                wenn die zugrunde gelegten Annahmen eintreffen.
                             </p>
                             {p.rechtsstand.nichtModelliert.length > 0 && (
                                 <details className="group">
                                     <summary className="cursor-pointer list-none text-xs font-semibold text-amber-300 hover:text-amber-200">
-                                        Was dieses Szenario bewusst nicht abbildet
+                                        Was hier nicht eingerechnet ist
                                         <ChevronDown className="ml-1 inline h-3 w-3 transition-transform group-open:rotate-180" />
                                     </summary>
                                     <ul className="mt-2 list-disc space-y-1.5 pl-4 text-xs leading-relaxed text-amber-100/80">

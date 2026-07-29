@@ -58,8 +58,8 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                             <Link href="/" className="hover:text-indigo-400 transition-colors">steuerlast-rechner.de</Link>
                         </h1>
                         <p className="text-slate-400 text-base sm:text-lg mt-2 sm:mt-3 max-w-3xl leading-relaxed">
-                            Netto 2026 nach dem amtlichen Programmablaufplan des BMF. Mit Teilzeit-Analyse,
-                            Grenzabgabenquote und klar gekennzeichneten Zukunftsszenarien.
+                            Dein Gehalt im Detail: Berechne dein Netto 2026, sieh nach, was eine
+                            Stundenreduzierung wirklich kostet, und wirf einen Blick auf morgen.
                         </p>
                     </div>
 
