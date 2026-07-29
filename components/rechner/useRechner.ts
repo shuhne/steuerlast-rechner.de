@@ -217,6 +217,14 @@ export function useRechner() {
         [hatAnpassung, bruttoBasisJahr, eingabe]
     );
 
+    /**
+     * Ergebnis nach geltendem Recht - unabhaengig vom gewaehlten Rechtsstand.
+     * Die Zeitreise nach 1958 muss dagegen vergleichen: Ein Vergleich "1958
+     * gegen eine Modellrechnung fuer 2035" waere unter der Ueberschrift
+     * "heutiges Recht" schlicht falsch beschriftet.
+     */
+    const ergebnisGeltendesRecht = referenz ?? ergebnis;
+
     const teilzeit = useMemo(
         () =>
             hatEingabe
@@ -292,6 +300,7 @@ export function useRechner() {
         hatEingabe,
         ergebnis,
         referenz,
+        ergebnisGeltendesRecht,
         teilzeit,
         kurve,
         stunden,
