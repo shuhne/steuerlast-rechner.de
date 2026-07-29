@@ -75,6 +75,33 @@ npx tsc --noEmit
 | Stand der Reformvorhaben | [`docs/wissensspeicher/reformmonitor.md`](docs/wissensspeicher/reformmonitor.md) |
 | Was nicht abgebildet ist | [`docs/wissensspeicher/offene-punkte.md`](docs/wissensspeicher/offene-punkte.md) |
 
+## Deployment
+
+Firebase Hosting mit Next.js-Backend in `europe-west1`. Das Projekt ist über
+[`.firebaserc`](.firebaserc) fest hinterlegt, `--project` ist deshalb nicht
+nötig.
+
+```bash
+rm -rf .next        # wichtig, siehe unten
+npm run build
+npx firebase deploy --only hosting
+```
+
+**`.next` vor dem Build loeschen.** Das Firebase-Frameworks-Backend packt den
+Projektordner mitsamt `.next`. Wurde vorher `npm run dev` ausgefuehrt, liegt
+dort ein `dev`-Unterordner mit Entwicklungsartefakten — in einem gemessenen Fall
+288 MB, die unnoetig hochgeladen werden. Ein sauberer Build erzeugt rund 19 MB.
+
+Läuft die Anmeldung ab, meldet die CLI einen `Authentication Error`. Dann:
+
+```bash
+npx firebase login --reauth
+```
+
+Vor jedem Deployment müssen `npm test`, `npx tsc --noEmit`, `npm run lint` und
+`npm run build` sauber durchlaufen — insbesondere der Abgleich gegen die
+amtlichen Prüftabellen.
+
 ## Grenzen
 
 Der Rechner bildet den laufenden Lohnsteuerabzug ab. Die endgültige Steuer
