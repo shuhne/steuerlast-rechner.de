@@ -152,3 +152,13 @@ Nach erwartetem Nutzen sortiert, jeweils mit dem Grund.
    einer Ansicht — die Datenstruktur trägt das schon.
 5. **Ergebnis als teilbarer Link.** Zustand in der URL, ohne Serverspeicherung.
    Verträgt sich mit der Datenschutzzusage.
+
+## Modellgrenzen nach UI-Prüfung (22.09.2026)
+
+- Bonus: Dezemberzahlung bei ganzjähriger regulärer Beschäftigung unterstützt.
+  Unterjährige Zahlung, Unterbrechungen, Märzklausel und Mini-/Midijobs mit Bonus
+  benötigen ein monatsbezogenes Modell mit Vorjahresdaten und bleiben ausdrücklich
+  nicht modelliert (§ 23a SGB IV).
+- PKV: Fehlende Beiträge sperren die UI; der PAP erhält den tatsächlich begrenzten
+  Zuschuss. Separate Beitragsanteile für PKV/PPV und Basis-/Mehrleistungen fehlen
+  weiterhin. Die Auswahl prüft nicht die rechtliche Berechtigung zum PKV-Verbleib.

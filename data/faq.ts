@@ -25,7 +25,9 @@ export const FAQ_ITEMS: FAQItem[] = [
             'Nein. Die gesamte Berechnung läuft in deinem Browser; Gehalt, Steuerklasse und die ' +
             'übrigen Angaben verlassen dein Gerät nicht. Es gibt keine Cookies, kein Tracking und ' +
             'keine Analytics. Wie bei jedem Seitenaufruf verarbeitet der Hosting-Anbieter technisch ' +
-            'notwendige Verbindungsdaten wie die IP-Adresse — deine Eingaben sind davon nicht betroffen.',
+            'notwendige Verbindungsdaten wie die IP-Adresse — deine Eingaben sind davon nicht betroffen. ' +
+            'Beim Wechsel zur FAQ bleiben deine Angaben nur im Arbeitsspeicher dieses Tabs erhalten. ' +
+            'Neuladen oder Alle Eingaben zurücksetzen löscht sie.',
         category: 'general',
     },
     {
@@ -100,7 +102,8 @@ export const FAQ_ITEMS: FAQItem[] = [
             'Kind ein Abschlag von 0,25 Punkten dazu (§ 55 SGB XI). Steuerlich mindern ' +
             'Kinderfreibeträge beim laufenden Abzug bereits den Solidaritätszuschlag und die ' +
             'Kirchensteuer; bei der Lohnsteuer selbst wirken sie erst über die Günstigerprüfung ' +
-            'zwischen Kindergeld und Freibetrag in der Veranlagung.',
+            'zwischen Kindergeld und Freibetrag in der Veranlagung. Im Rechner sind deshalb drei Angaben getrennt: ' +
+            'lebenslange Elterneigenschaft, ganze Kinder unter 25 und der steuerliche ELStAM-Zähler unter Weitere Angaben.',
         category: 'tax',
     },
     {
@@ -116,11 +119,20 @@ export const FAQ_ITEMS: FAQItem[] = [
     {
         question: 'Was ist bei privater Krankenversicherung zu beachten?',
         answer:
-            'Gib den vollen Monatsbeitrag inklusive Pflegepflichtversicherung an. Der ' +
-            'Arbeitgeberzuschuss nach § 257 SGB V und § 61 SGB XI wird abgezogen: höchstens die ' +
-            'Hälfte deines Beitrags und höchstens 508,59 € für die Kranken- plus 104,63 € für die ' +
-            'Pflegeversicherung im Monat (in Sachsen 75,56 € für die Pflegeversicherung). ' +
-            'Wechseln kannst du erst ab einem Jahresbruttoentgelt von 77.400 €.',
+            'Gib den vollen Monatsbeitrag inklusive Pflegepflichtversicherung an. Ohne Beitrag erscheint kein fertiges Netto. ' +
+            'Der Arbeitgeberzuschuss wird durch die Hälfte des Beitrags und die Höchstgrenzen des gewählten Rechtsstands begrenzt ' +
+            '(§ 257 SGB V, § 61 SGB XI). Die gemeinsame Begrenzung ist ein vereinfachtes Modell; ' +
+            'getrennte Beitragsanteile für Kranken- und Pflegeversicherung sowie steuerliche Mehrleistungen sind nicht abgebildet. ' +
+            'Die PKV-Auswahl bleibt auch unterhalb der allgemeinen Jahresarbeitsentgeltgrenze für Bestandsfälle verfügbar. ' +
+            'Sie stellt keine Prüfung der Versicherungsberechtigung dar; der Wechsel zurück zur GKV bleibt im Rechner möglich.',
+        category: 'social',
+    },
+    {
+        question: 'Wie wird ein Bonus berücksichtigt?',
+        answer: 'Das Feld Bonus im Dezember modelliert eine Einmalzahlung bei ganzjähriger, ununterbrochener Beschäftigung mit gleichbleibendem Monatslohn. ' +
+            'Die Zahlung wird als sonstiger Bezug versteuert. Sozialbeiträge fallen auf den noch freien Teil der jeweiligen Jahres-Beitragsbemessungsgrenze an (§ 23a Abs. 3 SGB IV). ' +
+            'Andere Zahlungsmonate, die Märzklausel sowie Mini- und Midijobs sind nicht modelliert. Nicht unterstützte Varianten werden in Analysen ausgelassen. ' +
+            'Das angezeigte Monatsnetto ist bei Bonus der Jahresdurchschnitt und keine Dezemberabrechnung.',
         category: 'social',
     },
     {

@@ -70,16 +70,16 @@ export function Zeitreise1958(p: Props) {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="rounded-lg border border-slate-800/60 bg-slate-950/40 p-4">
-                        <div className="text-xs uppercase tracking-wider text-slate-500">Netto nach 1958er Recht</div>
+                        <div className="text-xs uppercase tracking-wider text-slate-400">Netto nach 1958er Recht</div>
                         <div className="mt-1 text-3xl font-bold text-white">{formatEuro(h.inEuro.netto, 0)}</div>
-                        <div className="mt-1 text-xs text-slate-500">
+                        <div className="mt-1 text-xs text-slate-400">
                             {formatDM(h.nettoDm)} · Abgabenquote {formatProzent(h.abgabenquote)}
                         </div>
                     </div>
                     <div className="rounded-lg border border-slate-800/60 bg-slate-950/40 p-4">
-                        <div className="text-xs uppercase tracking-wider text-slate-500">Netto nach heutigem Recht</div>
+                        <div className="text-xs uppercase tracking-wider text-slate-400">Netto nach heutigem Recht</div>
                         <div className="mt-1 text-3xl font-bold text-white">{formatEuro(heute.netto.jahr, 0)}</div>
-                        <div className="mt-1 text-xs text-slate-500">
+                        <div className="mt-1 text-xs text-slate-400">
                             Abgabenquote {formatProzent(heute.quoten.abgabenquote)}
                         </div>
                     </div>
@@ -117,7 +117,7 @@ export function Zeitreise1958(p: Props) {
                             <span className="text-slate-400">
                                 {name as string}
                                 {(name === 'Pflegeversicherung' || name === 'Solidaritätszuschlag') && (
-                                    <span className="ml-1.5 text-xs text-slate-600">(gab es 1958 nicht)</span>
+                                    <span className="ml-1.5 text-xs text-slate-400">(gab es 1958 nicht)</span>
                                 )}
                             </span>
                             <span className="shrink-0 font-mono text-white">{formatDM(wert as number)}</span>
@@ -129,7 +129,7 @@ export function Zeitreise1958(p: Props) {
                     </div>
                 </div>
                 {h.hinweise.map((t, i) => (
-                    <p key={i} className="mt-3 text-xs leading-relaxed text-slate-500">{t}</p>
+                    <p key={i} className="mt-3 text-xs leading-relaxed text-slate-400">{t}</p>
                 ))}
             </div>
 
@@ -144,7 +144,7 @@ export function Zeitreise1958(p: Props) {
                         <li key={i}>{t}</li>
                     ))}
                 </ul>
-                <p className="mt-4 border-t border-amber-500/20 pt-3 text-xs leading-relaxed text-slate-500">
+                <p className="mt-4 border-t border-amber-500/20 pt-3 text-xs leading-relaxed text-slate-400">
                     Diese Lücken wirken überwiegend in dieselbe Richtung — das Netto von 1958
                     fällt hier eher zu günstig aus.
                 </p>
@@ -173,10 +173,10 @@ export function Zeitreise1958(p: Props) {
                                     </span>
                                 )}
                             </div>
-                            <div className="text-slate-500">
+                            <div className="text-slate-400">
                                 {param.quelle.herausgeber}: {param.quelle.titel}
                             </div>
-                            {param.hinweis && <div className="mt-1 text-slate-600">{param.hinweis}</div>}
+                            {param.hinweis && <div className="mt-1 text-slate-400">{param.hinweis}</div>}
                         </div>
                     ))}
                 </div>

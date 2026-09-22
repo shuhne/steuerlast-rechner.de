@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { createContext, createElement, useContext, useMemo, useState } from 'react';
 import {
     berechne,
     berechne1958,
@@ -14,6 +14,7 @@ import {
     rechtsstandFuer,
     RECHTSSTAND_GELTEND,
 } from '../../lib/tax';
+import { bonusModellUnterstuetzt } from '../../lib/tax/rechner';
 import type { RechnerEingabe } from '../../lib/tax';
 import { einordnen } from '../../lib/statistik/verdienste';
 import { kaufkraftreihe } from '../../lib/statistik/kaufkraft';
@@ -37,7 +38,10 @@ export interface RechnerZustand {
     bundesland: string;
     kirchensteuer: boolean;
     alter: number;
-    kinder: number;
+    kinderfreibetraege: number;
+    hatKinder: boolean;
+    kinderUnter25: number;
+    eigenerZusatzbeitrag: boolean;
     krankenversicherung: 'gesetzlich' | 'privat';
     kvZusatzProzent: number;
     pkvMonatsbeitrag: number;
@@ -60,7 +64,10 @@ export const STANDARD: RechnerZustand = {
     bundesland: 'BE',
     kirchensteuer: false,
     alter: 30,
-    kinder: 0,
+    kinderfreibetraege: 0,
+    hatKinder: false,
+    kinderUnter25: 0,
+    eigenerZusatzbeitrag: false,
     krankenversicherung: 'gesetzlich',
     kvZusatzProzent: 2.9,
     pkvMonatsbeitrag: 0,
@@ -75,8 +82,14 @@ export const STANDARD: RechnerZustand = {
 };
 
 export function parseZahl(text: string): number {
-    if (!text) return 0;
-    return parseFloat(text.replace(/\./g, '').replace(',', '.')) || 0;
+    const wert = text.trim();
+    if (!wert) return 0;
+    // Deutsche Gruppierung oder Dezimalpunkt mit höchstens zwei Centstellen.
+    // Ungültige Eingaben bleiben sichtbar; niemals Zeichen still entfernen.
+    if (/^\d+(?:,\d{1,2})?$/.test(wert)) return Number(wert.replace(',', '.'));
+    if (/^\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?$/.test(wert)) return Number(wert.replace(/\./g, '').replace(',', '.'));
+    if (/^\d+\.\d{1,2}$/.test(wert)) return Number(wert);
+    return Number.NaN;
 }
 
 /**
@@ -99,7 +112,7 @@ export function periodeWechseln(
     if (zustand.periode === neuePeriode) return zustand;
 
     const wert = parseZahl(zustand.bruttoEingabe);
-    if (wert <= 0) return { ...zustand, periode: neuePeriode };
+    if (!Number.isFinite(wert) || wert <= 0) return { ...zustand, periode: neuePeriode };
 
     const umgerechnet = neuePeriode === 'monat' ? wert / 12 : wert * 12;
 
@@ -126,9 +139,21 @@ export function formatProzent(v: number, nachkomma = 1): string {
     })} %`;
 }
 
-export function useRechner() {
+function useRechnerZustand() {
     const [z, setZ] = useState<RechnerZustand>(STANDARD);
     const [ansicht, setAnsicht] = useState<Ansicht>('rechner');
+    return { z, setZ, ansicht, setAnsicht };
+}
+const RechnerKontext = createContext<ReturnType<typeof useRechnerZustand> | null>(null);
+/** Nur im Arbeitsspeicher des Tabs; kein Storage und keine Übertragung. */
+export function RechnerProvider({ children }: { children: React.ReactNode }) {
+    return createElement(RechnerKontext.Provider, { value: useRechnerZustand() }, children);
+}
+
+export function useRechner() {
+    const kontext = useContext(RechnerKontext);
+    if (!kontext) throw new Error('RechnerProvider fehlt');
+    const { z, setZ, ansicht, setAnsicht } = kontext;
 
     const setzen = <K extends keyof RechnerZustand>(schluessel: K, wert: RechnerZustand[K]) =>
         setZ((alt) => ({ ...alt, [schluessel]: wert }));
@@ -163,7 +188,14 @@ export function useRechner() {
     /** Wochenstunden, auf die sich der Stundenlohn bezieht. */
     const wochenstundenEffektiv = z.wochenstunden * (z.arbeitszeitProzent / 100);
 
-    const hatEingabe = bruttoJahr > 0;
+    const bruttoFehler = z.bruttoEingabe.trim() && (!Number.isFinite(bruttoJahr) || bruttoJahr <= 0 || bruttoJahr > 10_000_000)
+        ? 'Bitte ein positives Gehalt eingeben, z. B. 5.000,00 oder 5000.00 (höchstens 10 Mio. € pro Jahr).' : null;
+    const eingabeFehler = bruttoFehler
+        || (z.krankenversicherung === 'privat' && !(z.pkvMonatsbeitrag > 0) ? 'Bitte deinen PKV-Monatsbeitrag inklusive Pflegepflichtversicherung ergänzen.' : null)
+        || (![z.alter, z.wochenstunden, z.kvZusatzProzent, z.kinderUnter25, z.kinderfreibetraege].every(Number.isFinite) ? 'Bitte die leeren Zahlenfelder ergänzen.' : null)
+        || (!Number.isInteger(z.alter) || z.alter < 14 || z.alter > 100 || z.wochenstunden < 1 || z.wochenstunden > 80 || z.kvZusatzProzent < 0 || z.kvZusatzProzent > 10 || !Number.isInteger(z.kinderUnter25) || z.kinderUnter25 < 0 || z.kinderUnter25 > 20 || z.kinderfreibetraege < 0 || z.kinderfreibetraege > 20 || !Number.isInteger(z.kinderfreibetraege * 2) ? 'Bitte die gültigen Wertebereiche beachten: Alter und Kinder unter 25 in ganzen Zahlen, Kinderfreibeträge in halben Schritten.' : null)
+        || (z.sonstigeBezuege > 0 && bruttoJahr / 12 <= svWerte(SV_2026).uebergangsbereichObergrenze ? 'Bonus bei Mini- und Midijobs ist nicht modelliert. Bitte den Bonus entfernen.' : null);
+    const hatEingabe = bruttoJahr > 0 && !eingabeFehler;
 
     /**
      * Einheit, in der ueber Betraege gesprochen wird - geteilt zwischen
@@ -181,8 +213,10 @@ export function useRechner() {
             kirchensteuer: z.kirchensteuer,
             kirchensteuerKappungProzent: z.kirchensteuerKappungProzent,
             alter: z.alter,
-            kinderfreibetraege: z.kinder,
-            kinderFuerPflege: z.kinder,
+            kinderfreibetraege: z.kinderfreibetraege,
+            kinderFuerPflege: z.hatKinder ? z.kinderUnter25 : 0,
+            hatKinder: z.hatKinder,
+            eigenerZusatzbeitrag: z.eigenerZusatzbeitrag,
             krankenversicherung: z.krankenversicherung,
             kvZusatzProzent: z.kvZusatzProzent,
             pkvMonatsbeitrag: z.pkvMonatsbeitrag,
@@ -211,10 +245,10 @@ export function useRechner() {
     /** Ergebnis ohne die Regler, als Vergleichsmassstab. */
     const basisErgebnis = useMemo(
         () =>
-            hatAnpassung && bruttoBasisJahr > 0
+            hatEingabe && hatAnpassung && bruttoBasisJahr > 0 && bonusModellUnterstuetzt({ ...eingabe, bruttoJahr: bruttoBasisJahr })
                 ? berechne({ ...eingabe, bruttoJahr: bruttoBasisJahr })
                 : null,
-        [hatAnpassung, bruttoBasisJahr, eingabe]
+        [hatEingabe, hatAnpassung, bruttoBasisJahr, eingabe]
     );
 
     /**
@@ -261,7 +295,7 @@ export function useRechner() {
     );
 
     const paarvergleich = useMemo(
-        () => (hatEingabe ? steuerklassenvergleich(eingabe, { ...eingabe, bruttoJahr: bruttoJahr * 0.6 }) : null),
+        () => (hatEingabe && bonusModellUnterstuetzt({ ...eingabe, bruttoJahr: bruttoJahr * 0.6 }) ? steuerklassenvergleich(eingabe, { ...eingabe, bruttoJahr: bruttoJahr * 0.6 }) : null),
         [hatEingabe, eingabe, bruttoJahr]
     );
 
@@ -297,6 +331,8 @@ export function useRechner() {
         setPeriode,
         setMonatlich,
         hatEingabe,
+        bruttoFehler,
+        eingabeFehler,
         ergebnis,
         referenz,
         ergebnisGeltendesRecht,

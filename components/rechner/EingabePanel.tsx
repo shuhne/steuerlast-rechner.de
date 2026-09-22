@@ -59,9 +59,9 @@ function Feld({
 }) {
     return (
         <div className="space-y-1.5">
-            <span className="flex items-center gap-1 text-sm font-medium text-slate-400">
+            <span className="flex flex-wrap items-center gap-1 text-sm font-medium text-slate-400">
                 {label}
-                {hinweis && <InfoTooltip text={hinweis} />}
+                {hinweis && <InfoTooltip label={label} text={hinweis} />}
             </span>
             {children}
         </div>
@@ -161,27 +161,27 @@ function ZahlFeld({
                 onChange={(e) => setzen(parseFloat(e.target.value))}
                 onBlur={(e) => setzen(begrenzen(parseFloat(e.target.value) || min))}
                 aria-label={ariaLabel}
-                className={cn(inputKlasse, 'pr-12 font-mono', ohneSpinner)}
+                className={cn(inputKlasse, 'pr-8 font-mono', ohneSpinner)}
             />
             {suffix && (
-                <span className="pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                <span className="pointer-events-none absolute right-3 top-5 text-sm text-slate-400">
                     {suffix}
                 </span>
             )}
-            <div className="absolute bottom-1 right-1 top-1 flex w-10 flex-col gap-0.5 rounded border border-slate-800 bg-slate-900 p-0.5">
+            <div className="mt-1 grid grid-cols-2 gap-1">
                 <button
                     type="button"
-                    onClick={() => setzen(begrenzen(runden(wert + schritt)))}
+                    onClick={() => setzen(begrenzen(runden((Number.isFinite(wert) ? wert : min) + schritt)))}
                     aria-label={`${ariaLabel} erhöhen`}
-                    className="flex flex-1 items-center justify-center rounded text-xs font-bold text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                    className="flex min-h-11 items-center justify-center rounded border border-slate-700 text-base font-bold text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
                 >
                     +
                 </button>
                 <button
                     type="button"
-                    onClick={() => setzen(begrenzen(runden(wert - schritt)))}
+                    onClick={() => setzen(begrenzen(runden((Number.isFinite(wert) ? wert : min) - schritt)))}
                     aria-label={`${ariaLabel} verringern`}
-                    className="flex flex-1 items-center justify-center rounded text-xs font-bold text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                    className="flex min-h-11 items-center justify-center rounded border border-slate-700 text-base font-bold text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
                 >
                     −
                 </button>
@@ -204,7 +204,7 @@ export function EingabePanel(p: Props) {
                 {p.hatEingabe && (
                     <button
                         onClick={p.zuruecksetzen}
-                        className="rounded p-1 text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                        className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-300"
                         title="Zurücksetzen"
                         aria-label="Alle Eingaben zurücksetzen"
                     >
@@ -216,28 +216,30 @@ export function EingabePanel(p: Props) {
             {/* Gehalt */}
             <Feld label="Bruttogehalt">
                 <div className="group relative">
-                    <Euro className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400" />
+                    <Euro className="pointer-events-none absolute left-3 top-4 h-5 w-5 text-slate-400 group-focus-within:text-indigo-400" />
                     <input
                         type="text"
                         inputMode="decimal"
                         value={p.z.bruttoEingabe}
-                        onChange={(e) => p.setzen('bruttoEingabe', e.target.value.replace(/[^0-9.,]/g, ''))}
+                        onChange={(e) => p.setzen('bruttoEingabe', e.target.value)}
                         onBlur={() => {
                             const v = parseZahl(p.z.bruttoEingabe);
                             if (v > 0) p.setzen('bruttoEingabe', v.toLocaleString('de-DE'));
                         }}
                         placeholder="z. B. 50.000"
-                        className="w-full rounded-lg border border-slate-800 bg-slate-950 py-3 pl-10 pr-24 font-mono text-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full rounded-lg border border-slate-800 bg-slate-950 py-3 pl-10 pr-3 font-mono text-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         aria-label="Bruttogehalt"
+                        aria-invalid={!!p.bruttoFehler}
+                        aria-describedby={p.bruttoFehler ? "brutto-fehler" : undefined}
                     />
-                    <div className="absolute bottom-1 right-1 top-1 flex w-20 flex-col gap-0.5 rounded border border-slate-800 bg-slate-900 p-0.5">
+                    <div className="mt-2 grid grid-cols-2 gap-1 rounded border border-slate-800 bg-slate-900 p-1">
                         {(['jahr', 'monat'] as const).map((per) => (
                             <button
                                 key={per}
                                 onClick={() => p.setPeriode(per)}
                                 className={cn(
-                                    'flex flex-1 items-center justify-center rounded text-xs font-bold uppercase transition-colors',
-                                    p.z.periode === per ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'
+                                    'flex min-h-11 items-center justify-center rounded text-xs font-bold uppercase transition-colors',
+                                    p.z.periode === per ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-300'
                                 )}
                             >
                                 {per === 'jahr' ? 'Jährlich' : 'Monatlich'}
@@ -246,6 +248,8 @@ export function EingabePanel(p: Props) {
                     </div>
                 </div>
             </Feld>
+
+            {p.bruttoFehler && <p id="brutto-fehler" role="alert" className="text-sm text-rose-300">{p.bruttoFehler}</p>}
 
             {/* Rechtsstand */}
             {/* Ohne Status-Chip: Der Rechtsstand steht bereits im Namen der
@@ -266,7 +270,7 @@ export function EingabePanel(p: Props) {
                             </option>
                         ))}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 </div>
             </Feld>
 
@@ -279,7 +283,7 @@ export function EingabePanel(p: Props) {
                             onClick={() => p.setzen('steuerklasse', k)}
                             aria-pressed={p.z.steuerklasse === k}
                             className={cn(
-                                'rounded-md border py-2 text-xs font-bold transition-all',
+                                'min-h-11 rounded-md border py-2 text-xs font-bold transition-all',
                                 p.z.steuerklasse === k
                                     ? 'border-indigo-500 bg-indigo-600 text-white'
                                     : 'border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900'
@@ -295,6 +299,7 @@ export function EingabePanel(p: Props) {
                 <Feld label="Bundesland">
                     <div className="relative">
                         <select
+                            aria-label="Bundesland"
                             value={p.z.bundesland}
                             onChange={(e) => p.setzen('bundesland', e.target.value)}
                             className={cn(inputKlasse, 'cursor-pointer appearance-none pr-8')}
@@ -303,7 +308,7 @@ export function EingabePanel(p: Props) {
                                 <option key={k} value={k}>{n}</option>
                             ))}
                         </select>
-                        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500" />
+                        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-400" />
                     </div>
                 </Feld>
 
@@ -339,39 +344,15 @@ export function EingabePanel(p: Props) {
                     />
                 </div>
 
-                <Feld
-                    label="Kinder"
-                    hinweis="Halbe Werte sind moeglich: Der Kinderfreibetrag wird auf beide Elternteile aufgeteilt, jeder traegt in der Regel 0,5 je Kind. Bei Alleinerziehenden oder wenn der andere Elternteil den Freibetrag uebertragen hat, ist es 1,0."
-                >
-                    {p.z.kinder === 0 ? (
-                        <button
-                            onClick={() => p.setzen('kinder', 1)}
-                            className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2.5 text-base font-medium text-slate-400 transition-all hover:bg-slate-900 sm:text-sm"
-                        >
-                            Keine
-                        </button>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => p.setzen('kinder', Math.max(0, p.z.kinder - 0.5))}
-                                aria-label="Ein halbes Kind weniger"
-                                className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-colors hover:border-slate-700 hover:text-white"
-                            >
-                                −
-                            </button>
-                            <div className="flex-1 text-center font-mono text-lg font-medium text-white">
-                                {p.z.kinder.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-                            </div>
-                            <button
-                                onClick={() => p.setzen('kinder', Math.min(12, p.z.kinder + 0.5))}
-                                aria-label="Ein halbes Kind mehr"
-                                className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-colors hover:border-slate-700 hover:text-white"
-                            >
-                                +
-                            </button>
-                        </div>
-                    )}
+                <Feld label="Elterneigenschaft" hinweis="Für die Pflegeversicherung gilt die Elterneigenschaft lebenslang, auch wenn alle Kinder älter als 25 sind. Steuerliche Kinderfreibeträge stehen unter Weitere Einstellungen.">
+                    <button type="button" aria-label="Elterneigenschaft" aria-pressed={p.z.hatKinder}
+                        onClick={() => p.setzen('hatKinder', !p.z.hatKinder)} className={inputKlasse}>
+                        {p.z.hatKinder ? 'Ja, ich bin Elternteil' : 'Nein, kinderlos'}
+                    </button>
                 </Feld>
+                {p.z.hatKinder && <Feld label="Kinder unter 25" hinweis="Nur ganze Kinder zählen für die Beitragsabschläge der Pflegeversicherung. Sind alle Kinder älter, trage 0 ein; die Elterneigenschaft bleibt bestehen.">
+                    <ZahlFeld wert={p.z.kinderUnter25} setzen={(v) => p.setzen('kinderUnter25', v)} min={0} max={20} ariaLabel="Kinder unter 25" />
+                </Feld>}
 
                 <Feld
                     label="Wochenstunden"
@@ -387,17 +368,17 @@ export function EingabePanel(p: Props) {
                     />
                 </Feld>
 
-                <div className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2">
-                        <span className="flex items-center gap-1 text-sm font-medium text-slate-400">
+                <div className="col-span-2 space-y-1.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="flex flex-wrap items-center gap-1 text-sm font-medium text-slate-400">
                             Krankenversicherung
                             {!p.pkvMoeglich && (
-                                <InfoTooltip text={`Die allgemeine Jahresarbeitsentgeltgrenze im gewählten Rechtsstand ${p.rechtsstand.jahr} liegt bei ${formatEuro(p.rechtsstand.sv.jaeg.wert, 0)}. Das regelmäßige Jahresarbeitsentgelt muss diese Grenze überschreiten. Sonderregeln für Bestandsfälle sind nicht abgebildet.`} />
+                                <InfoTooltip label="Krankenversicherung" text={`Die allgemeine Jahresarbeitsentgeltgrenze im gewählten Rechtsstand ${p.rechtsstand.jahr} liegt bei ${formatEuro(p.rechtsstand.sv.jaeg.wert, 0)}. Das regelmäßige Jahresarbeitsentgelt muss diese Grenze überschreiten. Sonderregeln für Bestandsfälle sind nicht abgebildet.`} />
                             )}
                         </span>
                         {p.pkvMoeglich && (
                             <span className="rounded border border-emerald-900/50 bg-emerald-950 px-1.5 py-0.5 text-[10px] text-emerald-500">
-                                Freie Wahl
+                                Über JAEG
                             </span>
                         )}
                     </div>
@@ -405,16 +386,18 @@ export function EingabePanel(p: Props) {
                         <select
                             value={p.z.krankenversicherung}
                             onChange={(e) => p.setzen('krankenversicherung', e.target.value as 'gesetzlich' | 'privat')}
-                            disabled={!p.pkvMoeglich}
+                            aria-label="Krankenversicherung"
                             className={cn(inputKlasse, 'cursor-pointer appearance-none pr-8 disabled:opacity-60')}
                         >
                             <option value="gesetzlich">Gesetzlich</option>
                             <option value="privat">Privat</option>
                         </select>
-                        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500" />
+                        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-400" />
                     </div>
                 </div>
             </div>
+
+            {p.z.krankenversicherung === 'privat' && !p.pkvMoeglich && <p className="text-sm text-amber-200">Unter der allgemeinen Jahresarbeitsentgeltgrenze: Die Auswahl bildet eine bestehende PKV ab. Ob du privat versichert bleiben darfst, hängt von deinem Versicherungsstatus ab.</p>}
 
             {/* KV-Zusatzbeitrag: jetzt Hauptfeld statt wirkungslosem Expertenfeld */}
             {p.z.krankenversicherung === 'gesetzlich' ? (
@@ -423,7 +406,11 @@ export function EingabePanel(p: Props) {
                     hinweis={`Standard ist der rechnerische Durchschnitt von ${(sv.kvZusatzDurchschnitt * 100)
                         .toLocaleString('de-DE', { minimumFractionDigits: 1 })} % nach § 242a SGB V. Der tatsächlich gewichtete Kassendurchschnitt lag im Januar 2026 bei rund 3,1 %. Den eigenen Satz findest du auf der Website deiner Kasse.`}
                 >
-                    <ZahlFeld
+                    {p.rechtsstand.svUeberschreibungen?.kvZusatz !== undefined && <select aria-label="Zusatzbeitrag verwenden" className={inputKlasse} value={p.z.eigenerZusatzbeitrag ? 'eigen' : 'szenario'} onChange={(e) => p.setzen('eigenerZusatzbeitrag', e.target.value === 'eigen')}>
+                        <option value="szenario">Szenarioannahme: {(p.rechtsstand.svUeberschreibungen.kvZusatz * 100).toLocaleString('de-DE')} %</option>
+                        <option value="eigen">Eigenen Kassenbeitrag verwenden</option>
+                    </select>}
+                    {(p.z.eigenerZusatzbeitrag || p.rechtsstand.svUeberschreibungen?.kvZusatz === undefined) && <ZahlFeld
                         wert={p.z.kvZusatzProzent}
                         setzen={(v) => p.setzen('kvZusatzProzent', v)}
                         min={0}
@@ -431,20 +418,21 @@ export function EingabePanel(p: Props) {
                         schritt={0.1}
                         suffix="%"
                         ariaLabel="Zusatzbeitrag der Krankenkasse"
-                    />
+                    />}
                 </Feld>
             ) : (
                 <Feld
                     label="PKV-Beitrag im Monat"
-                    hinweis="Voller Monatsbeitrag inklusive Pflegepflichtversicherung. Der Arbeitgeberzuschuss wird abgezogen: höchstens die Hälfte des Beitrags und höchstens 508,59 € für die Kranken- plus 104,63 € für die Pflegeversicherung."
+                    hinweis="Voller Monatsbeitrag inklusive Pflegepflichtversicherung. Der Arbeitgeberzuschuss wird durch den halben Beitrag und die Grenzen des gewählten Rechtsstands begrenzt. Die Aufteilung in Basisabsicherung und Mehrleistungen ist nicht modelliert."
                 >
                     <div className="relative">
-                        <Euro className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                        <Euro className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <input
                             type="number"
                             min={0}
                             step={10}
-                            value={p.z.pkvMonatsbeitrag || ''}
+                            aria-label="PKV-Beitrag im Monat"
+                                value={p.z.pkvMonatsbeitrag || ''}
                             onChange={(e) => p.setzen('pkvMonatsbeitrag', Math.max(0, parseFloat(e.target.value) || 0))}
                             placeholder="z. B. 700"
                             className={cn(inputKlasse, 'pl-9 font-mono')}
@@ -463,7 +451,7 @@ export function EingabePanel(p: Props) {
                         <Settings2 className="h-4 w-4 text-indigo-400" />
                         Weitere Angaben
                     </span>
-                    {expertenmodus ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                    {expertenmodus ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
                 </button>
 
                 {expertenmodus && (
@@ -476,6 +464,7 @@ export function EingabePanel(p: Props) {
                             <span className="flex items-center gap-1 text-sm font-semibold text-slate-300">
                                 Was wäre wenn
                                 <InfoTooltip
+                                    label="Was wäre wenn"
                                     text="Beide Regler wirken nur auf das Ergebnis. Dein eingegebenes Gehalt bleibt unverändert, du kannst also jederzeit auf den Ausgangswert zurück."
                                 />
                             </span>
@@ -485,7 +474,7 @@ export function EingabePanel(p: Props) {
                                         p.setzen('lohnerhoehungProzent', 0);
                                         p.setzen('arbeitszeitProzent', 100);
                                     }}
-                                    className="flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-300"
+                                    className="flex items-center gap-1 text-xs text-slate-400 transition-colors hover:text-slate-300"
                                 >
                                     <RotateCcw className="h-3 w-3" />
                                     zurücksetzen
@@ -534,14 +523,18 @@ export function EingabePanel(p: Props) {
                         )}
                             </div>
 
+                        <Feld label="Kinderfreibeträge lt. ELStAM" hinweis="Steuerlicher Zähler, meist 0,5 je Kind und Elternteil. Unabhängig von den Kindern unter 25 in der Pflegeversicherung. Wirkt auf Solidaritätszuschlag und Kirchensteuer.">
+                            <ZahlFeld wert={p.z.kinderfreibetraege} setzen={(v) => p.setzen('kinderfreibetraege', v)} min={0} max={20} schritt={0.5} ariaLabel="Kinderfreibeträge lt. ELStAM" />
+                        </Feld>
                         <Feld
-                            label="Einmalzahlung im Jahr"
-                            hinweis="Bonus, Weihnachts- oder Urlaubsgeld. Wird als sonstiger Bezug nach § 39b Abs. 3 EStG versteuert — dabei greift der Grenzsteuersatz, nicht der Durchschnittssatz."
+                            label="Bonus im Dezember"
+                            hinweis="Einmalzahlung bei ganzjähriger Beschäftigung mit gleichbleibendem Monatslohn. Sozialbeiträge bis zur noch freien Jahresgrenze (§ 23a SGB IV), Besteuerung als sonstiger Bezug (§ 39b Abs. 3 EStG). Andere Zahlungsmonate, Unterbrechungen und Mini-/Midijobs sind nicht modelliert."
                         >
                             <input
                                 type="number"
                                 min={0}
                                 step={100}
+                                aria-label="Bonus im Dezember"
                                 value={p.z.sonstigeBezuege || ''}
                                 onChange={(e) => p.setzen('sonstigeBezuege', Math.max(0, parseFloat(e.target.value) || 0))}
                                 placeholder="0"
@@ -557,6 +550,7 @@ export function EingabePanel(p: Props) {
                                 type="number"
                                 min={0}
                                 step={100}
+                                aria-label="Freibetrag lt. ELStAM"
                                 value={p.z.jahresfreibetrag || ''}
                                 onChange={(e) => p.setzen('jahresfreibetrag', Math.max(0, parseFloat(e.target.value) || 0))}
                                 placeholder="0"
@@ -575,7 +569,8 @@ export function EingabePanel(p: Props) {
                                         min={2}
                                         max={4.5}
                                         step={0.25}
-                                        value={p.z.kirchensteuerKappungProzent ?? ''}
+                                        aria-label="Kirchensteuer-Kappung"
+                                value={p.z.kirchensteuerKappungProzent ?? ''}
                                         onChange={(e) =>
                                             p.setzen(
                                                 'kirchensteuerKappungProzent',
@@ -585,13 +580,15 @@ export function EingabePanel(p: Props) {
                                         placeholder="keine Kappung"
                                         className={cn(inputKlasse, 'pr-8 font-mono')}
                                     />
-                                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">%</span>
+                                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
                                 </div>
                             </Feld>
                         )}
                     </div>
                 )}
             </div>
+
+            {p.eingabeFehler && !p.bruttoFehler && <p role="alert" className="text-sm text-rose-300">{p.eingabeFehler}</p>}
 
             {/* Zeitreise */}
             <button
@@ -614,7 +611,7 @@ export function EingabePanel(p: Props) {
             {p.hatEingabe && p.ergebnis && (
                 <a
                     href="#ergebnis"
-                    className="flex items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-950/40 px-4 py-3 text-sm font-semibold text-indigo-200 transition-colors hover:bg-indigo-900/40 lg:pointer-events-none lg:border-transparent lg:bg-transparent lg:font-normal lg:text-slate-500"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-950/40 px-4 py-3 text-sm font-semibold text-indigo-200 transition-colors hover:bg-indigo-900/40 lg:pointer-events-none lg:border-transparent lg:bg-transparent lg:font-normal lg:text-slate-400"
                 >
                     <span>{formatEuro(p.ergebnis.netto.monat)} netto im Monat</span>
                     <ArrowDown className="h-4 w-4 lg:hidden" />

@@ -42,7 +42,7 @@ Angaben verlassen das Gerät nicht.
 - Grenzabgabenquote inklusive Sozialabgaben, mit den Sprüngen an den
   Beitragsbemessungsgrenzen
 - Teilzeitanalyse mit Netto je Arbeitsstunde und erworbenen Entgeltpunkten
-- Übergangsbereich bei Midijobs, Einmalzahlungen, ELStAM-Freibetrag,
+- Übergangsbereich bei Midijobs, Dezemberbonus bei ganzjähriger regulärer Beschäftigung, ELStAM-Freibetrag,
   private Krankenversicherung mit Arbeitgeberzuschuss
 - Einordnung in die amtliche Verdienstverteilung
 - Kaufkraftentwicklung
@@ -132,3 +132,15 @@ Keine Steuerberatung.
 ## Lizenz
 
 MIT.
+
+### Bedienung und Modellgrenzen (22.09.2026)
+
+- Deutsche Gehaltsformate und Dezimalpunkt mit bis zu zwei Centstellen werden erkannt. Ungültige Angaben bleiben sichtbar und sperren die Auswertung.
+- Elterneigenschaft, Kinder unter 25 und steuerliche Kinderfreibeträge sind getrennte Angaben. Der Elternstatus wirkt auch im PAP auf den Kinderlosenzuschlag.
+- In Szenarien kann der angenommene Zusatzbeitrag ausdrücklich durch den eigenen Kassenbeitrag ersetzt werden.
+- PKV benötigt einen positiven Monatsbeitrag. Die Auswahl prüft keine Versicherungsberechtigung. Der PAP erhält den tatsächlich begrenzten Arbeitgeberzuschuss.
+- Der Bonus gilt als Dezemberzahlung bei ganzjähriger Beschäftigung mit gleichbleibendem Monatslohn. Andere Zahlungsmonate, Märzklausel und Mini-/Midijobs mit Bonus sind nicht modelliert. API-Aufrufe für diese Beschäftigungsfälle werden abgewiesen; Analysen lassen sie aus.
+- Die mobile Nettoleiste zeigt das Ergebnis während der Eingabe. Analysen sind über Tabs erreichbar, Teilzeit- und Paarvergleiche mobil als Karten lesbar.
+- Eingaben überleben interne Navigation im Arbeitsspeicher; Neuladen und Zurücksetzen löschen sie. Es gibt kein Local Storage und keine Übertragung.
+
+Prüfung und Nachweise: [UI-Prüfbericht](docs/ui-pruefung-2026-09-22.md).

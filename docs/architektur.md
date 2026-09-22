@@ -122,3 +122,22 @@ Fehler formuliert und im Code als solche kommentiert.
 
 `vitest.config.ts` schließt `.claude/worktrees` und `.firebase` aus — von dort
 liefen sonst veraltete Testkopien mit.
+
+## UI-Korrekturen vom 22.09.2026
+
+`RechnerProvider` im Root-Layout hält den fachlichen Zustand aus `useRechner.ts`
+über interne Navigation hinweg. Er nutzt ausschließlich React-Arbeitsspeicher.
+Panels erhalten weiterhin die berechneten Hook-Props. Der aktive Analyse-Tab ist
+lokaler Darstellungszustand; die Seite besitzt weiterhin nur eine vertikale Scrollleiste.
+
+`hatKinder` ist unabhängig von `kinderFuerPflege` und `kinderfreibetraege`.
+Bei älteren API-Aufrufen ohne `hatKinder` wird wie bisher aus einer positiven
+Pflege-Kinderzahl auf Elterneigenschaft geschlossen. Neue Aufrufe sollten den
+Elternstatus ausdrücklich senden. `eigenerZusatzbeitrag: true` überschreibt die
+KV-Annahme eines Szenarios in Sozialversicherung, PAP und Zuschussberechnung.
+
+`sonstigeBezuege` hat für die Sozialversicherung den dokumentierten Modellumfang
+Dezember/ganzjährige reguläre Beschäftigung. `bonusModellUnterstuetzt` sichert
+API, Hauptrechnung und Varianten ab. Die beitragspflichtige Jahresbasis ist
+je Zweig `min(laufendes Jahresbrutto + Dezemberbonus, BBG)`. Der generierte PAP
+und die amtlichen Prüfwerte bleiben unverändert.

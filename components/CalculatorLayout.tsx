@@ -26,6 +26,12 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
         }
     };
 
+    useEffect(() => {
+        const schliessen = (e: KeyboardEvent) => { if (e.key === 'Escape') { setIsPrivacyOpen(false); privacyButtonRef.current?.focus(); } };
+        if (isPrivacyOpen) document.addEventListener('keydown', schliessen);
+        return () => document.removeEventListener('keydown', schliessen);
+    }, [isPrivacyOpen]);
+
     // Close when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -52,14 +58,13 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
     return (
         <div className="min-h-screen w-full bg-slate-950 p-3 sm:p-4 md:p-6 lg:p-8 font-sans selection:bg-indigo-500/30">
             <div className="mx-auto max-w-7xl">
-                <header className="mb-8 sm:mb-12 flex flex-col md:flex-row md:items-start justify-between gap-4 sm:gap-6">
+                <header className="mb-5 sm:mb-12 flex flex-col md:flex-row md:items-start justify-between gap-4 sm:gap-6">
                     <div className="text-center md:text-left">
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                        <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
                             <Link href="/" className="hover:text-indigo-400 transition-colors">steuerlast-rechner.de</Link>
                         </h1>
                         <p className="text-slate-400 text-base sm:text-lg mt-2 sm:mt-3 max-w-3xl leading-relaxed">
-                            Dein Gehalt im Detail: Berechne dein Netto 2026, sieh nach, was eine
-                            Stundenreduzierung wirklich kostet, und wirf einen Blick auf morgen.
+                            Dein Netto. Deine Arbeitszeit. Dein Blick auf morgen.
                         </p>
                     </div>
 
@@ -67,6 +72,8 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                     <div className="relative shrink-0 mx-auto md:mx-0">
                         <button
                             ref={privacyButtonRef}
+                            aria-expanded={isPrivacyOpen}
+                            aria-controls="datenschutz-info"
                             onClick={() => setIsPrivacyOpen(!isPrivacyOpen)}
                             className="peer flex items-center gap-2 text-slate-400 hover:text-white transition-colors bg-slate-900/50 hover:bg-slate-800 px-4 py-2 rounded-full border border-slate-700/50 text-sm font-medium backdrop-blur-sm"
                         >
@@ -77,8 +84,9 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                         {/* Hover Overlay - Controlled by State OR Peer Hover */}
                         <div
                             ref={overlayRef}
+                            id="datenschutz-info"
                             className={`absolute right-1/2 translate-x-1/2 md:translate-x-0 md:transform-none md:right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-[320px] sm:w-[320px] md:w-[350px] p-4 sm:p-6 bg-slate-900/95 border border-slate-700 rounded-xl shadow-2xl transition-all duration-200 z-50 backdrop-blur-md 
-                            ${isPrivacyOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2 peer-hover:opacity-100 peer-hover:visible peer-hover:translate-y-0 pointer-events-none peer-hover:pointer-events-auto'}`}
+                            ${isPrivacyOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2 pointer-events-none'}`}
                         >
                             <h3 className="text-white font-bold mb-4 flex items-center gap-2 border-b border-slate-800 pb-3">
                                 <Lock className="w-4 h-4 text-emerald-400" />
@@ -91,13 +99,13 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                                 <li className="flex gap-2 items-start"><Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Gehalt und Steuerklasse verlassen dein Gerät nicht</li>
                             </ul>
 
-                            <p className="mt-4 text-xs leading-relaxed text-slate-500">
+                            <p className="mt-4 text-xs leading-relaxed text-slate-400">
                                 Wie bei jedem Seitenaufruf verarbeitet der Hosting-Anbieter technisch notwendige
                                 Verbindungsdaten wie die IP-Adresse. Deine Eingaben sind davon nicht betroffen:
-                                Sie werden weder übertragen noch gespeichert.
+                                Sie bleiben nur im Arbeitsspeicher dieses Tabs und werden nicht übertragen. Neuladen oder Zurücksetzen löscht sie.
                             </p>
 
-                            <div className="mt-5 pt-4 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
+                            <div className="mt-5 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
                                 <span>Privatsphäre by Design.</span>
                                 <button className="flex items-center gap-1 hover:text-white transition-colors cursor-default">
                                     <Github className="w-3 h-3" />
@@ -116,7 +124,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                     <aside
                         ref={sidebarRef}
                         style={stickyStil}
-                        className={`w-full shrink-0 lg:self-start ${stickyKlassen}`}
+                        className={`w-full min-w-0 shrink-0 lg:self-start ${stickyKlassen}`}
                     >
                         {sidebar}
                     </aside>
@@ -134,7 +142,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                 )}
             </div>
             {/* Footer */}
-            <footer className="mx-auto max-w-7xl mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 text-sm">
+            <footer className="mx-auto max-w-7xl mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-400 text-sm">
                 <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
                     <span>&copy; 2026 steuerlast-rechner.de</span>
                     <nav className="flex gap-6">
@@ -155,7 +163,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                         <span className="font-medium">GitHub</span>
                         <span className="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1 group-hover:bg-indigo-500/20">OPEN SOURCE</span>
                     </a>
-                    <span className="text-slate-500 text-[10px] uppercase tracking-wider px-2">
+                    <span className="text-slate-400 text-[10px] uppercase tracking-wider px-2">
                         Entwickelt von <a href="https://shuhne.de" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-indigo-400 transition-colors">Sascha Huhne</a>
                     </span>
                 </div>

@@ -32,7 +32,7 @@ function Zeile({
             <span className={cn('text-slate-400', stark && 'font-semibold text-slate-200')}>
                 {name}
                 {erlaeuterung && (
-                    <span className="ml-1.5 text-xs text-slate-600">{erlaeuterung}</span>
+                    <span className="ml-1.5 text-xs text-slate-400">{erlaeuterung}</span>
                 )}
             </span>
             <span className={cn('shrink-0 font-mono text-white', stark && 'font-bold')}>
@@ -58,7 +58,7 @@ export function ErgebnisPanel(p: Props) {
                 </div>
                 <h3 className="mb-2 text-lg font-semibold text-white">Deine Auswertung erscheint hier</h3>
                 <p className="max-w-xs text-sm leading-relaxed text-slate-400">
-                    Gib dein Bruttogehalt ein — den Rest übernehmen wir.
+                    {p.eingabeFehler ?? 'Gib dein Bruttogehalt ein — den Rest übernehmen wir.'}
                 </p>
             </div>
         );
@@ -174,7 +174,7 @@ export function ErgebnisPanel(p: Props) {
                                     gegenüber deiner Eingabe
                                 </span>
                             </div>
-                            <div className="mt-0.5 text-xs text-slate-500">
+                            <div className="mt-0.5 text-xs text-slate-400">
                                 {p.z.lohnerhoehungProzent > 0 && `+${p.z.lohnerhoehungProzent} % Gehalt`}
                                 {p.z.lohnerhoehungProzent > 0 && p.z.arbeitszeitProzent !== 100 && ' · '}
                                 {p.z.arbeitszeitProzent !== 100 && `${p.z.arbeitszeitProzent} % Arbeitszeit`}
@@ -210,13 +210,13 @@ export function ErgebnisPanel(p: Props) {
                 {[
                     { label: 'Abgabenquote', wert: formatProzent(e.quoten.abgabenquote), hinweis: 'Steuern und Beiträge zusammen' },
                     { label: 'Grenzabgabenquote', wert: formatProzent(e.quoten.grenzabgabenquote), hinweis: 'vom nächsten Euro' },
-                    { label: 'Netto je Stunde', wert: p.stunden ? formatEuro(p.stunden.nettoJeStunde) : '–', hinweis: `bei ${p.z.wochenstunden} h/Woche` },
+                    { label: 'Netto je Stunde', wert: p.stunden ? formatEuro(p.stunden.nettoJeStunde) : '–', hinweis: `bei ${p.wochenstundenEffektiv.toLocaleString('de-DE')} h/Woche` },
                     { label: 'Arbeitgeberkosten', wert: formatEuro(monatlich ? e.arbeitgeber.gesamtkosten / 12 : e.arbeitgeber.gesamtkosten), hinweis: 'Brutto plus AG-Anteile' },
                 ].map((k) => (
                     <div key={k.label} className="rounded-xl border border-slate-800 bg-slate-900 p-3">
                         <div className="text-xs text-slate-400">{k.label}</div>
                         <div className="mt-1 font-mono text-lg font-bold text-white">{k.wert}</div>
-                        <div className="mt-0.5 text-[11px] leading-tight text-slate-600">{k.hinweis}</div>
+                        <div className="mt-0.5 text-[11px] leading-tight text-slate-400">{k.hinweis}</div>
                     </div>
                 ))}
             </div>
@@ -241,7 +241,7 @@ export function ErgebnisPanel(p: Props) {
                                     {eintrag.name}
                                 </span>
                                 <span className="flex items-baseline gap-3 font-mono">
-                                    <span className="text-slate-500">
+                                    <span className="text-slate-400">
                                         {e.brutto > 0 ? formatProzent((eintrag.wert / e.brutto) * 100) : '–'}
                                     </span>
                                     <span className="w-24 text-right text-white">
@@ -257,7 +257,7 @@ export function ErgebnisPanel(p: Props) {
             {/* Abzüge */}
             <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
                 <h3 className="mb-4 text-lg font-semibold text-white">
-                    Abzüge im Detail <span className="text-sm font-normal text-slate-500">({monatlich ? 'monatlich' : 'jährlich'})</span>
+                    Abzüge im Detail <span className="text-sm font-normal text-slate-400">({monatlich ? 'monatlich' : 'jährlich'})</span>
                 </h3>
 
                 <div className="space-y-5">
@@ -362,7 +362,7 @@ export function ErgebnisPanel(p: Props) {
                             <div className="border-t border-slate-800 pt-2">
                                 <Zeile name="Gesamtkosten der Stelle" betrag={e.arbeitgeber.gesamtkosten} monatlich={monatlich} stark />
                             </div>
-                            <p className="pt-1 text-xs leading-relaxed text-slate-500">
+                            <p className="pt-1 text-xs leading-relaxed text-slate-400">
                                 Ohne Umlagen U1/U2/U3 und ohne Beiträge zur gesetzlichen Unfallversicherung.
                             </p>
                         </div>
@@ -375,7 +375,7 @@ export function ErgebnisPanel(p: Props) {
                 <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
                     {e.hinweise.map((h, i) => (
                         <div key={i} className="flex gap-2 text-sm leading-relaxed text-slate-400">
-                            <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                            <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
                             <span>{h}</span>
                         </div>
                     ))}
@@ -389,9 +389,9 @@ export function ErgebnisPanel(p: Props) {
                     className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-slate-950/40"
                 >
                     <span className="text-sm font-semibold text-slate-300">Stand und Quellen</span>
-                    {methodikOffen ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                    {methodikOffen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
                 </button>
-                <div className="border-t border-slate-800 px-4 py-3 text-xs leading-relaxed text-slate-500">
+                <div className="border-t border-slate-800 px-4 py-3 text-xs leading-relaxed text-slate-400">
                     Berechnet nach dem amtlichen Programmablaufplan {PAP_META.jahr} des BMF
                     (Version {PAP_META.version}, Stand {PAP_META.stand}).
                     Sozialversicherung: {p.rechtsstand.bezeichnung}.
@@ -423,7 +423,7 @@ export function ErgebnisPanel(p: Props) {
                                     {param.einheit ? ` ${param.einheit.replace('EUR', '')}` : ''}
                                 </div>
                                 {istSzenario && <RechtsstatusChip status={param.rechtsstatus} klein />}
-                                <div className="text-slate-500">
+                                <div className="text-slate-400">
                                     {param.quelle.herausgeber}:{' '}
                                     {param.quelle.url ? (
                                         <a href={param.quelle.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">
@@ -432,14 +432,15 @@ export function ErgebnisPanel(p: Props) {
                                     ) : param.quelle.titel}
                                     {param.quelle.fundstelle ? ` — ${param.quelle.fundstelle}` : ''}
                                 </div>
-                                {param.hinweis && <div className="mt-1 text-slate-500">{param.hinweis}</div>}
+                                {param.hinweis && <div className="mt-1 text-slate-400">{param.hinweis}</div>}
                             </div>
                         ))}
+                        <p className="text-sm text-slate-300">Verwendeter Zusatzbeitrag: {((p.z.eigenerZusatzbeitrag ? undefined : p.rechtsstand.svUeberschreibungen?.kvZusatz) ?? p.z.kvZusatzProzent / 100) * 100} % ({p.z.eigenerZusatzbeitrag || p.rechtsstand.svUeberschreibungen?.kvZusatz === undefined ? 'eigene Eingabe' : 'Szenarioannahme'}).</p>
                         {p.rechtsstand.annahmen.map((annahme, i) => (
                             <div key={`annahme-${i}`} className="space-y-1 border-l-2 border-amber-500/30 pl-3">
                                 <RechtsstatusChip status={annahme.rechtsstatus} klein />
                                 <div>{annahme.text}</div>
-                                <div className="text-slate-500">
+                                <div className="text-slate-400">
                                     {annahme.quelle.url ? (
                                         <a href={annahme.quelle.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">
                                             {annahme.quelle.herausgeber}: {annahme.quelle.titel}
@@ -448,7 +449,7 @@ export function ErgebnisPanel(p: Props) {
                                 </div>
                             </div>
                         ))}
-                        <p className="border-t border-slate-800 pt-3 text-slate-500">
+                        <p className="border-t border-slate-800 pt-3 text-slate-400">
                             Die Berechnung bildet den laufenden Lohnsteuerabzug ab. Die endgültige
                             Steuer ergibt sich erst aus der Einkommensteuerveranlagung. Nicht
                             abgebildet sind unter anderem betriebliche Altersvorsorge,
