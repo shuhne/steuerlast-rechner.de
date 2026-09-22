@@ -38,6 +38,9 @@ export interface SvEingabe {
     /** Kassenindividueller Zusatzbeitragssatz in Prozentpunkten (gesamt). */
     kvZusatzProzent: number;
     kinderFuerPflege: number;
+    hatKinder?: boolean;
+    /** Einmalzahlung im Dezember, ganzjährige Beschäftigung; § 23a Abs. 3 SGB IV. */
+    bonusDezember?: number;
     alter: number;
     krankenversicherung:
         | { art: 'gesetzlich' }
@@ -77,7 +80,7 @@ const r2 = euroRunden;
 /** Effektiver Arbeitnehmeranteil zur Pflegeversicherung. */
 export function pflegesatzArbeitnehmer(
     s: Pick<SvSaetze, 'pvSatz' | 'pvZuschlagKinderlose' | 'pvAbschlagJeKind'>,
-    opts: { bundesland: string; kinder: number; alter: number; pvArbeitgeberSachsen: number }
+    opts: { bundesland: string; kinder: number; hatKinder?: boolean; alter: number; pvArbeitgeberSachsen: number }
 ): number {
     const kinder = Math.floor(Math.max(0, opts.kinder));
     const sachsen = opts.bundesland.toUpperCase() === 'SN';
@@ -85,7 +88,7 @@ export function pflegesatzArbeitnehmer(
     // Grundverteilung: hälftig, in Sachsen trägt der Arbeitgeber 0,5 Punkte weniger.
     let satz = sachsen ? s.pvSatz - opts.pvArbeitgeberSachsen : s.pvSatz / 2;
 
-    if (kinder <= 0 && opts.alter >= 23) satz += s.pvZuschlagKinderlose;
+    if (!(opts.hatKinder ?? kinder > 0) && opts.alter >= 23) satz += s.pvZuschlagKinderlose;
     if (kinder >= 2) satz -= (Math.min(kinder, 5) - 1) * s.pvAbschlagJeKind;
 
     return Math.max(0, satz);
@@ -111,10 +114,12 @@ export function berechneSozialabgaben(e: SvEingabe): SvErgebnis {
 
     const privat = e.krankenversicherung.art === 'privat';
     const hinweise: string[] = [];
+    if (e.bonusDezember) hinweise.push('Bonusmodell: Zahlung im Dezember bei ganzjähriger, ununterbrochener Beschäftigung mit gleichbleibendem Monatslohn; ungenutzte Jahres-Beitragsbemessungsgrenzen nach § 23a Abs. 3 SGB IV. Andere Zahlungsmonate, Märzklausel sowie Mini- und Midijobs sind nicht modelliert.');
 
     const pvAn = pflegesatzArbeitnehmer(s, {
         bundesland: e.bundesland,
         kinder: e.kinderFuerPflege,
+        hatKinder: e.hatKinder,
         alter: e.alter,
         pvArbeitgeberSachsen: basis.pvArbeitgeberSachsen,
     });
@@ -219,9 +224,9 @@ export function berechneSozialabgaben(e: SvEingabe): SvErgebnis {
     }
 
     // ------------------------------------------------------------- Regelfall
-    const basisRvAv = Math.min(e.bruttoJahr, s.bbgRvAv);
-    const basisKv = Math.min(e.bruttoJahr, s.bbgKv);
-    const basisPv = Math.min(e.bruttoJahr, s.bbgPv);
+    const basisRvAv = Math.min(e.bruttoJahr + (e.bonusDezember ?? 0), s.bbgRvAv);
+    const basisKv = Math.min(e.bruttoJahr + (e.bonusDezember ?? 0), s.bbgKv);
+    const basisPv = Math.min(e.bruttoJahr + (e.bonusDezember ?? 0), s.bbgPv);
 
     const an: SvAnteil = {
         rv: r2(basisRvAv * (s.rvSatz / 2)),

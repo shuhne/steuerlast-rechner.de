@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { bonusModellUnterstuetzt } from './rechner';
 import { RECHTSSTAENDE } from './parameter/rechtsstaende';
 
 /**
@@ -23,7 +24,9 @@ export const RechnerEingabeSchema = z.object({
     kirchensteuerKappungProzent: z.number().min(0).max(10).nullable().optional(),
     alter: z.number().int().min(14).max(120),
     kinderfreibetraege: z.number().min(0).max(20),
-    kinderFuerPflege: z.number().min(0).max(20),
+    kinderFuerPflege: z.number().int().min(0).max(20),
+    hatKinder: z.boolean().optional(),
+    eigenerZusatzbeitrag: z.boolean().optional(),
     krankenversicherung: z.enum(['gesetzlich', 'privat']),
     kvZusatzProzent: z.number().min(0).max(15),
     pkvMonatsbeitrag: z.number().min(0).max(10_000).optional(),
@@ -35,7 +38,8 @@ export const RechnerEingabeSchema = z.object({
     rentenversicherungspflichtig: z.boolean().optional(),
     arbeitslosenversicherungspflichtig: z.boolean().optional(),
     szenarioId: z.enum(szenarioIds).nullable().optional(),
-});
+}).refine(bonusModellUnterstuetzt, { message: 'Bonus bei Mini- und Midijobs ist nicht modelliert.', path: ['sonstigeBezuege'] })
+.refine((e) => e.krankenversicherung !== 'privat' || (e.pkvMonatsbeitrag ?? 0) > 0, { message: 'PKV-Beitrag fehlt.', path: ['pkvMonatsbeitrag'] });
 
 export const Eingabe1958Schema = z.object({
     bruttoJahrEur: z.number().min(0).max(10_000_000),

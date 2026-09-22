@@ -1,4 +1,4 @@
-import { berechne, RechnerEingabe, RechnerErgebnis } from './rechner';
+import { berechne, bonusModellUnterstuetzt, RechnerEingabe, RechnerErgebnis } from './rechner';
 import { runden } from './runden';
 import { rechtsstandFuer, RECHTSSTAND_GELTEND } from './parameter/rechtsstaende';
 
@@ -45,7 +45,7 @@ export function teilzeitanalyse(
     const vollzeit = berechne({ ...basis, bruttoJahr: basis.bruttoJahr });
     const nettoJeStundeVollzeit = vollzeit.netto.jahr / Math.max(1, wochenstundenVollzeit);
 
-    return stufen.map((anteil) => {
+    return stufen.filter((anteil) => bonusModellUnterstuetzt({ ...basis, bruttoJahr: basis.bruttoJahr * anteil / 100 })).map((anteil) => {
         const faktor = anteil / 100;
         const brutto = runden(basis.bruttoJahr * faktor, 2);
         const r = berechne({ ...basis, bruttoJahr: brutto });
@@ -67,7 +67,7 @@ export function teilzeitanalyse(
                     ? runden((nettoJeStunde / nettoJeStundeVollzeit - 1) * 100, 2)
                     : 0,
             entgeltpunkte: entgelt
-                ? runden(Math.min(brutto, bbgRente) / entgelt, 4)
+                ? runden(Math.min(brutto + (basis.sonstigeBezuege ?? 0), bbgRente) / entgelt, 4)
                 : 0,
         };
     });
@@ -93,6 +93,7 @@ export function gehaltskurve(
     for (let i = 0; i <= schritte; i++) {
         const faktor = (vonProzent + ((bisProzent - vonProzent) * i) / schritte) / 100;
         const brutto = runden(basis.bruttoJahr * faktor, 2);
+        if (!bonusModellUnterstuetzt({ ...basis, bruttoJahr: brutto })) continue;
         const r = berechne({ ...basis, bruttoJahr: brutto });
         punkte.push({
             bruttoJahr: brutto,
