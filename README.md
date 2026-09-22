@@ -77,30 +77,47 @@ npx tsc --noEmit
 
 ## Deployment
 
-Firebase Hosting mit Next.js-Backend in `europe-west1`. Das Projekt ist über
-[`.firebaserc`](.firebaserc) fest hinterlegt, `--project` ist deshalb nicht
-nötig.
+Die Produktionsdomain **steuerlast-rechner.de** ist mit **Firebase App Hosting**
+verbunden: Backend `steuerlastrechner`, Region `europe-west4`, Projekt
+`steuerlast-rechner`. Ein Deployment mit `firebase deploy --only hosting`
+aktualisiert lediglich die separate Adresse `steuerlast-rechner.web.app` und
+deren Next.js-Backend in `europe-west1`, **nicht die Produktionsdomain**.
+Die Zuordnung wurde am 22.09.2026 über die App-Hosting-Domain-API geprüft.
+
+Vor jedem Deployment müssen `npm test`, `npm run lint`, `npx tsc --noEmit`
+und ein frischer `npm run build` sauber durchlaufen — insbesondere der Abgleich
+gegen die amtlichen Prüftabellen. Vor dem Build `.next` entfernen oder aus dem
+Projekt verschieben, damit keine Artefakte aus `.next/dev` verpackt werden.
+
+Produktionsdeployment eines geprüften Commits:
 
 ```bash
-rm -rf .next        # wichtig, siehe unten
+npm test
+npm run lint
+npx tsc --noEmit
+# Vorher .next entfernen oder außerhalb des Projekts sichern
 npm run build
-npx firebase deploy --only hosting
+git push origin HEAD
+npx firebase apphosting:rollouts:create steuerlastrechner --git-commit "$(git rev-parse HEAD)" --force
 ```
 
-**`.next` vor dem Build loeschen.** Das Firebase-Frameworks-Backend packt den
-Projektordner mitsamt `.next`. Wurde vorher `npm run dev` ausgefuehrt, liegt
-dort ein `dev`-Unterordner mit Entwicklungsartefakten — in einem gemessenen Fall
-288 MB, die unnoetig hochgeladen werden. Ein sauberer Build erzeugt rund 19 MB.
+App Hosting baut den gepushten Commit aus dem verbundenen GitHub-Repository.
+Die CLI startet den Rollout; anschließend dessen Status bis `SUCCEEDED`
+verfolgen und die Änderungen auf **https://steuerlast-rechner.de** prüfen.
+Eine Erfolgsmeldung für `steuerlast-rechner.web.app` genügt dafür nicht.
+Das Firebase-Projekt ist in [`.firebaserc`](.firebaserc) hinterlegt.
+
+Für die separate Firebase-Hosting-Seite gilt nach denselben Prüfungen:
+
+```bash
+npx firebase deploy --only hosting
+```
 
 Läuft die Anmeldung ab, meldet die CLI einen `Authentication Error`. Dann:
 
 ```bash
 npx firebase login --reauth
 ```
-
-Vor jedem Deployment müssen `npm test`, `npx tsc --noEmit`, `npm run lint` und
-`npm run build` sauber durchlaufen — insbesondere der Abgleich gegen die
-amtlichen Prüftabellen.
 
 ## Grenzen
 
