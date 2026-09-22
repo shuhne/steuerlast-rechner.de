@@ -1,5 +1,5 @@
 import { Parameter, Quelle, Rechtsstatus } from './typen';
-import { SV_2026, SvParameter } from './sozialversicherung';
+import { SV_2026, SV_2027_ENTWURF, SVBEZGRV_2027_ENTWURF, PNOG_ENTWURF, SvParameter } from './sozialversicherung';
 import type { SvSaetze } from '../sozialabgaben';
 
 /**
@@ -26,14 +26,6 @@ const RVB_2025: Quelle = {
     fundstelle: 'BT-Drs. 21/3080, Übersicht B 2.1 (Beitragssätze 2025-2039, neun Modellvarianten)',
     url: 'https://dserver.bundestag.de/btd/21/030/2103080.pdf',
     stand: '2025-11-26',
-};
-
-const PNOG_ENTWURF: Quelle = {
-    herausgeber: 'Bundesministerium für Gesundheit',
-    titel: 'Referentenentwurf Pflegeneuordnungsgesetz (PNOG)',
-    fundstelle: 'Referentenentwurf vom 04.06.2026',
-    url: 'https://www.bundesgesundheitsministerium.de/fileadmin/Dateien/3_Downloads/Gesetze_und_Verordnungen/GuV/P/RefE-Pflegeneuordnungsgesetz_PNOG.pdf',
-    stand: '2026-06-04',
 };
 
 const GKV_LUECKE_2027: Quelle = {
@@ -106,7 +98,8 @@ function fortgeschrieben(
         ...basis,
         jahr,
         bbgRvAv: skaliere(basis.bbgRvAv, 600),
-        bbgKvPv: skaliere(basis.bbgKvPv, 450),
+        bbgKv: skaliere(basis.bbgKv, 450),
+        bbgPv: skaliere(basis.bbgPv, 450),
         jaeg: skaliere(basis.jaeg, 450),
         durchschnittsentgelt: skaliere(basis.durchschnittsentgelt, 1),
     };
@@ -146,8 +139,8 @@ export const RECHTSSTAND_2027: Rechtsstand = {
     beschreibung:
         'Was sich 2027 nach dem heutigen Stand der Gesetzgebung abzeichnet. Die Beitragssätze ' +
         'stammen aus amtlichen Vorausberechnungen und einem Referentenentwurf, die ' +
-        'Bemessungsgrenzen sind fortgeschrieben.',
-    sv: fortgeschrieben(SV_2026, 2027, LOHNWACHSTUM_ANNAHME),
+        'Rechengrößen aus dem BMAS-Referentenentwurf vom 21.09.2026. Die Pflegegrenze folgt dem PNOG-Entwurf.',
+    sv: SV_2027_ENTWURF,
     svUeberschreibungen: {
         // RV bleibt 2027 in der mittleren und oberen Variante bei 18,6 %.
         rvSatz: 0.186,
@@ -174,14 +167,14 @@ export const RECHTSSTAND_2027: Rechtsstand = {
             quelle: GKV_LUECKE_2027,
         },
         {
-            text: 'Beitragsbemessungsgrenzen mit 4 % Lohnwachstum fortgeschrieben.',
-            rechtsstatus: 'eigene_annahme',
-            quelle: {
-                herausgeber: 'steuerlast-rechner.de',
-                titel: 'Fortschreibungsannahme',
-                fundstelle: 'Die tatsächlichen Werte legt die SVBezGrV im Herbst 2026 fest.',
-                stand: '2026-07-27',
-            },
+            text: `BMAS-Entwurf vom 21.09.2026: Beitragsbemessungsgrenze Rente/Arbeitslosigkeit ${SV_2027_ENTWURF.bbgRvAv.wert.toLocaleString('de-DE')} €/Jahr, Krankenversicherung ${SV_2027_ENTWURF.bbgKv.wert.toLocaleString('de-DE')} €/Jahr; allgemeine Versicherungspflichtgrenze ${SV_2027_ENTWURF.jaeg.wert.toLocaleString('de-DE')} €/Jahr. Die zusätzliche Krankenversicherungs-Anhebung ist bereits enthalten.`,
+            rechtsstatus: 'referentenentwurf',
+            quelle: SVBEZGRV_2027_ENTWURF,
+        },
+        {
+            text: `Pflegeversicherung: eigene Beitragsbemessungsgrenze auf Höhe der allgemeinen Versicherungspflichtgrenze (${SV_2027_ENTWURF.bbgPv.wert.toLocaleString('de-DE')} €/Jahr), gemäß PNOG-Entwurf.`,
+            rechtsstatus: 'referentenentwurf',
+            quelle: PNOG_ENTWURF,
         },
         {
             text: 'Mindestlohn steigt zum 01.01.2027 auf 14,60 €.',
@@ -194,6 +187,11 @@ export const RECHTSSTAND_2027: Rechtsstand = {
         },
     ],
     nichtModelliert: [
+        'Die Lohnsteuer wird weiterhin mit dem amtlichen Programmablaufplan 2026 berechnet. ' +
+            'Die neuen Beitragsbemessungsgrenzen und Pflegebeiträge sind deshalb in der steuerlichen ' +
+            'Vorsorgepauschale noch nicht berücksichtigt; das Netto ist eine Modellrechnung.',
+        'Die besonderen Versicherungspflichtgrenzen für privat versicherte Bestandsfälle ' +
+            'nach § 6 Abs. 7 und 8 SGB V; angezeigt wird die allgemeine Grenze nach Abs. 6.',
         'Die am 01.07.2026 im Koalitionsausschuss vereinbarte Einkommensteuerreform zum 01.01.2027. ' +
             'Beschlossen sind bislang nur Richtung und Volumen (rund 10 Mrd. € Entlastung), nicht die ' +
             'konkreten Beträge für Grundfreibetrag, Kinderfreibetrag, Kindergeld und ' +

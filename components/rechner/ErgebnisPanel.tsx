@@ -5,7 +5,7 @@ import { AlertTriangle, Building2, ChevronDown, ChevronUp, HeartPulse, Info, Wal
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import type { RechnerErgebnis } from '../../lib/tax';
-import { PAP_META, SV_2026 } from '../../lib/tax';
+import { PAP_META } from '../../lib/tax';
 import { formatEuro, formatProzent, useRechner } from './useRechner';
 import { RechtsstatusChip } from './EingabePanel';
 import { Donut } from './Donut';
@@ -393,28 +393,59 @@ export function ErgebnisPanel(p: Props) {
                 </button>
                 <div className="border-t border-slate-800 px-4 py-3 text-xs leading-relaxed text-slate-500">
                     Berechnet nach dem amtlichen Programmablaufplan {PAP_META.jahr} des BMF
-                    (Version {PAP_META.version}, Stand {PAP_META.stand}) sowie der
-                    Sozialversicherungsrechengrößen-Verordnung 2026.
+                    (Version {PAP_META.version}, Stand {PAP_META.stand}).
+                    Sozialversicherung: {p.rechtsstand.bezeichnung}.
+                    {istSzenario && ' Die Steuerberechnung berücksichtigt noch nicht alle Änderungen des Szenarios.'}
                 </div>
                 {methodikOffen && (
                     <div className="space-y-3 border-t border-slate-800 bg-slate-950/30 p-4 text-xs leading-relaxed text-slate-400">
                         {[
-                            SV_2026.bbgRvAv, SV_2026.bbgKvPv, SV_2026.jaeg,
-                            SV_2026.rvSatz, SV_2026.avSatz, SV_2026.kvAllgemein,
-                            SV_2026.kvZusatzDurchschnitt, SV_2026.pvSatz, SV_2026.mindestlohn,
-                        ].map((param, i) => (
-                            <div key={i} className="border-l-2 border-slate-800 pl-3">
+                            { label: 'Beitragsbemessungsgrenze Rente / Arbeitslosigkeit', param: p.rechtsstand.sv.bbgRvAv },
+                            { label: 'Beitragsbemessungsgrenze Krankenversicherung', param: p.rechtsstand.sv.bbgKv },
+                            { label: 'Beitragsbemessungsgrenze Pflegeversicherung', param: p.rechtsstand.sv.bbgPv },
+                            { label: 'Allgemeine Versicherungspflichtgrenze', param: p.rechtsstand.sv.jaeg },
+                            { label: 'Vorläufiges Durchschnittsentgelt Rente', param: p.rechtsstand.sv.durchschnittsentgelt },
+                            ...(!istSzenario ? [
+                                { label: 'Rentenbeitrag', param: p.rechtsstand.sv.rvSatz },
+                                { label: 'Arbeitslosenbeitrag', param: p.rechtsstand.sv.avSatz },
+                                { label: 'Allgemeiner Krankenbeitrag', param: p.rechtsstand.sv.kvAllgemein },
+                                { label: 'Durchschnittlicher Zusatzbeitrag', param: p.rechtsstand.sv.kvZusatzDurchschnitt },
+                                { label: 'Pflegebeitrag', param: p.rechtsstand.sv.pvSatz },
+                                { label: 'Mindestlohn', param: p.rechtsstand.sv.mindestlohn },
+                            ] : []),
+                        ].map(({ label, param }) => (
+                            <div key={label} className="border-l-2 border-slate-800 pl-3">
+                                <div>{label}</div>
                                 <div className="font-mono text-slate-300">
                                     {param.einheit === 'EUR/Jahr' || param.einheit === 'EUR/Stunde'
                                         ? formatEuro(param.wert)
                                         : formatProzent(param.wert * 100, 2)}
                                     {param.einheit ? ` ${param.einheit.replace('EUR', '')}` : ''}
                                 </div>
+                                {istSzenario && <RechtsstatusChip status={param.rechtsstatus} klein />}
                                 <div className="text-slate-500">
-                                    {param.quelle.herausgeber}: {param.quelle.titel}
+                                    {param.quelle.herausgeber}:{' '}
+                                    {param.quelle.url ? (
+                                        <a href={param.quelle.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">
+                                            {param.quelle.titel}
+                                        </a>
+                                    ) : param.quelle.titel}
                                     {param.quelle.fundstelle ? ` — ${param.quelle.fundstelle}` : ''}
                                 </div>
-                                {param.hinweis && <div className="mt-1 text-slate-600">{param.hinweis}</div>}
+                                {param.hinweis && <div className="mt-1 text-slate-500">{param.hinweis}</div>}
+                            </div>
+                        ))}
+                        {p.rechtsstand.annahmen.map((annahme, i) => (
+                            <div key={`annahme-${i}`} className="space-y-1 border-l-2 border-amber-500/30 pl-3">
+                                <RechtsstatusChip status={annahme.rechtsstatus} klein />
+                                <div>{annahme.text}</div>
+                                <div className="text-slate-500">
+                                    {annahme.quelle.url ? (
+                                        <a href={annahme.quelle.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">
+                                            {annahme.quelle.herausgeber}: {annahme.quelle.titel}
+                                        </a>
+                                    ) : `${annahme.quelle.herausgeber}: ${annahme.quelle.titel}`}
+                                </div>
                             </div>
                         ))}
                         <p className="border-t border-slate-800 pt-3 text-slate-500">

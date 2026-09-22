@@ -42,8 +42,10 @@ export interface SvParameter {
     jahr: number;
     /** Beitragsbemessungsgrenze Renten-/Arbeitslosenversicherung, Euro/Jahr. */
     bbgRvAv: Parameter<number>;
-    /** Beitragsbemessungsgrenze Kranken-/Pflegeversicherung, Euro/Jahr. */
-    bbgKvPv: Parameter<number>;
+    /** Beitragsbemessungsgrenze Krankenversicherung, Euro/Jahr. */
+    bbgKv: Parameter<number>;
+    /** Beitragsbemessungsgrenze Pflegeversicherung, Euro/Jahr. */
+    bbgPv: Parameter<number>;
     /** Jahresarbeitsentgeltgrenze (Versicherungspflichtgrenze GKV), Euro/Jahr. */
     jaeg: Parameter<number>;
     /** Vorläufiges Durchschnittsentgelt der Rentenversicherung, Euro/Jahr. */
@@ -77,7 +79,8 @@ export interface SvParameter {
 export const SV_2026: SvParameter = {
     jahr: 2026,
     bbgRvAv: belegt(101_400, SVBEZGRV_2026, 2026, { einheit: 'EUR/Jahr' }),
-    bbgKvPv: belegt(69_750, SVBEZGRV_2026, 2026, { einheit: 'EUR/Jahr' }),
+    bbgKv: belegt(69_750, SVBEZGRV_2026, 2026, { einheit: 'EUR/Jahr' }),
+    bbgPv: belegt(69_750, SVBEZGRV_2026, 2026, { einheit: 'EUR/Jahr' }),
     jaeg: belegt(77_400, SVBEZGRV_2026, 2026, { einheit: 'EUR/Jahr' }),
     durchschnittsentgelt: belegt(51_944, SVBEZGRV_2026, 2026, {
         einheit: 'EUR/Jahr',
@@ -123,11 +126,57 @@ export const SV_2026: SvParameter = {
     }, 2026, { einheit: 'EUR/Stunde' }),
 };
 
+/** Amtlich veröffentlichte Entwurfswerte; noch kein geltendes Recht für 2027. */
+export const SVBEZGRV_2027_ENTWURF: Quelle = {
+    herausgeber: 'Bundesministerium für Arbeit und Soziales',
+    titel: 'Referentenentwurf zur Sozialversicherungsrechengrößen-Verordnung 2027',
+    fundstelle: 'BMAS-Tabelle vom 21.09.2026; Kabinettsbeschluss und Bundesratszustimmung stehen aus',
+    url: 'https://www.bmas.de/DE/Service/Presse/Meldungen/2026/referentenentwurf-zur-sozialversicherungsrechengroessen-verordnung-2027.html',
+    stand: '2026-09-21',
+};
+
+export const PNOG_ENTWURF: Quelle = {
+    herausgeber: 'Bundesministerium für Gesundheit',
+    titel: 'Referentenentwurf Pflegeneuordnungsgesetz (PNOG)',
+    fundstelle: 'Fassung vom 05.06.2026, Artikel 1 Nr. 48, § 55 Abs. 2 und 3 SGB XI (S. 46)',
+    url: 'https://www.bundesgesundheitsministerium.de/fileadmin/Dateien/3_Downloads/Gesetze_und_Verordnungen/GuV/P/RefE-Pflegeneuordnungsgesetz_PNOG.pdf',
+    stand: '2026-06-05',
+};
+
+function entwurfswert(wert: number, hinweis?: string): Parameter<number> {
+    return belegt(wert, SVBEZGRV_2027_ENTWURF, 2027, {
+        einheit: 'EUR/Jahr',
+        rechtsstatus: 'referentenentwurf',
+        hinweis,
+    });
+}
+
+const JAEG_2027_ENTWURF = entwurfswert(84_150, 'Allgemeine Jahresarbeitsentgeltgrenze nach § 6 Abs. 6 SGB V.');
+
+/** Rechengrößen 2027 im Szenario einschließlich des PNOG-Referentenentwurfs. */
+export const SV_2027_ENTWURF: SvParameter = {
+    ...SV_2026,
+    jahr: 2027,
+    bbgRvAv: entwurfswert(106_200),
+    bbgKv: entwurfswert(76_500, 'Enthält bereits die zusätzliche Anhebung um 300 EUR monatlich; nicht erneut addieren.'),
+    bbgPv: {
+        ...JAEG_2027_ENTWURF,
+        quelle: PNOG_ENTWURF,
+        belastbarkeit: 'hergeleitet',
+        hinweis: 'PNOG-Entwurf: Pflegegrenze entspricht § 6 Abs. 6 SGB V. Dessen Wert von ' +
+            '84.150 EUR stammt aus der BMAS-Tabelle vom 21.09.2026 (SVBezGrV-Entwurf 2027). ' +
+            'Ohne diese PNOG-Änderung gilt die Grenze nach § 6 Abs. 7 SGB V.',
+    },
+    jaeg: JAEG_2027_ENTWURF,
+    durchschnittsentgelt: entwurfswert(53_452, 'Vorläufiges Durchschnittsentgelt 2027 der allgemeinen Rentenversicherung.'),
+};
+
 /** Bequemer Zugriff auf die reinen Werte. */
 export function werte(p: SvParameter) {
     return {
         bbgRvAv: p.bbgRvAv.wert,
-        bbgKvPv: p.bbgKvPv.wert,
+        bbgKv: p.bbgKv.wert,
+        bbgPv: p.bbgPv.wert,
         jaeg: p.jaeg.wert,
         durchschnittsentgelt: p.durchschnittsentgelt.wert,
         rvSatz: p.rvSatz.wert,

@@ -75,7 +75,7 @@ function Teilzeit(p: Props) {
             titel="Teilzeit"
             untertitel="Was Stundenreduzierung wirklich kostet"
             icon={<ArrowRightLeft className="h-5 w-5 text-indigo-400" />}
-            quelle="Rentenanwartschaft: Entgeltpunkte = Bruttoentgelt geteilt durch das vorläufige Durchschnittsentgelt der Rentenversicherung (51.944 € für 2026)."
+            quelle={`Rentenanwartschaft: Entgeltpunkte = Bruttoentgelt bis zur Renten-Beitragsbemessungsgrenze geteilt durch das vorläufige Durchschnittsentgelt (${formatEuro(p.rechtsstand.sv.durchschnittsentgelt.wert, 0)} für ${p.rechtsstand.jahr}). Quelle: ${p.rechtsstand.sv.durchschnittsentgelt.quelle.titel}. ${p.rechtsstand.sv.durchschnittsentgelt.hinweis ?? ''}`}
         >
             {achtzig && (
                 <p className="mb-4 rounded-lg border border-indigo-500/20 bg-indigo-950/30 p-3 text-sm leading-relaxed text-slate-300">
@@ -153,7 +153,7 @@ function Grenzbelastung(p: Props) {
             titel="Grenzbelastung"
             untertitel="Wie viel vom nächsten Euro ankommt"
             icon={<TrendingUp className="h-5 w-5 text-indigo-400" />}
-            quelle="Die Grenzabgabenquote enthält Lohnsteuer, Solidaritätszuschlag, Kirchensteuer und Arbeitnehmerbeiträge zur Sozialversicherung. Die sichtbaren Sprünge liegen an den Beitragsbemessungsgrenzen (69.750 € und 101.400 €), oberhalb derer keine weiteren Beiträge anfallen."
+            quelle={`Die Grenzabgabenquote enthält Steuern und Arbeitnehmerbeiträge zur Sozialversicherung. Die Beitragsbemessungsgrenzen des gewählten Rechtsstands liegen bei ${formatEuro(p.rechtsstand.sv.bbgKv.wert, 0)} (Krankenversicherung), ${formatEuro(p.rechtsstand.sv.bbgPv.wert, 0)} (Pflege) und ${formatEuro(p.rechtsstand.sv.bbgRvAv.wert, 0)} (Rente / Arbeitslosigkeit) pro Jahr. Oberhalb der jeweiligen Grenze fallen für diesen Zweig keine weiteren Beiträge an. Quellen und Rechtsstatus unter „Stand und Quellen“.`}
         >
             <p className="mb-4 rounded-lg border border-indigo-500/20 bg-indigo-950/30 p-3 text-sm leading-relaxed text-slate-300">
                 Von 100 € mehr brutto bleiben dir rund{' '}

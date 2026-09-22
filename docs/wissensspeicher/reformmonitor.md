@@ -3,7 +3,7 @@
 Stand der steuer-, abgaben- und sozialpolitischen Vorhaben, die den Rechner
 betreffen.
 
-**Stand dieser Datei: 27.07.2026**
+**Rechengrößen aktualisiert: 22.09.2026; übrige Reformstände: 27.07.2026**
 
 **Für Recherche-Agenten:** Prüfe zuerst, ob ein Vorhaben seinen Status
 gewechselt hat. Ein Referentenentwurf, der Gesetz geworden ist, muss von
@@ -40,6 +40,34 @@ vorgesehen. Wer sie ergänzen will: Der PAP kennt dafür keinen Merker; sie wär
 
 Im Rechner als Szenario `2027-entwurf` abgebildet, gekennzeichnet als
 `referentenentwurf`.
+
+### Sozialversicherungsrechengrößen-Verordnung 2027
+
+[BMAS-Veröffentlichung vom 21.09.2026](https://www.bmas.de/DE/Service/Presse/Meldungen/2026/referentenentwurf-zur-sozialversicherungsrechengroessen-verordnung-2027.html),
+Status `referentenentwurf`; Kabinett und Bundesrat müssen noch zustimmen.
+
+| Größe | Monat | Jahr |
+|---|---:|---:|
+| BBG Rente / Arbeitslosigkeit | 8.850 € | 106.200 € |
+| BBG Krankenversicherung | 6.375 € | 76.500 € |
+| Allgemeine JAEG (§ 6 Abs. 6 SGB V) | 7.012,50 € | 84.150 € |
+| Vorläufiges Durchschnittsentgelt | — | 53.452 € |
+
+Diese Werte ersetzen im Szenario `2027-entwurf` die bisherige eigene
+4-%-Fortschreibung. Die KV-Grenze enthält die Sonderanhebung bereits.
+Die Szenarien ab 2030 behalten ihre ausdrücklich eigene Fortschreibung.
+
+Kranken- und Pflegegrenze werden getrennt berechnet. Im bestehenden
+PNOG-Szenario folgt die Pflegegrenze der allgemeinen JAEG: 84.150 €/Jahr,
+hergeleitet aus Artikel 1 Nr. 48 Buchstabe b des
+[PNOG-Entwurfs, Fassung 05.06.2026, S. 46](https://www.bundesgesundheitsministerium.de/fileadmin/Dateien/3_Downloads/Gesetze_und_Verordnungen/GuV/P/RefE-Pflegeneuordnungsgesetz_PNOG.pdf)
+und dem BMAS-Wert. Das ist keine bereits geltende Pflegegrenze. Ohne PNOG
+verweist § 55 Abs. 2 SGB XI auf § 6 Abs. 7 SGB V (Entwurfswert 72.900 €/Jahr).
+
+Die Lohnsteuer bleibt beim amtlichen PAP 2026. Die steuerliche Rückwirkung
+höherer Grenzen wird noch nicht vollständig abgebildet und im Szenario benannt.
+Regressionstests prüfen die Grenzen, getrennte KV/PV-Beiträge, Sachsen und
+PKV-Zuschüsse mit unabhängig aus den Quellen hergeleiteten Sollbeträgen.
 
 ### Pflegeneuordnungsgesetz (PNOG)
 

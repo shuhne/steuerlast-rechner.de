@@ -28,7 +28,8 @@ export interface SvSaetze {
     pvZuschlagKinderlose: number;
     pvAbschlagJeKind: number;
     bbgRvAv: number;
-    bbgKvPv: number;
+    bbgKv: number;
+    bbgPv: number;
 }
 
 export interface SvEingabe {
@@ -104,7 +105,8 @@ export function berechneSozialabgaben(e: SvEingabe): SvErgebnis {
         pvZuschlagKinderlose: o.pvZuschlagKinderlose ?? basis.pvZuschlagKinderlose,
         pvAbschlagJeKind: o.pvAbschlagJeKind ?? basis.pvAbschlagJeKind,
         bbgRvAv: o.bbgRvAv ?? basis.bbgRvAv,
-        bbgKvPv: o.bbgKvPv ?? basis.bbgKvPv,
+        bbgKv: o.bbgKv ?? basis.bbgKv,
+        bbgPv: o.bbgPv ?? basis.bbgPv,
     };
 
     const privat = e.krankenversicherung.art === 'privat';
@@ -218,7 +220,8 @@ export function berechneSozialabgaben(e: SvEingabe): SvErgebnis {
 
     // ------------------------------------------------------------- Regelfall
     const basisRvAv = Math.min(e.bruttoJahr, s.bbgRvAv);
-    const basisKvPv = Math.min(e.bruttoJahr, s.bbgKvPv);
+    const basisKv = Math.min(e.bruttoJahr, s.bbgKv);
+    const basisPv = Math.min(e.bruttoJahr, s.bbgPv);
 
     const an: SvAnteil = {
         rv: r2(basisRvAv * (s.rvSatz / 2)),
@@ -244,8 +247,8 @@ export function berechneSozialabgaben(e: SvEingabe): SvErgebnis {
         // Der Arbeitgeberzuschuss ist auf die Hälfte des Beitrags und zugleich
         // auf den GKV-Höchstbetrag begrenzt (§ 257 SGB V, § 61 SGB XI).
         const hoechstzuschuss =
-            (s.bbgKvPv / 12) * (s.kvAllgemein / 2 + s.kvZusatz / 2) +
-            (s.bbgKvPv / 12) * pvAgEffektiv;
+            (s.bbgKv / 12) * (s.kvAllgemein / 2 + s.kvZusatz / 2) +
+            (s.bbgPv / 12) * pvAgEffektiv;
         const zuschuss = Math.min(
             kv.arbeitgeberzuschussMonat,
             kv.monatsbeitrag / 2,
@@ -270,10 +273,10 @@ export function berechneSozialabgaben(e: SvEingabe): SvErgebnis {
                 'die Pflege-Pflichtversicherung ist darin enthalten.'
         );
     } else {
-        an.kv = r2(basisKvPv * kvAnSatz);
-        an.pv = r2(basisKvPv * pvAn);
-        ag.kv = r2(basisKvPv * kvAgSatz);
-        ag.pv = r2(basisKvPv * pvAgEffektiv);
+        an.kv = r2(basisKv * kvAnSatz);
+        an.pv = r2(basisPv * pvAn);
+        ag.kv = r2(basisKv * kvAgSatz);
+        ag.pv = r2(basisPv * pvAgEffektiv);
     }
 
     an.summe = r2(an.rv + an.av + an.kv + an.pv);
@@ -300,10 +303,10 @@ export function maximalerPkvZuschuss(
     p: SvParameter = SV_2026
 ): { kv: number; pv: number; summe: number } {
     const b = werte(p);
-    const monatsBbg = b.bbgKvPv / 12;
+    const monatsBbg = b.bbgKv / 12;
     const kv = monatsBbg * (b.kvAllgemein / 2 + kvZusatzProzent / 100 / 2);
     const pvSatzAg =
         bundesland.toUpperCase() === 'SN' ? b.pvArbeitgeberSachsen : b.pvSatz / 2;
-    const pv = monatsBbg * pvSatzAg;
+    const pv = (b.bbgPv / 12) * pvSatzAg;
     return { kv: r2(kv), pv: r2(pv), summe: r2(kv + pv) };
 }

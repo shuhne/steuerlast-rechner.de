@@ -231,8 +231,7 @@ export function useRechner() {
                 ? teilzeitanalyse(
                       eingabe,
                       wochenstundenEffektiv,
-                      [100, 90, 80, 70, 60, 50],
-                      svWerte(SV_2026).durchschnittsentgelt
+                      [100, 90, 80, 70, 60, 50]
                   )
                 : null,
         [hatEingabe, eingabe, wochenstundenEffektiv]
@@ -281,7 +280,7 @@ export function useRechner() {
     );
 
     const rechtsstand = rechtsstandFuer(z.szenarioId);
-    const pkvMoeglich = bruttoJahr >= jaeg(null);
+    const pkvMoeglich = bruttoJahr > jaeg(z.szenarioId);
 
     return {
         z,

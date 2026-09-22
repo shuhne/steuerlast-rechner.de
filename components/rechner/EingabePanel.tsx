@@ -392,7 +392,7 @@ export function EingabePanel(p: Props) {
                         <span className="flex items-center gap-1 text-sm font-medium text-slate-400">
                             Krankenversicherung
                             {!p.pkvMoeglich && (
-                                <InfoTooltip text="Der Wechsel in die private Krankenversicherung ist erst ab 77.400 € Jahresbrutto möglich (Jahresarbeitsentgeltgrenze 2026)." />
+                                <InfoTooltip text={`Die allgemeine Jahresarbeitsentgeltgrenze im gewählten Rechtsstand ${p.rechtsstand.jahr} liegt bei ${formatEuro(p.rechtsstand.sv.jaeg.wert, 0)}. Das regelmäßige Jahresarbeitsentgelt muss diese Grenze überschreiten. Sonderregeln für Bestandsfälle sind nicht abgebildet.`} />
                             )}
                         </span>
                         {p.pkvMoeglich && (
