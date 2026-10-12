@@ -81,13 +81,13 @@ export default function Home() {
         <CalculatorLayout
             sidebar={<EingabePanel {...r} />}
             results={
-                <div className="space-y-4">
+                <div className="space-y-5 sm:space-y-6">
                     {r.ansicht === 'historisch' ? (
                         <Zeitreise1958 {...r} />
                     ) : (
                         <>
-                            {r.ergebnis && <nav aria-label="Rechnerbereiche" className="flex flex-wrap gap-3 text-sm text-indigo-300"><Link className="inline-flex min-h-11 items-center" href="#ergebnis">Ergebnis</Link><Link className="inline-flex min-h-11 items-center" href="#analysen">Analysen & Vergleiche</Link></nav>}
                             <ErgebnisPanel {...r} />
+                            {r.ergebnis && <nav aria-label="Rechnerbereiche" className="flex flex-wrap gap-4 border-t border-slate-800 pt-2 text-sm text-indigo-300 lg:hidden"><Link className="inline-flex min-h-11 items-center" href="#ergebnis">Ergebnis</Link><Link className="inline-flex min-h-11 items-center" href="#analysen">Analysen & Vergleiche</Link></nav>}
                             <Analysen {...r} />
                         </>
                     )}

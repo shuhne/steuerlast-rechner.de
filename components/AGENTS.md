@@ -82,6 +82,8 @@ Jedes Diagramm braucht:
 
 - Zahlenfelder: eigene Plus/Minus-Schaltflächen statt der nativen Spinner. Die
   sind auf Touch kaum treffbar und in Firefox nicht vorhanden. Nutze `ZahlFeld`.
+  Plus/Minus bleiben rechts im Feld; keine eigene Buttonzeile darunter.
+  Gemeinsame Feldhoehen und Kartenabstaende kommen aus `rechner/ui.tsx`.
 - Jedes Bedienelement braucht ein `aria-label`, wenn die sichtbare Beschriftung
   nicht eindeutig ist.
 - `InfoTooltip` muss per Maus, Tastatur und Touch erreichbar bleiben.

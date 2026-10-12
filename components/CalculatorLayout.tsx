@@ -56,28 +56,28 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
 
 
     return (
-        <div className="min-h-screen w-full bg-slate-950 p-3 sm:p-4 md:p-6 lg:p-8 font-sans selection:bg-indigo-500/30">
+        <div className="min-h-screen w-full bg-slate-950 px-4 py-5 sm:p-6 lg:p-8 font-sans selection:bg-indigo-500/30">
             <div className="mx-auto max-w-7xl">
-                <header className="mb-5 sm:mb-12 flex flex-col md:flex-row md:items-start justify-between gap-4 sm:gap-6">
-                    <div className="text-center md:text-left">
-                        <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                <header className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-slate-800/60 pb-5 sm:mb-8 sm:pb-6">
+                    <div className="min-w-0 space-y-2">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                             <Link href="/" className="hover:text-indigo-400 transition-colors">steuerlast-rechner.de</Link>
                         </h1>
-                        <p className="text-slate-400 text-base sm:text-lg mt-2 sm:mt-3 max-w-3xl leading-relaxed">
+                        <p className="text-sm leading-relaxed text-slate-400">
                             Dein Netto. Deine Arbeitszeit. Dein Blick auf morgen.
                         </p>
                     </div>
 
                     {/* Privacy Button & Overlay */}
-                    <div className="relative shrink-0 mx-auto md:mx-0">
+                    <div className="relative shrink-0">
                         <button
                             ref={privacyButtonRef}
                             aria-expanded={isPrivacyOpen}
                             aria-controls="datenschutz-info"
                             onClick={() => setIsPrivacyOpen(!isPrivacyOpen)}
-                            className="peer flex items-center gap-2 text-slate-400 hover:text-white transition-colors bg-slate-900/50 hover:bg-slate-800 px-4 py-2 rounded-full border border-slate-700/50 text-sm font-medium backdrop-blur-sm"
+                            className="peer flex items-center min-h-11 gap-2 text-slate-400 hover:text-white transition-colors bg-slate-900/50 hover:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700/50 text-xs sm:text-sm font-medium backdrop-blur-sm"
                         >
-                            <ShieldCheck className="w-4 h-4" />
+                            <ShieldCheck className="w-3.5 h-3.5" />
                             Datenschutz
                         </button>
 
@@ -85,7 +85,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                         <div
                             ref={overlayRef}
                             id="datenschutz-info"
-                            className={`absolute right-1/2 translate-x-1/2 md:translate-x-0 md:transform-none md:right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-[320px] sm:w-[320px] md:w-[350px] p-4 sm:p-6 bg-slate-900/95 border border-slate-700 rounded-xl shadow-2xl transition-all duration-200 z-50 backdrop-blur-md 
+                            className={`absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-[320px] sm:w-[320px] md:w-[350px] p-4 sm:p-6 bg-slate-900/95 border border-slate-700 rounded-xl shadow-2xl transition-all duration-200 z-50 backdrop-blur-md
                             ${isPrivacyOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2 pointer-events-none'}`}
                         >
                             <h3 className="text-white font-bold mb-4 flex items-center gap-2 border-b border-slate-800 pb-3">
@@ -116,7 +116,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                     </div>
                 </header>
 
-                <div className="flex flex-col lg:grid lg:grid-cols-[400px_1fr] gap-4 sm:gap-6 lg:gap-8 lg:items-start">
+                <div className="flex flex-col lg:grid lg:grid-cols-[384px_minmax(0,1fr)] gap-5 sm:gap-6 lg:items-start">
                     {/* Input Panel (Sidebar) */}
                     {/* Klebt nur, wenn das Panel vollstaendig ins Fenster passt.
                         Sonst scrollt es normal mit - in keinem Fall entsteht eine
@@ -136,7 +136,7 @@ export function CalculatorLayout({ sidebar, results, content }: CalculatorLayout
                 </div>
 
                 {content && (
-                    <div className="mt-16 sm:mt-24 max-w-4xl mx-auto">
+                    <div className="mt-12 border-t border-slate-800/60 pt-10 sm:mt-16 sm:pt-12 max-w-4xl mx-auto">
                         {content}
                     </div>
                 )}

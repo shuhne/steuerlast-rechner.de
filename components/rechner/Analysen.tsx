@@ -25,19 +25,21 @@ type WertTyp = number | undefined;
 type NameTyp = string | number | undefined;
 const zahl = (v: unknown): number => (typeof v === 'number' ? v : Number(v) || 0);
 
+import { KARTE } from './ui';
+
 function Karte({
     titel, untertitel, icon, quelle, children,
 }: {
     titel: string; untertitel: string; icon: React.ReactNode; quelle?: string; children: React.ReactNode;
 }) {
     return (
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
-            <div className="mb-4">
+        <div className={KARTE.standard}>
+            <div className="mb-5">
                 <h3 className="flex items-center gap-2 text-lg font-semibold text-white">{icon}{titel}</h3>
-                <p className="mt-1 text-sm text-slate-400">{untertitel}</p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">{untertitel}</p>
             </div>
             {children}
-            {quelle && <p className="mt-3 text-[11px] leading-relaxed text-slate-400">{quelle}</p>}
+            {quelle && <p className="mt-5 border-t border-slate-800 pt-4 text-xs leading-relaxed text-slate-400">{quelle}</p>}
         </div>
     );
 }
@@ -50,13 +52,13 @@ export function Analysen(p: Props) {
         ['kaufkraft', 'Kaufkraft'], ['paare', 'Paare'],
     ];
     return (
-        <section id="analysen" className="space-y-4 scroll-mt-4" aria-label="Gehaltsanalysen">
-            <div role="tablist" aria-label="Analyse auswählen" className="flex flex-wrap gap-2">
+        <section id="analysen" className="space-y-4 scroll-mt-6" aria-label="Gehaltsanalysen">
+            <div role="tablist" aria-label="Analyse auswählen" className="flex flex-wrap gap-1.5 rounded-xl border border-slate-800 bg-slate-900/60 p-1.5">
                 {bereiche.map(([id, titel], index) => <button key={id} id={`tab-${id}`} role="tab" aria-selected={auswahl === id} aria-controls={`analyse-${id}`} tabIndex={auswahl === id ? 0 : -1}
                     onClick={() => setAuswahl(id)} onKeyDown={(e) => {
                         const naechster = e.key === 'ArrowRight' ? (index + 1) % bereiche.length : e.key === 'ArrowLeft' ? (index + bereiche.length - 1) % bereiche.length : e.key === 'Home' ? 0 : e.key === 'End' ? bereiche.length - 1 : null;
                         if (naechster !== null) { e.preventDefault(); setAuswahl(bereiche[naechster][0]); document.getElementById(`tab-${bereiche[naechster][0]}`)?.focus(); }
-                    }} className={`min-h-11 rounded-lg border px-3 text-sm ${auswahl === id ? 'border-indigo-400 bg-indigo-600 text-white' : 'border-slate-700 bg-slate-900 text-slate-300'}`}>{titel}</button>)}
+                    }} className={`min-h-11 flex-1 rounded-lg border px-3 text-sm whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-indigo-400 ${auswahl === id ? 'border-indigo-400 bg-indigo-600 text-white' : 'border-transparent text-slate-400 hover:bg-slate-800 hover:text-white'}`}>{titel}</button>)}
             </div>
             {p.z.sonstigeBezuege > 0 && <p className="text-sm text-slate-300">Bonusmodell: Dezember, ganzjährige Beschäftigung. Mini- und Midijob-Varianten werden ausgelassen.</p>}
             <div role="tabpanel" id={`analyse-${auswahl}`} aria-labelledby={`tab-${auswahl}`} tabIndex={0}>
@@ -329,7 +331,7 @@ function Paarvergleich(p: Props) {
                                 <td className="py-2 font-sans">
                                     {v.bezeichnung}
                                     {v.bezeichnung === p.paarvergleich!.beste && (
-                                        <span className="ml-2 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                                        <span className="ml-2 rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs font-semibold text-emerald-300">
                                             höchstes laufendes Netto
                                         </span>
                                     )}
@@ -343,7 +345,7 @@ function Paarvergleich(p: Props) {
                     </tbody>
                 </table>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-slate-400">{p.paarvergleich.hinweis}</p>
+            <p className="mt-5 border-t border-slate-800 pt-4 text-xs leading-relaxed text-slate-400">{p.paarvergleich.hinweis}</p>
         </Karte>
     );
 }

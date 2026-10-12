@@ -6,6 +6,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { GRENZEN_1958, P1958 } from '../../lib/tax';
 import { formatEuro, formatProzent, useRechner } from './useRechner';
+import { KARTE } from './ui';
 
 const cn = (...i: ClassValue[]) => twMerge(clsx(i));
 
@@ -33,7 +34,8 @@ export function Zeitreise1958(p: Props) {
 
     return (
         <div className="space-y-4">
-            <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-900/30 to-slate-900 p-5">
+            {/* Netto-Box 1958 */}
+            <div className={cn(KARTE.hervorgehoben, 'border-amber-500/30 from-amber-900/30')}>
                 <div className="mb-3 flex items-center gap-2">
                     <History className="h-6 w-6 text-amber-400" />
                     <h3 className="text-xl font-semibold text-white">Zeitreise nach 1958</h3>
@@ -99,7 +101,7 @@ export function Zeitreise1958(p: Props) {
             </div>
 
             {/* Aufschlüsselung */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
+            <div className={KARTE.standard}>
                 <h4 className="mb-4 text-base font-semibold text-white">Aufschlüsselung 1958</h4>
                 <div className="space-y-2 rounded-lg border border-slate-800/50 bg-slate-950/50 p-3 text-sm">
                     {[
@@ -151,7 +153,7 @@ export function Zeitreise1958(p: Props) {
             </div>
 
             {/* Datengrundlage */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
+            <div className={KARTE.standard}>
                 <h4 className="mb-3 text-base font-semibold text-white">Datengrundlage 1958</h4>
                 <div className="space-y-3 text-xs leading-relaxed">
                     {[
@@ -168,7 +170,7 @@ export function Zeitreise1958(p: Props) {
                                           : param.wert.toLocaleString('de-DE')}
                                 </span>
                                 {param.belastbarkeit !== 'belegt' && (
-                                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-xs font-semibold text-amber-300">
                                         {param.belastbarkeit}
                                     </span>
                                 )}

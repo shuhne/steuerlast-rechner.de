@@ -95,9 +95,11 @@ export function InfoTooltip({ text, label = 'Information' }: { text: string; lab
                     oeffnen();
                 }}
                 onKeyDown={(e) => { if (e.key === 'Escape') schliessen(); }}
-                className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center cursor-help rounded-full text-slate-400 transition-colors hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                // Die Klickflaeche bleibt in der Beschriftungszeile und
+                // ueberlagert weder Nachbarlabels noch das Eingabefeld.
+                className="relative inline-flex h-6 w-6 shrink-0 cursor-help items-center justify-center rounded-full align-middle text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-                <Info className="h-3.5 w-3.5" />
+                <Info className="h-4 w-4" />
             </button>
 
             {position !== null &&
