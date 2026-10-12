@@ -148,7 +148,7 @@ function ZahlFeld({
 }) {
     const begrenzen = (v: number) => Math.min(max, Math.max(min, v));
     const runden = (v: number) => Math.round(v / schritt) * schritt;
-
+    const basis = Number.isFinite(wert) ? wert : min;
     return (
         <div className="group relative">
             <input
@@ -161,27 +161,29 @@ function ZahlFeld({
                 onChange={(e) => setzen(parseFloat(e.target.value))}
                 onBlur={(e) => setzen(begrenzen(parseFloat(e.target.value) || min))}
                 aria-label={ariaLabel}
-                className={cn(inputKlasse, 'pr-8 font-mono', ohneSpinner)}
+                className={cn(inputKlasse, suffix ? 'pr-16' : 'pr-12', 'font-mono', ohneSpinner)}
             />
             {suffix && (
-                <span className="pointer-events-none absolute right-3 top-5 text-sm text-slate-400">
+                <span className="pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 text-sm text-slate-400">
                     {suffix}
                 </span>
             )}
-            <div className="mt-1 grid grid-cols-2 gap-1">
+            <div className="absolute bottom-1 right-1 top-1 flex w-10 flex-col gap-0.5 rounded border border-slate-800 bg-slate-900 p-0.5">
                 <button
                     type="button"
-                    onClick={() => setzen(begrenzen(runden((Number.isFinite(wert) ? wert : min) + schritt)))}
+                    onClick={() => setzen(begrenzen(runden(basis + schritt)))}
+                    disabled={basis >= max}
                     aria-label={`${ariaLabel} erhöhen`}
-                    className="flex min-h-11 items-center justify-center rounded border border-slate-700 text-base font-bold text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+                    className="flex flex-1 items-center justify-center rounded text-xs font-bold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-indigo-400 disabled:text-slate-600"
                 >
                     +
                 </button>
                 <button
                     type="button"
-                    onClick={() => setzen(begrenzen(runden((Number.isFinite(wert) ? wert : min) - schritt)))}
+                    onClick={() => setzen(begrenzen(runden(basis - schritt)))}
+                    disabled={basis <= min}
                     aria-label={`${ariaLabel} verringern`}
-                    className="flex min-h-11 items-center justify-center rounded border border-slate-700 text-base font-bold text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+                    className="flex flex-1 items-center justify-center rounded text-xs font-bold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-indigo-400 disabled:text-slate-600"
                 >
                     −
                 </button>
@@ -213,10 +215,10 @@ export function EingabePanel(p: Props) {
                 )}
             </div>
 
-            {/* Gehalt */}
+            {/* Der Periodenschalter sitzt wieder rechts im Gehaltsfeld. */}
             <Feld label="Bruttogehalt">
                 <div className="group relative">
-                    <Euro className="pointer-events-none absolute left-3 top-4 h-5 w-5 text-slate-400 group-focus-within:text-indigo-400" />
+                    <Euro className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400" />
                     <input
                         type="text"
                         inputMode="decimal"
@@ -227,19 +229,21 @@ export function EingabePanel(p: Props) {
                             if (v > 0) p.setzen('bruttoEingabe', v.toLocaleString('de-DE'));
                         }}
                         placeholder="z. B. 50.000"
-                        className="w-full rounded-lg border border-slate-800 bg-slate-950 py-3 pl-10 pr-3 font-mono text-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        aria-label="Bruttogehalt"
+                        className="w-full rounded-lg border border-slate-800 bg-slate-950 py-3 pl-10 pr-24 font-mono text-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        aria-label={`Bruttogehalt ${p.monatlich ? 'pro Monat' : 'pro Jahr'}`}
                         aria-invalid={!!p.bruttoFehler}
                         aria-describedby={p.bruttoFehler ? "brutto-fehler" : undefined}
                     />
-                    <div className="mt-2 grid grid-cols-2 gap-1 rounded border border-slate-800 bg-slate-900 p-1">
+                    <div role="group" aria-label="Bruttogehalt angeben" className="absolute bottom-1 right-1 top-1 flex w-20 flex-col gap-0.5 rounded border border-slate-800 bg-slate-900 p-0.5">
                         {(['jahr', 'monat'] as const).map((per) => (
                             <button
                                 key={per}
+                                type="button"
                                 onClick={() => p.setPeriode(per)}
+                                aria-pressed={p.z.periode === per}
                                 className={cn(
-                                    'flex min-h-11 items-center justify-center rounded text-xs font-bold uppercase transition-colors',
-                                    p.z.periode === per ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-300'
+                                    'flex flex-1 items-center justify-center rounded text-xs font-bold uppercase transition-colors focus-visible:outline-2 focus-visible:outline-indigo-400',
+                                    p.z.periode === per ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
                                 )}
                             >
                                 {per === 'jahr' ? 'Jährlich' : 'Monatlich'}
