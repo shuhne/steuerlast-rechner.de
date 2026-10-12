@@ -18,7 +18,7 @@ const formatDM = (v: number) =>
 export function Zeitreise1958(p: Props) {
     if (!p.hatEingabe || !p.historisch || !p.ergebnisGeltendesRecht) {
         return (
-            <div className="rounded-xl border border-dashed border-amber-700/50 bg-slate-900 p-8 text-center">
+            <div id="ergebnis" className="scroll-mt-6 rounded-xl border border-dashed border-amber-700/50 bg-slate-900 p-8 text-center">
                 <History className="mx-auto mb-4 h-8 w-8 text-amber-500" />
                 <p className="text-sm text-slate-400">
                     Gib dein Bruttogehalt ein, um den Vergleich mit 1958 zu sehen.
@@ -33,7 +33,7 @@ export function Zeitreise1958(p: Props) {
     const differenz = h.inEuro.netto - heute.netto.jahr;
 
     return (
-        <div className="space-y-4">
+        <div id="ergebnis" className="scroll-mt-6 space-y-5 sm:space-y-6">
             {/* Netto-Box 1958 */}
             <div className={cn(KARTE.hervorgehoben, 'border-amber-500/30 from-amber-900/30')}>
                 <div className="mb-3 flex items-center gap-2">

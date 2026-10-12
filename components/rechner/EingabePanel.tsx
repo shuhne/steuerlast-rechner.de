@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowDown, Calculator, ChevronDown, ChevronUp, Euro, History, RotateCcw, Settings2, Trash2 } from 'lucide-react';
-import { RECHTSSTAENDE, RECHTSSTATUS_LABEL, svWerte, SV_2026 } from '../../lib/tax';
+import { ArrowDown, Calculator, ChevronDown, ChevronUp, Euro, RotateCcw, Settings2, Trash2 } from 'lucide-react';
+import { RECHTSSTAENDE, RECHTSSTAND_GELTEND, RECHTSSTATUS_LABEL, svWerte, SV_2026 } from '../../lib/tax';
 import { formatEuro, parseZahl, useRechner } from './useRechner';
 import { InfoTooltip } from './InfoTooltip';
 import { cn, JA_NEIN, KARTE, STEUER_HOEHE, Umschalter } from './ui';
@@ -300,11 +300,15 @@ export function EingabePanel(p: Props) {
                 Auswahl, und bei Szenarien weist die Ergebniskarte deutlich
                 genug darauf hin. Ein farbiger Chip an jedem Zustand - auch am
                 Normalfall "geltendes Recht" - war visuelles Rauschen. */}
-            <Feld label="Rechtsstand" hinweis={p.rechtsstand.beschreibung}>
+            <Feld label="Rechtsstand" hinweis={p.ansicht === 'historisch' ? 'Historischer Vergleich mit 1958: wahlweise lohn- oder kaufkraftbereinigt. Die Grenzen des Modells stehen im Ergebnis.' : p.rechtsstand.beschreibung}>
                 <div className="relative">
                     <select
-                        value={p.z.szenarioId}
-                        onChange={(e) => p.setzen('szenarioId', e.target.value)}
+                        value={p.ansicht === 'historisch' ? 'historisch-1958' : p.z.szenarioId}
+                        onChange={(e) => {
+                            const historisch = e.target.value === 'historisch-1958';
+                            p.setzen('szenarioId', historisch ? RECHTSSTAND_GELTEND.id : e.target.value);
+                            p.setAnsicht(historisch ? 'historisch' : 'rechner');
+                        }}
                         className={auswahlKlasse}
                         aria-label="Rechtsstand oder Szenario wählen"
                     >
@@ -313,6 +317,7 @@ export function EingabePanel(p: Props) {
                                 {r.bezeichnung}
                             </option>
                         ))}
+                        <option value="historisch-1958">Zeitreise 1958 (historischer Vergleich)</option>
                     </select>
                     <Auswahlpfeil />
                 </div>
@@ -393,7 +398,7 @@ export function EingabePanel(p: Props) {
                     />
                 </Feld>
 
-                <Feld label="Elternteil" className={p.z.hatKinder ? undefined : "col-span-2"} hinweis="Für die Pflegeversicherung gilt die Elterneigenschaft lebenslang, auch wenn alle Kinder älter als 25 sind. Steuerliche Kinderfreibeträge stehen unter Weitere Angaben.">
+                <Feld label="Elternteil" hinweis="Für die Pflegeversicherung gilt die Elterneigenschaft lebenslang, auch wenn alle Kinder älter als 25 sind. Steuerliche Kinderfreibeträge sind die separate Angabe daneben.">
                     <Umschalter
                         label="Elterneigenschaft"
                         optionen={JA_NEIN}
@@ -402,7 +407,11 @@ export function EingabePanel(p: Props) {
                         className="w-full"
                     />
                 </Feld>
-                {p.z.hatKinder && <Feld label="Kinder unter 25" hinweis="Nur ganze Kinder zählen für die Beitragsabschläge der Pflegeversicherung. Sind alle Kinder älter, trage 0 ein; die Elterneigenschaft bleibt bestehen.">
+                <Feld label="Kinderfreibeträge" hinweis="Steuerlicher Zähler, meist 0,5 je Kind und Elternteil. Unabhängig von den Kindern unter 25 in der Pflegeversicherung. Wirkt auf Solidaritätszuschlag und Kirchensteuer.">
+                    <ZahlFeld wert={p.z.kinderfreibetraege} setzen={(v) => p.setzen('kinderfreibetraege', v)} min={0} max={20} schritt={0.5} ariaLabel="Kinderfreibeträge lt. ELStAM" />
+                </Feld>
+
+                {p.z.hatKinder && <Feld label="Kinder unter 25" className="col-span-2" hinweis="Nur ganze Kinder zählen für die Beitragsabschläge der Pflegeversicherung. Sind alle Kinder älter, trage 0 ein; die Elterneigenschaft bleibt bestehen.">
                     <ZahlFeld wert={p.z.kinderUnter25} setzen={(v) => p.setzen('kinderUnter25', v)} min={0} max={20} ariaLabel="Kinder unter 25" />
                 </Feld>}
 
@@ -563,9 +572,6 @@ export function EingabePanel(p: Props) {
                         )}
                             </div>
 
-                        <Feld label="Kinderfreibeträge lt. ELStAM" hinweis="Steuerlicher Zähler, meist 0,5 je Kind und Elternteil. Unabhängig von den Kindern unter 25 in der Pflegeversicherung. Wirkt auf Solidaritätszuschlag und Kirchensteuer.">
-                            <ZahlFeld wert={p.z.kinderfreibetraege} setzen={(v) => p.setzen('kinderfreibetraege', v)} min={0} max={20} schritt={0.5} ariaLabel="Kinderfreibeträge lt. ELStAM" />
-                        </Feld>
                         <Feld
                             label="Bonus im Dezember"
                             hinweis="Einmalzahlung bei ganzjähriger Beschäftigung mit gleichbleibendem Monatslohn. Sozialbeiträge bis zur noch freien Jahresgrenze (§ 23a SGB IV), Besteuerung als sonstiger Bezug (§ 39b Abs. 3 EStG). Andere Zahlungsmonate, Unterbrechungen und Mini-/Midijobs sind nicht modelliert."
@@ -636,21 +642,6 @@ export function EingabePanel(p: Props) {
 
             {p.eingabeFehler && !p.bruttoFehler && <p role="alert" className="text-sm text-rose-300">{p.eingabeFehler}</p>}
 
-            {/* Zeitreise */}
-            <button
-                onClick={() => p.setAnsicht(p.ansicht === 'historisch' ? 'rechner' : 'historisch')}
-                className={cn(
-                    STEUER_HOEHE,
-                    'flex w-full items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition-colors',
-                    p.ansicht === 'historisch'
-                        ? 'border-amber-500/40 bg-amber-600/20 text-amber-200'
-                        : 'border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200'
-                )}
-            >
-                <History className="h-4 w-4" />
-                {p.ansicht === 'historisch' ? 'Zurück zum Rechner' : 'Zeitreise: Wie wäre es 1958 gewesen?'}
-            </button>
-
             {/* Auf schmalen Bildschirmen liegt das Ergebnis weit unterhalb des
                 Panels. Frueher sprang die Seite nach dem Klick auf "Berechnen"
                 dorthin; seit der Sofortberechnung gibt es diesen Moment nicht
@@ -664,7 +655,7 @@ export function EingabePanel(p: Props) {
                         'lg:pointer-events-none lg:h-auto lg:border-transparent lg:bg-transparent lg:font-normal lg:text-slate-400'
                     )}
                 >
-                    <span>{formatEuro(p.ergebnis.netto.monat)} netto im Monat</span>
+                    <span>{p.ansicht === 'historisch' ? 'Zum Vergleich mit 1958' : `${formatEuro(p.ergebnis.netto.monat)} netto im Monat`}</span>
                     <ArrowDown className="h-4 w-4 lg:hidden" />
                 </a>
             )}
