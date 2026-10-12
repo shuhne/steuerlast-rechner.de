@@ -35,7 +35,7 @@ interface Position {
     oberhalb: boolean;
 }
 
-export function InfoTooltip({ text }: { text: string }) {
+export function InfoTooltip({ text, label = 'Information' }: { text: string; label?: string }) {
     const [position, setPosition] = useState<Position | null>(null);
     const knopfRef = useRef<HTMLButtonElement>(null);
     const id = useId();
@@ -83,7 +83,7 @@ export function InfoTooltip({ text }: { text: string }) {
             <button
                 ref={knopfRef}
                 type="button"
-                aria-label="Erklärung anzeigen"
+                aria-label={`${label}: Erklärung anzeigen`}
                 aria-describedby={position ? id : undefined}
                 aria-expanded={position !== null}
                 onMouseEnter={oeffnen}
@@ -92,12 +92,14 @@ export function InfoTooltip({ text }: { text: string }) {
                 onBlur={schliessen}
                 onClick={(e) => {
                     e.preventDefault();
-                    if (position) schliessen();
-                    else oeffnen();
+                    oeffnen();
                 }}
-                className="cursor-help rounded-full p-0.5 text-slate-500 transition-colors hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                onKeyDown={(e) => { if (e.key === 'Escape') schliessen(); }}
+                // Die Klickflaeche bleibt in der Beschriftungszeile und
+                // ueberlagert weder Nachbarlabels noch das Eingabefeld.
+                className="relative inline-flex h-6 w-6 shrink-0 cursor-help items-center justify-center rounded-full align-middle text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-                <Info className="h-3.5 w-3.5" />
+                <Info className="h-4 w-4" />
             </button>
 
             {position !== null &&

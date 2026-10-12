@@ -86,6 +86,17 @@ Fassung ab VZ 2026: Grundfreibetrag 12.348 €, Zonengrenzen 17.799 / 69.878 /
 Die Werte stehen ab dem Kabinettsbeschluss faktisch fest, sind aber erst mit der
 Verkündung geltendes Recht. Bis dahin `rechtsstatus: 'regierungsentwurf'`.
 
+**Entwurf 2027 (abgerufen 22.09.2026):**
+[BMAS-Tabelle vom 21.09.2026](https://www.bmas.de/DE/Service/Presse/Meldungen/2026/referentenentwurf-zur-sozialversicherungsrechengroessen-verordnung-2027.html).
+RV/AV-BBG 106.200 €, KV-BBG 76.500 €, allgemeine JAEG 84.150 €,
+vorläufiges Durchschnittsentgelt 53.452 €. Status `referentenentwurf`.
+Die KV-Sonderanhebung ist in diesem Wert bereits enthalten.
+
+Die getrennte Pflegegrenze im 2027-Szenario folgt dem
+[PNOG-Referentenentwurf, Fassung 05.06.2026, Art. 1 Nr. 48 b, S. 46](https://www.bundesgesundheitsministerium.de/fileadmin/Dateien/3_Downloads/Gesetze_und_Verordnungen/GuV/P/RefE-Pflegeneuordnungsgesetz_PNOG.pdf):
+Verweis auf § 6 Abs. 6 SGB V statt Abs. 7; mit dem BMAS-Entwurfswert
+hergeleitet als 84.150 €. Beide Entwürfe sind noch nicht geltendes Recht.
+
 ### Beitragssätze
 
 | Zweig | Fundstelle | Wer legt fest |

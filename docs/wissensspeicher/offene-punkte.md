@@ -119,9 +119,17 @@ versteuernden Einkommens (Brutto abzüglich Arbeitnehmerbeiträge,
 Arbeitnehmer-Pauschbetrag und Sonderausgaben-Pauschbetrag), nicht das exakte
 zvE der Veranlagung.
 
-**Szenarien.** Beitragsbemessungsgrenzen künftiger Jahre werden mit einer
+**Szenarien (aktualisiert 22.09.2026).** Für 2027 gelten im Entwurfsszenario
+die BMAS-Rechengrößen vom 21.09.2026 sowie die gesonderte Pflegegrenze nach
+PNOG-Entwurf. Erst die weiter entfernten Jahre werden mit einer
 angenommenen Lohnentwicklung fortgeschrieben. Die tatsächlichen Werte legt die
 Sozialversicherungsrechengrößen-Verordnung jeweils im Herbst des Vorjahres fest.
+
+**Lohnsteuer in Szenarien.** Der PAP 2026 bleibt unverändert. Höhere
+Beitragsbemessungsgrenzen und Pflegebeiträge fließen noch nicht in dessen
+Vorsorgepauschale ein. Für exakte Nettozahlen 2027 wird der amtliche PAP 2027
+mit Prüftabellen benötigt. Sonderregeln der JAEG für privat versicherte
+Bestandsfälle werden nicht abgebildet.
 
 **Steuerfaktor in Szenarien.** Ein Multiplikator auf Lohnsteuer und
 Solidaritätszuschlag. Er kann keine Tarifänderung abbilden — insbesondere keine
@@ -144,3 +152,13 @@ Nach erwartetem Nutzen sortiert, jeweils mit dem Grund.
    einer Ansicht — die Datenstruktur trägt das schon.
 5. **Ergebnis als teilbarer Link.** Zustand in der URL, ohne Serverspeicherung.
    Verträgt sich mit der Datenschutzzusage.
+
+## Modellgrenzen nach UI-Prüfung (22.09.2026)
+
+- Bonus: Dezemberzahlung bei ganzjähriger regulärer Beschäftigung unterstützt.
+  Unterjährige Zahlung, Unterbrechungen, Märzklausel und Mini-/Midijobs mit Bonus
+  benötigen ein monatsbezogenes Modell mit Vorjahresdaten und bleiben ausdrücklich
+  nicht modelliert (§ 23a SGB IV).
+- PKV: Fehlende Beiträge sperren die UI; der PAP erhält den tatsächlich begrenzten
+  Zuschuss. Separate Beitragsanteile für PKV/PPV und Basis-/Mehrleistungen fehlen
+  weiterhin. Die Auswahl prüft nicht die rechtliche Berechtigung zum PKV-Verbleib.

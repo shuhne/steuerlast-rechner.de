@@ -6,7 +6,8 @@ import { EingabePanel } from '../components/rechner/EingabePanel';
 import { ErgebnisPanel } from '../components/rechner/ErgebnisPanel';
 import { Analysen } from '../components/rechner/Analysen';
 import { Zeitreise1958 } from '../components/rechner/Zeitreise1958';
-import { useRechner } from '../components/rechner/useRechner';
+import Link from 'next/link';
+import { formatEuro, useRechner } from '../components/rechner/useRechner';
 import { PAP_META } from '../lib/tax';
 
 export default function Home() {
@@ -72,15 +73,21 @@ export default function Home() {
     );
 
     return (
+        <>
+        {r.ergebnis && r.ansicht === 'rechner' && <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-slate-700 bg-slate-950/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+            <div aria-live="polite" aria-atomic="true"><p className="text-xs text-slate-300">{r.rechtsstand.rechtsstatus === 'geltendes_recht' ? 'Dein Netto' : 'Szenario-Netto'} / {r.monatlich ? 'Monat' : 'Jahr'}</p><p className="font-mono text-xl font-bold text-white">{formatEuro(r.monatlich ? r.ergebnis.netto.monat : r.ergebnis.netto.jahr)}</p></div>
+            <Link href="#ergebnis" className="inline-flex min-h-11 items-center rounded-lg bg-indigo-600 px-3 text-sm font-semibold text-white">Zum Ergebnis</Link>
+        </div>}
         <CalculatorLayout
             sidebar={<EingabePanel {...r} />}
             results={
-                <div className="space-y-4">
+                <div className="space-y-5 sm:space-y-6">
                     {r.ansicht === 'historisch' ? (
                         <Zeitreise1958 {...r} />
                     ) : (
                         <>
                             <ErgebnisPanel {...r} />
+                            {r.ergebnis && <nav aria-label="Rechnerbereiche" className="flex flex-wrap gap-4 border-t border-slate-800 pt-2 text-sm text-indigo-300 lg:hidden"><Link className="inline-flex min-h-11 items-center" href="#ergebnis">Ergebnis</Link><Link className="inline-flex min-h-11 items-center" href="#analysen">Analysen & Vergleiche</Link></nav>}
                             <Analysen {...r} />
                         </>
                     )}
@@ -88,5 +95,6 @@ export default function Home() {
             }
             content={inhalt}
         />
+        </>
     );
 }

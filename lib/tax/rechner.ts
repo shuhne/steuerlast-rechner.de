@@ -2,7 +2,7 @@ import { euroRunden } from './runden';
 import { berechneLohnsteuer, LohnsteuerEingabe } from './lohnsteuer';
 import { berechneSozialabgaben, maximalerPkvZuschuss, SvErgebnis } from './sozialabgaben';
 import { KIRCHENSTEUER } from './parameter/kirchensteuer';
-import { SV_2026 } from './parameter/sozialversicherung';
+import { SV_2026, werte } from './parameter/sozialversicherung';
 import { Rechtsstand, RECHTSSTAND_GELTEND, rechtsstandFuer } from './parameter/rechtsstaende';
 
 /**
@@ -33,6 +33,10 @@ export interface RechnerEingabe {
     kinderfreibetraege: number;
     /** Zahl der Kinder unter 25 fuer die Pflegeversicherung. */
     kinderFuerPflege: number;
+    /** Elterneigenschaft bleibt auch nach dem 25. Geburtstag bestehen. */
+    hatKinder?: boolean;
+    /** Eigener Kassenbeitrag hat Vorrang vor der Szenarioannahme. */
+    eigenerZusatzbeitrag?: boolean;
     krankenversicherung: 'gesetzlich' | 'privat';
     /** Kassenindividueller Zusatzbeitrag in Prozentpunkten. */
     kvZusatzProzent: number;
@@ -110,11 +114,14 @@ const GRENZ_DELTA = 1200;
 
 function berechneRoh(e: RechnerEingabe, stand: Rechtsstand) {
     const kvArt = e.krankenversicherung;
+    const ueberschreibungen = { ...stand.svUeberschreibungen };
+    if (e.eigenerZusatzbeitrag) delete ueberschreibungen.kvZusatz;
+    const kvZusatz = (ueberschreibungen.kvZusatz ?? e.kvZusatzProzent / 100) * 100;
     const zuschuss =
         kvArt === 'privat'
             ? e.pkvArbeitgeberzuschussMonat === 'maximal' ||
               e.pkvArbeitgeberzuschussMonat === undefined
-                ? maximalerPkvZuschuss(e.bundesland, e.kvZusatzProzent, stand.sv).summe
+                ? maximalerPkvZuschuss(e.bundesland, kvZusatz, stand.sv).summe
                 : e.pkvArbeitgeberzuschussMonat
             : 0;
 
@@ -123,6 +130,8 @@ function berechneRoh(e: RechnerEingabe, stand: Rechtsstand) {
         bundesland: e.bundesland,
         kvZusatzProzent: e.kvZusatzProzent,
         kinderFuerPflege: e.kinderFuerPflege,
+        hatKinder: e.hatKinder,
+        bonusDezember: e.sonstigeBezuege,
         alter: e.alter,
         krankenversicherung:
             kvArt === 'privat'
@@ -132,7 +141,7 @@ function berechneRoh(e: RechnerEingabe, stand: Rechtsstand) {
                       arbeitgeberzuschussMonat: zuschuss,
                   }
                 : { art: 'gesetzlich' },
-        ueberschreibungen: stand.svUeberschreibungen,
+        ueberschreibungen,
         parameter: stand.sv,
     });
 
@@ -143,14 +152,15 @@ function berechneRoh(e: RechnerEingabe, stand: Rechtsstand) {
         alter: e.alter,
         bundesland: e.bundesland,
         kirchensteuer: e.kirchensteuer,
-        kvZusatzbeitragProzent: (stand.svUeberschreibungen?.kvZusatz ?? e.kvZusatzProzent / 100) * 100,
+        kvZusatzbeitragProzent: kvZusatz,
         kinderFuerPflegeversicherung: e.kinderFuerPflege,
+        hatKinder: e.hatKinder,
         krankenversicherung:
             kvArt === 'privat'
                 ? {
                       art: 'privat',
                       monatsbeitrag: e.pkvMonatsbeitrag ?? 0,
-                      arbeitgeberzuschussMonat: zuschuss,
+                      arbeitgeberzuschussMonat: sv.arbeitgeber.kv / 12,
                   }
                 : { art: 'gesetzlich' },
         arbeitslosenversicherungspflichtig: e.arbeitslosenversicherungspflichtig ?? true,
@@ -191,8 +201,15 @@ function berechneRoh(e: RechnerEingabe, stand: Rechtsstand) {
     return { sv, steuerSumme, lohnsteuer, soli, kirchensteuer, lstSonst, soliSonst, kirchensteuerSonst };
 }
 
+/** Das Bonusmodell setzt eine reguläre, ganzjährige Beschäftigung voraus. */
+export function bonusModellUnterstuetzt(e: RechnerEingabe): boolean {
+    const stand = e.szenarioId ? rechtsstandFuer(e.szenarioId) : RECHTSSTAND_GELTEND;
+    return !(e.sonstigeBezuege && e.sonstigeBezuege > 0) || e.bruttoJahr / 12 > werte(stand.sv).uebergangsbereichObergrenze;
+}
+
 export function berechne(e: RechnerEingabe): RechnerErgebnis {
     const stand = e.szenarioId ? rechtsstandFuer(e.szenarioId) : RECHTSSTAND_GELTEND;
+    if (!bonusModellUnterstuetzt(e)) throw new RangeError('Bonus bei Mini- und Midijobs ist nicht modelliert.');
     const roh = berechneRoh(e, stand);
     const { sv } = roh;
 

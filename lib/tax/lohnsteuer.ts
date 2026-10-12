@@ -47,6 +47,7 @@ export interface LohnsteuerEingabe {
      * Pflegeversicherung. Bestimmt Kinderlosenzuschlag und Beitragsabschlaege.
      */
     kinderFuerPflegeversicherung: number;
+    hatKinder?: boolean;
     /** Gesetzlich oder privat krankenversichert. */
     krankenversicherung:
         | { art: 'gesetzlich' }
@@ -106,8 +107,8 @@ export function beitragsabschlaegePflege(kinderUnter25: number): number {
  * 0,6 Beitragssatzpunkte fuer Kinderlose ab dem 24. Lebensjahr
  * (§ 55 Abs. 3 Satz 1 SGB XI).
  */
-export function kinderlosenzuschlagPflege(kinder: number, alter: number): boolean {
-    return kinder <= 0 && alter >= 23;
+export function kinderlosenzuschlagPflege(kinder: number, alter: number, hatKinder = kinder > 0): boolean {
+    return !hatKinder && alter >= 23;
 }
 
 export function berechneLohnsteuer(e: LohnsteuerEingabe): LohnsteuerErgebnis {
@@ -147,7 +148,7 @@ export function berechneLohnsteuer(e: LohnsteuerEingabe): LohnsteuerErgebnis {
     pap.ALV = e.arbeitslosenversicherungspflichtig ? 0 : 1;
     pap.KRV = e.rentenversicherungspflichtig ? 0 : 1;
     pap.PVS = e.bundesland.toUpperCase() === 'SN' ? 1 : 0;
-    pap.PVZ = kinderlosenzuschlagPflege(e.kinderFuerPflegeversicherung, e.alter) ? 1 : 0;
+    pap.PVZ = kinderlosenzuschlagPflege(e.kinderFuerPflegeversicherung, e.alter, e.hatKinder) ? 1 : 0;
     pap.PVA = new Big(beitragsabschlaegePflege(e.kinderFuerPflegeversicherung));
 
     if (e.krankenversicherung.art === 'gesetzlich') {

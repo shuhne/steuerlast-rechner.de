@@ -2,15 +2,12 @@
 
 import React, { useState } from 'react';
 import { AlertTriangle, Building2, ChevronDown, ChevronUp, HeartPulse, Info, Wallet } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import type { RechnerErgebnis } from '../../lib/tax';
-import { PAP_META, SV_2026 } from '../../lib/tax';
+import { PAP_META } from '../../lib/tax';
 import { formatEuro, formatProzent, useRechner } from './useRechner';
 import { RechtsstatusChip } from './EingabePanel';
 import { Donut } from './Donut';
-
-const cn = (...i: ClassValue[]) => twMerge(clsx(i));
+import { cn, KARTE, KARTE_PX, PERIODEN, Umschalter } from './ui';
 
 type Props = ReturnType<typeof useRechner>;
 
@@ -29,13 +26,13 @@ function Zeile({
 }) {
     return (
         <div className="flex items-baseline justify-between gap-3 text-sm">
-            <span className={cn('text-slate-400', stark && 'font-semibold text-slate-200')}>
+            <span className={cn('min-w-0 flex-1 [overflow-wrap:anywhere] text-slate-400', stark && 'font-semibold text-slate-200')}>
                 {name}
                 {erlaeuterung && (
-                    <span className="ml-1.5 text-xs text-slate-600">{erlaeuterung}</span>
+                    <span className="ml-1.5 text-xs text-slate-400">{erlaeuterung}</span>
                 )}
             </span>
-            <span className={cn('shrink-0 font-mono text-white', stark && 'font-bold')}>
+            <span className={cn('shrink-0 font-mono tabular-nums text-white', stark && 'font-bold')}>
                 {formatEuro(monatlich ? betrag / 12 : betrag)}
             </span>
         </div>
@@ -52,13 +49,13 @@ export function ErgebnisPanel(p: Props) {
 
     if (!p.hatEingabe || !p.ergebnis) {
         return (
-            <div id="ergebnis" className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-700/70 bg-slate-900 p-8 text-center lg:min-h-[480px]">
+            <div id="ergebnis" className="flex min-h-[240px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-700/70 bg-slate-900 p-5 text-center sm:p-6 lg:min-h-[360px]">
                 <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10">
                     <Wallet className="h-7 w-7 text-indigo-400" />
                 </div>
                 <h3 className="mb-2 text-lg font-semibold text-white">Deine Auswertung erscheint hier</h3>
                 <p className="max-w-xs text-sm leading-relaxed text-slate-400">
-                    Gib dein Bruttogehalt ein — den Rest übernehmen wir.
+                    {p.eingabeFehler ?? 'Gib dein Bruttogehalt ein — den Rest übernehmen wir.'}
                 </p>
             </div>
         );
@@ -87,10 +84,14 @@ export function ErgebnisPanel(p: Props) {
     ];
 
     return (
-        <div id="ergebnis" className="scroll-mt-4 space-y-4">
+        // @container: Die Kennzahlen waehlen ihre Spaltenzahl nach der Breite
+        // dieser Spalte, nicht nach dem Fenster. Bei 1024 px ist das Fenster
+        // breit, die Ergebnisspalte neben dem Formular aber nur gut 500 px -
+        // vier Kacheln liefen dort ueber ihre Raender.
+        <div id="ergebnis" className="@container scroll-mt-6 space-y-5 sm:space-y-6">
             {/* Szenario-Warnung */}
             {e.rechtsstand.rechtsstatus !== 'geltendes_recht' && (
-                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+                <div className={cn('rounded-xl border border-amber-500/30 bg-amber-500/10 py-4', KARTE_PX)}>
                     <div className="flex items-start gap-3">
                         <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
                         <div className="space-y-2">
@@ -123,39 +124,36 @@ export function ErgebnisPanel(p: Props) {
             )}
 
             {/* Netto */}
-            <div className={cn('relative overflow-hidden rounded-xl border bg-gradient-to-br to-slate-900 p-5', kartenFarbe)}>
+            <div className={cn(KARTE.hervorgehoben, kartenFarbe)}>
                 <div className="relative z-10">
-                    <div className="mb-3 flex flex-wrap items-center gap-2">
-                        <Wallet className={cn('h-6 w-6', akzent)} />
-                        <h3 className="text-xl font-semibold text-white">Dein Nettogehalt</h3>
-                        {istSzenario && (
-                            <span className="text-sm font-normal text-rose-200/80">
-                                {p.rechtsstand.kurz}
-                            </span>
-                        )}
+                    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                            <Wallet className={cn('h-5 w-5 shrink-0', akzent)} />
+                            <h3 className="text-lg font-semibold text-white">Dein Nettogehalt</h3>
+                            {istSzenario && (
+                                <span className="text-sm font-normal text-rose-200/80">
+                                    {p.rechtsstand.kurz}
+                                </span>
+                            )}
+                        </div>
+                        <Umschalter
+                            label="Ergebnis anzeigen"
+                            optionen={PERIODEN}
+                            wert={monatlich}
+                            setzen={setMonatlich}
+                        />
                     </div>
-                    <div className="text-4xl font-bold leading-none tracking-tight text-white sm:text-5xl">
-                        {formatEuro(monatlich ? e.netto.monat : e.netto.jahr)}
-                    </div>
-                    <div className="mt-4 flex items-center gap-1.5">
-                        {([true, false] as const).map((m) => (
-                            <button
-                                key={String(m)}
-                                onClick={() => setMonatlich(m)}
-                                className={cn(
-                                    'rounded px-3 py-1 text-xs font-bold transition-colors',
-                                    monatlich === m
-                                        ? 'border border-indigo-400/50 bg-indigo-500/30 text-indigo-200'
-                                        : 'bg-slate-700/30 text-slate-400 hover:bg-slate-700/50'
-                                )}
-                            >
-                                {m ? 'Monatlich' : 'Jährlich'}
-                            </button>
-                        ))}
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                        <span className="text-3xl font-bold leading-tight tracking-tight text-white tabular-nums @md:text-4xl @xl:text-5xl">
+                            {formatEuro(monatlich ? e.netto.monat : e.netto.jahr)}
+                        </span>
+                        <span className="text-base font-medium text-slate-400">
+                            {monatlich ? 'im Monat' : 'im Jahr'}
+                        </span>
                     </div>
 
                     {p.basisErgebnis && (
-                        <div className="mt-5 rounded-xl border border-slate-800/50 bg-slate-950/40 p-3">
+                        <div className="mt-4 rounded-lg border border-slate-800/50 bg-slate-950/40 p-3">
                             <div
                                 className={cn(
                                     'text-lg font-bold',
@@ -174,7 +172,7 @@ export function ErgebnisPanel(p: Props) {
                                     gegenüber deiner Eingabe
                                 </span>
                             </div>
-                            <div className="mt-0.5 text-xs text-slate-500">
+                            <div className="mt-0.5 text-xs text-slate-400">
                                 {p.z.lohnerhoehungProzent > 0 && `+${p.z.lohnerhoehungProzent} % Gehalt`}
                                 {p.z.lohnerhoehungProzent > 0 && p.z.arbeitszeitProzent !== 100 && ' · '}
                                 {p.z.arbeitszeitProzent !== 100 && `${p.z.arbeitszeitProzent} % Arbeitszeit`}
@@ -183,7 +181,7 @@ export function ErgebnisPanel(p: Props) {
                     )}
 
                     {p.referenz && (
-                        <div className="mt-5 rounded-xl border border-slate-800/50 bg-slate-950/40 p-3">
+                        <div className="mt-4 rounded-lg border border-slate-800/50 bg-slate-950/40 p-3">
                             <div
                                 className={cn(
                                     'text-lg font-bold',
@@ -205,32 +203,34 @@ export function ErgebnisPanel(p: Props) {
                 </div>
             </div>
 
-            {/* Kennzahlen */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {/* Kennzahlen. Vier Spalten erst ab 42rem Spaltenbreite (rund 160 px
+                je Kachel) - darunter passen "Grenzabgabenquote" und ein
+                sechsstelliger Arbeitgeberbetrag nicht in die Kachel. */}
+            <div className="grid grid-cols-2 gap-3 @2xl:grid-cols-4">
                 {[
                     { label: 'Abgabenquote', wert: formatProzent(e.quoten.abgabenquote), hinweis: 'Steuern und Beiträge zusammen' },
                     { label: 'Grenzabgabenquote', wert: formatProzent(e.quoten.grenzabgabenquote), hinweis: 'vom nächsten Euro' },
-                    { label: 'Netto je Stunde', wert: p.stunden ? formatEuro(p.stunden.nettoJeStunde) : '–', hinweis: `bei ${p.z.wochenstunden} h/Woche` },
-                    { label: 'Arbeitgeberkosten', wert: formatEuro(monatlich ? e.arbeitgeber.gesamtkosten / 12 : e.arbeitgeber.gesamtkosten), hinweis: 'Brutto plus AG-Anteile' },
+                    { label: 'Netto je Stunde', wert: p.stunden ? formatEuro(p.stunden.nettoJeStunde) : '–', hinweis: `bei ${p.wochenstundenEffektiv.toLocaleString('de-DE')} h/Woche` },
+                    { label: 'Arbeitgeberkosten', wert: formatEuro(monatlich ? e.arbeitgeber.gesamtkosten / 12 : e.arbeitgeber.gesamtkosten), hinweis: `Brutto plus AG-Anteile, ${monatlich ? 'pro Monat' : 'pro Jahr'}` },
                 ].map((k) => (
-                    <div key={k.label} className="rounded-xl border border-slate-800 bg-slate-900 p-3">
-                        <div className="text-xs text-slate-400">{k.label}</div>
-                        <div className="mt-1 font-mono text-lg font-bold text-white">{k.wert}</div>
-                        <div className="mt-0.5 text-[11px] leading-tight text-slate-600">{k.hinweis}</div>
+                    <div key={k.label} className={cn(KARTE.kennzahl, "flex flex-col")}>
+                        <div className="min-h-8 text-xs leading-4 hyphens-auto [overflow-wrap:anywhere] text-slate-400 @md:text-sm">{k.label}</div>
+                        <div className="mt-1 whitespace-nowrap font-mono text-base font-semibold text-white @md:text-lg">{k.wert}</div>
+                        <div className="mt-auto pt-2 text-xs leading-relaxed text-slate-400">{k.hinweis}</div>
                     </div>
                 ))}
             </div>
 
             {/* Zusammensetzung - der schnelle Blick auf die Anteile */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
+            <div className={KARTE.standard}>
                 <h3 className="mb-4 text-lg font-semibold text-white">Zusammensetzung</h3>
-                <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center sm:gap-10">
+                <div className="flex flex-col items-center gap-6 @xl:flex-row @xl:justify-center @xl:gap-10">
                     <Donut
                         segmente={zusammensetzung}
                         titel="Brutto"
                         wert={formatEuro(monatlich ? e.brutto / 12 : e.brutto, 0)}
                     />
-                    <ul className="w-full max-w-xs space-y-2 sm:w-auto">
+                    <ul className="w-full max-w-xs space-y-2 @xl:w-auto">
                         {zusammensetzung.map((eintrag) => (
                             <li key={eintrag.name} className="flex items-center justify-between gap-4 text-sm">
                                 <span className="flex items-center gap-2 text-slate-300">
@@ -241,7 +241,7 @@ export function ErgebnisPanel(p: Props) {
                                     {eintrag.name}
                                 </span>
                                 <span className="flex items-baseline gap-3 font-mono">
-                                    <span className="text-slate-500">
+                                    <span className="text-slate-400">
                                         {e.brutto > 0 ? formatProzent((eintrag.wert / e.brutto) * 100) : '–'}
                                     </span>
                                     <span className="w-24 text-right text-white">
@@ -255,9 +255,9 @@ export function ErgebnisPanel(p: Props) {
             </div>
 
             {/* Abzüge */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
+            <div className={KARTE.standard}>
                 <h3 className="mb-4 text-lg font-semibold text-white">
-                    Abzüge im Detail <span className="text-sm font-normal text-slate-500">({monatlich ? 'monatlich' : 'jährlich'})</span>
+                    Abzüge im Detail <span className="text-sm font-normal text-slate-400">({monatlich ? 'monatlich' : 'jährlich'})</span>
                 </h3>
 
                 <div className="space-y-5">
@@ -304,7 +304,7 @@ export function ErgebnisPanel(p: Props) {
                             <HeartPulse className="h-4 w-4 text-rose-400" />
                             Sozialabgaben
                             {sv.art !== 'regulaer' && (
-                                <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                                <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-xs font-semibold text-amber-300">
                                     {sv.art === 'minijob' ? 'Minijob' : 'Übergangsbereich'}
                                 </span>
                             )}
@@ -343,11 +343,12 @@ export function ErgebnisPanel(p: Props) {
                 <div className="mt-4 overflow-hidden rounded-lg border border-slate-800">
                     <button
                         onClick={() => setAgOffen(!agOffen)}
-                        className="flex w-full items-center justify-between bg-slate-950/50 px-3 py-2.5 text-sm text-slate-300 transition-colors hover:bg-slate-950"
+                        aria-expanded={agOffen}
+                        className="flex min-h-11 w-full items-center justify-between gap-3 bg-slate-950/50 px-3 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-slate-950"
                     >
                         <span>Was dein Arbeitgeber zusätzlich zahlt</span>
                         <span className="flex items-center gap-2">
-                            <span className="font-mono text-white">
+                            <span className="font-mono tabular-nums text-white">
                                 {formatEuro(monatlich ? e.arbeitgeber.summe / 12 : e.arbeitgeber.summe)}
                             </span>
                             {agOffen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -362,7 +363,7 @@ export function ErgebnisPanel(p: Props) {
                             <div className="border-t border-slate-800 pt-2">
                                 <Zeile name="Gesamtkosten der Stelle" betrag={e.arbeitgeber.gesamtkosten} monatlich={monatlich} stark />
                             </div>
-                            <p className="pt-1 text-xs leading-relaxed text-slate-500">
+                            <p className="pt-1 text-xs leading-relaxed text-slate-400">
                                 Ohne Umlagen U1/U2/U3 und ohne Beiträge zur gesetzlichen Unfallversicherung.
                             </p>
                         </div>
@@ -372,10 +373,10 @@ export function ErgebnisPanel(p: Props) {
 
             {/* Hinweise */}
             {e.hinweise.length > 0 && (
-                <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                <div className={cn('space-y-2 rounded-xl border border-slate-800 bg-slate-900/60 py-4', KARTE_PX)}>
                     {e.hinweise.map((h, i) => (
                         <div key={i} className="flex gap-2 text-sm leading-relaxed text-slate-400">
-                            <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                            <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
                             <span>{h}</span>
                         </div>
                     ))}
@@ -386,38 +387,71 @@ export function ErgebnisPanel(p: Props) {
             <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
                 <button
                     onClick={() => setMethodikOffen(!methodikOffen)}
-                    className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-slate-950/40"
+                    aria-expanded={methodikOffen}
+                    className={cn('flex min-h-11 w-full items-center justify-between py-3 text-left transition-colors hover:bg-slate-950/40', KARTE_PX)}
                 >
                     <span className="text-sm font-semibold text-slate-300">Stand und Quellen</span>
-                    {methodikOffen ? <ChevronUp className="h-4 w-4 text-slate-500" /> : <ChevronDown className="h-4 w-4 text-slate-500" />}
+                    {methodikOffen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
                 </button>
-                <div className="border-t border-slate-800 px-4 py-3 text-xs leading-relaxed text-slate-500">
+                <div className={cn('border-t border-slate-800 py-3 text-xs leading-relaxed text-slate-400', KARTE_PX)}>
                     Berechnet nach dem amtlichen Programmablaufplan {PAP_META.jahr} des BMF
-                    (Version {PAP_META.version}, Stand {PAP_META.stand}) sowie der
-                    Sozialversicherungsrechengrößen-Verordnung 2026.
+                    (Version {PAP_META.version}, Stand {PAP_META.stand}).
+                    Sozialversicherung: {p.rechtsstand.bezeichnung}.
+                    {istSzenario && ' Die Steuerberechnung berücksichtigt noch nicht alle Änderungen des Szenarios.'}
                 </div>
                 {methodikOffen && (
-                    <div className="space-y-3 border-t border-slate-800 bg-slate-950/30 p-4 text-xs leading-relaxed text-slate-400">
+                    <div className={cn('space-y-3 border-t border-slate-800 bg-slate-950/30 py-4 text-xs leading-relaxed text-slate-400', KARTE_PX)}>
                         {[
-                            SV_2026.bbgRvAv, SV_2026.bbgKvPv, SV_2026.jaeg,
-                            SV_2026.rvSatz, SV_2026.avSatz, SV_2026.kvAllgemein,
-                            SV_2026.kvZusatzDurchschnitt, SV_2026.pvSatz, SV_2026.mindestlohn,
-                        ].map((param, i) => (
-                            <div key={i} className="border-l-2 border-slate-800 pl-3">
+                            { label: 'Beitragsbemessungsgrenze Rente / Arbeitslosigkeit', param: p.rechtsstand.sv.bbgRvAv },
+                            { label: 'Beitragsbemessungsgrenze Krankenversicherung', param: p.rechtsstand.sv.bbgKv },
+                            { label: 'Beitragsbemessungsgrenze Pflegeversicherung', param: p.rechtsstand.sv.bbgPv },
+                            { label: 'Allgemeine Versicherungspflichtgrenze', param: p.rechtsstand.sv.jaeg },
+                            { label: 'Vorläufiges Durchschnittsentgelt Rente', param: p.rechtsstand.sv.durchschnittsentgelt },
+                            ...(!istSzenario ? [
+                                { label: 'Rentenbeitrag', param: p.rechtsstand.sv.rvSatz },
+                                { label: 'Arbeitslosenbeitrag', param: p.rechtsstand.sv.avSatz },
+                                { label: 'Allgemeiner Krankenbeitrag', param: p.rechtsstand.sv.kvAllgemein },
+                                { label: 'Durchschnittlicher Zusatzbeitrag', param: p.rechtsstand.sv.kvZusatzDurchschnitt },
+                                { label: 'Pflegebeitrag', param: p.rechtsstand.sv.pvSatz },
+                                { label: 'Mindestlohn', param: p.rechtsstand.sv.mindestlohn },
+                            ] : []),
+                        ].map(({ label, param }) => (
+                            <div key={label} className="border-l-2 border-slate-800 pl-3">
+                                <div>{label}</div>
                                 <div className="font-mono text-slate-300">
                                     {param.einheit === 'EUR/Jahr' || param.einheit === 'EUR/Stunde'
                                         ? formatEuro(param.wert)
                                         : formatProzent(param.wert * 100, 2)}
                                     {param.einheit ? ` ${param.einheit.replace('EUR', '')}` : ''}
                                 </div>
-                                <div className="text-slate-500">
-                                    {param.quelle.herausgeber}: {param.quelle.titel}
+                                {istSzenario && <RechtsstatusChip status={param.rechtsstatus} klein />}
+                                <div className="text-slate-400">
+                                    {param.quelle.herausgeber}:{' '}
+                                    {param.quelle.url ? (
+                                        <a href={param.quelle.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">
+                                            {param.quelle.titel}
+                                        </a>
+                                    ) : param.quelle.titel}
                                     {param.quelle.fundstelle ? ` — ${param.quelle.fundstelle}` : ''}
                                 </div>
-                                {param.hinweis && <div className="mt-1 text-slate-600">{param.hinweis}</div>}
+                                {param.hinweis && <div className="mt-1 text-slate-400">{param.hinweis}</div>}
                             </div>
                         ))}
-                        <p className="border-t border-slate-800 pt-3 text-slate-500">
+                        <p className="text-sm text-slate-300">Verwendeter Zusatzbeitrag: {((p.z.eigenerZusatzbeitrag ? undefined : p.rechtsstand.svUeberschreibungen?.kvZusatz) ?? p.z.kvZusatzProzent / 100) * 100} % ({p.z.eigenerZusatzbeitrag || p.rechtsstand.svUeberschreibungen?.kvZusatz === undefined ? 'eigene Eingabe' : 'Szenarioannahme'}).</p>
+                        {p.rechtsstand.annahmen.map((annahme, i) => (
+                            <div key={`annahme-${i}`} className="space-y-1 border-l-2 border-amber-500/30 pl-3">
+                                <RechtsstatusChip status={annahme.rechtsstatus} klein />
+                                <div>{annahme.text}</div>
+                                <div className="text-slate-400">
+                                    {annahme.quelle.url ? (
+                                        <a href={annahme.quelle.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">
+                                            {annahme.quelle.herausgeber}: {annahme.quelle.titel}
+                                        </a>
+                                    ) : `${annahme.quelle.herausgeber}: ${annahme.quelle.titel}`}
+                                </div>
+                            </div>
+                        ))}
+                        <p className="border-t border-slate-800 pt-3 text-slate-400">
                             Die Berechnung bildet den laufenden Lohnsteuerabzug ab. Die endgültige
                             Steuer ergibt sich erst aus der Einkommensteuerveranlagung. Nicht
                             abgebildet sind unter anderem betriebliche Altersvorsorge,

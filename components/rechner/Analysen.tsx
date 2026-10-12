@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Area, CartesianGrid, ComposedChart, Legend, Line, ReferenceDot, ReferenceLine,
     ResponsiveContainer, Tooltip, XAxis, YAxis, Bar,
@@ -12,18 +12,20 @@ import { formatEuro, formatProzent, useRechner } from './useRechner';
 
 type Props = ReturnType<typeof useRechner>;
 
-const achse = { stroke: '#64748b', tick: { fontSize: 12, fill: '#64748b' } };
+const achse = { stroke: '#64748b', tick: { fontSize: 12, fill: '#94a3b8' } };
 const tooltipStil = {
     contentStyle: { backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' },
     itemStyle: { color: '#f8fafc' },
     labelStyle: { color: '#94a3b8' },
 };
-const kEuro = (v: number) => (v === 0 ? '0' : `${Math.round(v / 1000)}k`);
+const kEuro = (v: number) => (v === 0 ? '0' : `${(v / 1000).toLocaleString('de-DE', { maximumFractionDigits: 1 })}k`);
 
 // Recharts gibt Werte als `number | undefined` und Namen als ReactNode heraus.
 type WertTyp = number | undefined;
 type NameTyp = string | number | undefined;
 const zahl = (v: unknown): number => (typeof v === 'number' ? v : Number(v) || 0);
+
+import { KARTE } from './ui';
 
 function Karte({
     titel, untertitel, icon, quelle, children,
@@ -31,30 +33,42 @@ function Karte({
     titel: string; untertitel: string; icon: React.ReactNode; quelle?: string; children: React.ReactNode;
 }) {
     return (
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
-            <div className="mb-4">
+        <div className={KARTE.standard}>
+            <div className="mb-5">
                 <h3 className="flex items-center gap-2 text-lg font-semibold text-white">{icon}{titel}</h3>
-                <p className="mt-1 text-sm text-slate-400">{untertitel}</p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">{untertitel}</p>
             </div>
             {children}
-            {quelle && <p className="mt-3 text-[11px] leading-relaxed text-slate-600">{quelle}</p>}
+            {quelle && <p className="mt-5 border-t border-slate-800 pt-4 text-xs leading-relaxed text-slate-400">{quelle}</p>}
         </div>
     );
 }
 
 export function Analysen(p: Props) {
+    const [auswahl, setAuswahl] = useState('teilzeit');
     if (!p.hatEingabe || !p.ergebnis) return null;
-
+    const bereiche = [
+        ['teilzeit', 'Teilzeit'], ['gehalt', 'Mehr Gehalt'], ['vergleich', 'Vergleich'],
+        ['kaufkraft', 'Kaufkraft'], ['paare', 'Paare'],
+    ];
     return (
-        <div className="space-y-4">
-            <Teilzeit {...p} />
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <Grenzbelastung {...p} />
-                <Einordnung {...p} />
+        <section id="analysen" className="space-y-4 scroll-mt-6" aria-label="Gehaltsanalysen">
+            <div role="tablist" aria-label="Analyse auswählen" className="flex flex-wrap gap-1.5 rounded-xl border border-slate-800 bg-slate-900/60 p-1.5">
+                {bereiche.map(([id, titel], index) => <button key={id} id={`tab-${id}`} role="tab" aria-selected={auswahl === id} aria-controls={`analyse-${id}`} tabIndex={auswahl === id ? 0 : -1}
+                    onClick={() => setAuswahl(id)} onKeyDown={(e) => {
+                        const naechster = e.key === 'ArrowRight' ? (index + 1) % bereiche.length : e.key === 'ArrowLeft' ? (index + bereiche.length - 1) % bereiche.length : e.key === 'Home' ? 0 : e.key === 'End' ? bereiche.length - 1 : null;
+                        if (naechster !== null) { e.preventDefault(); setAuswahl(bereiche[naechster][0]); document.getElementById(`tab-${bereiche[naechster][0]}`)?.focus(); }
+                    }} className={`min-h-11 flex-1 rounded-lg border px-3 text-sm whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-indigo-400 ${auswahl === id ? 'border-indigo-400 bg-indigo-600 text-white' : 'border-transparent text-slate-400 hover:bg-slate-800 hover:text-white'}`}>{titel}</button>)}
             </div>
-            <Kaufkraft {...p} />
-            <Paarvergleich {...p} />
-        </div>
+            {p.z.sonstigeBezuege > 0 && <p className="text-sm text-slate-300">Bonusmodell: Dezember, ganzjährige Beschäftigung. Mini- und Midijob-Varianten werden ausgelassen.</p>}
+            <div role="tabpanel" id={`analyse-${auswahl}`} aria-labelledby={`tab-${auswahl}`} tabIndex={0}>
+                {auswahl === 'teilzeit' && <Teilzeit {...p} />}
+                {auswahl === 'gehalt' && <Grenzbelastung {...p} />}
+                {auswahl === 'vergleich' && <Einordnung {...p} />}
+                {auswahl === 'kaufkraft' && <Kaufkraft {...p} />}
+                {auswahl === 'paare' && <Paarvergleich {...p} />}
+            </div>
+        </section>
     );
 }
 
@@ -62,9 +76,9 @@ function Teilzeit(p: Props) {
     if (!p.teilzeit) return null;
     const daten = p.teilzeit.map((t) => ({
         name: `${t.anteilProzent} %`,
-        stunden: Math.round(p.z.wochenstunden * (t.anteilProzent / 100) * 10) / 10,
+        stunden: Math.round(p.wochenstundenEffektiv * (t.anteilProzent / 100) * 10) / 10,
         netto: t.nettoMonat,
-        jeStunde: t.nettoJeWochenstunde / 12,
+        jeStunde: t.nettoJeWochenstunde / 52,
         verlust: t.nettoverlustProzent,
         stundenPlus: t.stundennettoVeraenderungProzent,
     }));
@@ -73,9 +87,9 @@ function Teilzeit(p: Props) {
     return (
         <Karte
             titel="Teilzeit"
-            untertitel="Was Stundenreduzierung wirklich kostet"
+            untertitel={`100 % = deine aktuelle Einstellung: ${p.wochenstundenEffektiv.toLocaleString('de-DE')} h/Woche und ${formatEuro(p.bruttoJahr, 0)} Brutto/Jahr. Ein Bonus bleibt unverändert.`}
             icon={<ArrowRightLeft className="h-5 w-5 text-indigo-400" />}
-            quelle="Rentenanwartschaft: Entgeltpunkte = Bruttoentgelt geteilt durch das vorläufige Durchschnittsentgelt der Rentenversicherung (51.944 € für 2026)."
+            quelle={`Rentenanwartschaft: Entgeltpunkte = Bruttoentgelt bis zur Renten-Beitragsbemessungsgrenze geteilt durch das vorläufige Durchschnittsentgelt (${formatEuro(p.rechtsstand.sv.durchschnittsentgelt.wert, 0)} für ${p.rechtsstand.jahr}). Quelle: ${p.rechtsstand.sv.durchschnittsentgelt.quelle.titel}. ${p.rechtsstand.sv.durchschnittsentgelt.hinweis ?? ''}`}
         >
             {achtzig && (
                 <p className="mb-4 rounded-lg border border-indigo-500/20 bg-indigo-950/30 p-3 text-sm leading-relaxed text-slate-300">
@@ -103,13 +117,20 @@ function Teilzeit(p: Props) {
                         />
                         <Legend wrapperStyle={{ paddingTop: 16 }} />
                         <Bar yAxisId="l" dataKey="netto" name="Netto / Monat" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-                        <Line yAxisId="r" type="monotone" dataKey="jeStunde" name="Netto je Wochenstunde / Monat" stroke="#34d399" strokeWidth={2} dot={{ r: 3 }} />
+                        <Line yAxisId="r" type="monotone" dataKey="jeStunde" name="Netto / bezahlte Stunde" stroke="#34d399" strokeWidth={2} dot={{ r: 3 }} />
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
-            <div className="mt-4 overflow-x-auto">
+            <div className="mt-4 grid gap-2 sm:hidden">
+                {p.teilzeit.map((t) => <div key={t.anteilProzent} className="rounded-lg border border-slate-700 p-3 text-sm">
+                    <div className="flex justify-between gap-2 font-semibold text-white"><span>{t.anteilProzent} % · {(p.wochenstundenEffektiv * t.anteilProzent / 100).toLocaleString('de-DE')} h</span><span>{formatEuro(t.nettoMonat, 0)}/Monat</span></div>
+                    <p className="mt-1 text-slate-300">{formatEuro(t.nettoJeWochenstunde / 52)} netto/Stunde · {formatProzent(t.nettoverlustProzent)} Nettoverlust</p>
+                    <p className="mt-1 text-xs text-slate-400">{t.entgeltpunkte.toLocaleString('de-DE', { maximumFractionDigits: 3 })} Entgeltpunkte/Jahr</p>
+                </div>)}
+            </div>
+            <div className="mt-4 hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[440px] text-left text-xs">
-                    <thead className="text-slate-500">
+                    <thead className="text-slate-400">
                         <tr>
                             <th className="pb-2 font-medium">Arbeitszeit</th>
                             <th className="pb-2 text-right font-medium">Netto/Monat</th>
@@ -153,7 +174,7 @@ function Grenzbelastung(p: Props) {
             titel="Grenzbelastung"
             untertitel="Wie viel vom nächsten Euro ankommt"
             icon={<TrendingUp className="h-5 w-5 text-indigo-400" />}
-            quelle="Die Grenzabgabenquote enthält Lohnsteuer, Solidaritätszuschlag, Kirchensteuer und Arbeitnehmerbeiträge zur Sozialversicherung. Die sichtbaren Sprünge liegen an den Beitragsbemessungsgrenzen (69.750 € und 101.400 €), oberhalb derer keine weiteren Beiträge anfallen."
+            quelle={`Die Grenzabgabenquote enthält Steuern und Arbeitnehmerbeiträge zur Sozialversicherung. Die Beitragsbemessungsgrenzen des gewählten Rechtsstands liegen bei ${formatEuro(p.rechtsstand.sv.bbgKv.wert, 0)} (Krankenversicherung), ${formatEuro(p.rechtsstand.sv.bbgPv.wert, 0)} (Pflege) und ${formatEuro(p.rechtsstand.sv.bbgRvAv.wert, 0)} (Rente / Arbeitslosigkeit) pro Jahr. Oberhalb der jeweiligen Grenze fallen für diesen Zweig keine weiteren Beiträge an. Quellen und Rechtsstatus unter „Stand und Quellen“.`}
         >
             <p className="mb-4 rounded-lg border border-indigo-500/20 bg-indigo-950/30 p-3 text-sm leading-relaxed text-slate-300">
                 Von 100 € mehr brutto bleiben dir rund{' '}
@@ -189,7 +210,7 @@ function Grenzbelastung(p: Props) {
                         <Area yAxisId="l" type="monotone" dataKey="netto" name="Netto" stroke="#60a5fa" strokeWidth={2} fill="url(#nettoVerlauf)" />
                         <Line yAxisId="r" type="monotone" dataKey="grenze" name="Grenzabgabenquote" stroke="#f43f5e" strokeWidth={2} dot={false} />
                         <Line yAxisId="r" type="monotone" dataKey="grenzeSteuer" name="davon Steuern" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
-                        <ReferenceLine yAxisId="l" x={p.bruttoJahr} stroke="#475569" strokeDasharray="5 3" label={{ value: 'du', position: 'top', fill: '#64748b', fontSize: 11 }} />
+                        <ReferenceLine yAxisId="l" x={p.bruttoJahr} stroke="#475569" strokeDasharray="5 3" label={{ value: 'du', position: 'top', fill: '#94a3b8', fontSize: 11 }} />
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
@@ -271,7 +292,7 @@ function Kaufkraft(p: Props) {
                             formatter={(v: WertTyp, n: NameTyp) => [formatEuro(zahl(v), 0), n]}
                         />
                         <Legend wrapperStyle={{ paddingTop: 16 }} />
-                        <ReferenceLine x={BASISJAHR} stroke="#475569" strokeDasharray="6 3" label={{ value: 'heute', position: 'top', fill: '#64748b', fontSize: 11 }} />
+                        <ReferenceLine x={BASISJAHR} stroke="#475569" strokeDasharray="6 3" label={{ value: 'heute', position: 'top', fill: '#94a3b8', fontSize: 11 }} />
                         <Line type="monotone" dataKey="kaufkraftaequivalent" name="Betrag für gleiche Kaufkraft" stroke="#60a5fa" strokeWidth={2} dot={false} />
                         <Line type="monotone" dataKey="realwertOhneErhoehung" name="Realwert ohne Gehaltserhöhung" stroke="#f59e0b" strokeWidth={2} strokeDasharray="6 3" dot={false} connectNulls={false} />
                     </ComposedChart>
@@ -282,7 +303,7 @@ function Kaufkraft(p: Props) {
 }
 
 function Paarvergleich(p: Props) {
-    if (!p.paarvergleich) return null;
+    if (!p.paarvergleich) return <p className="rounded-lg border border-amber-500/30 p-4 text-sm text-amber-200">Der Paarvergleich ist für diese Bonus-Eingabe nicht verfügbar: Das Beispielgehalt des Partners liegt im Mini- oder Midijob-Bereich.</p>;
 
     return (
         <Karte
@@ -290,9 +311,14 @@ function Paarvergleich(p: Props) {
             untertitel="Beispielrechnung: Partner verdient 60 % deines Bruttos"
             icon={<Users className="h-5 w-5 text-indigo-400" />}
         >
-            <div className="overflow-x-auto">
+            <div className="grid gap-2 sm:hidden">
+                {p.paarvergleich.varianten.map((v) => <div key={v.bezeichnung} className="rounded-lg border border-slate-700 p-3 text-sm">
+                    <p className="font-semibold text-white">{v.bezeichnung}</p><p className="mt-1 text-slate-300">{formatEuro(v.nettoGesamt, 0)} netto zusammen/Jahr</p><p className="mt-1 text-xs text-slate-400">{v.differenz === 0 ? 'Höchstes laufendes Netto' : `${formatEuro(v.differenz, 0)} Unterschied`}</p>
+                </div>)}
+            </div>
+            <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[400px] text-left text-sm">
-                    <thead className="text-xs text-slate-500">
+                    <thead className="text-xs text-slate-400">
                         <tr>
                             <th className="pb-2 font-medium">Kombination</th>
                             <th className="pb-2 text-right font-medium">Netto zusammen / Jahr</th>
@@ -305,13 +331,13 @@ function Paarvergleich(p: Props) {
                                 <td className="py-2 font-sans">
                                     {v.bezeichnung}
                                     {v.bezeichnung === p.paarvergleich!.beste && (
-                                        <span className="ml-2 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                                        <span className="ml-2 rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs font-semibold text-emerald-300">
                                             höchstes laufendes Netto
                                         </span>
                                     )}
                                 </td>
                                 <td className="py-2 text-right">{formatEuro(v.nettoGesamt, 0)}</td>
-                                <td className="py-2 text-right text-slate-500">
+                                <td className="py-2 text-right text-slate-400">
                                     {v.differenz === 0 ? '–' : formatEuro(v.differenz, 0)}
                                 </td>
                             </tr>
@@ -319,7 +345,7 @@ function Paarvergleich(p: Props) {
                     </tbody>
                 </table>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">{p.paarvergleich.hinweis}</p>
+            <p className="mt-5 border-t border-slate-800 pt-4 text-xs leading-relaxed text-slate-400">{p.paarvergleich.hinweis}</p>
         </Karte>
     );
 }

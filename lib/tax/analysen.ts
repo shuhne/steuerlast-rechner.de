@@ -1,5 +1,6 @@
-import { berechne, RechnerEingabe, RechnerErgebnis } from './rechner';
+import { berechne, bonusModellUnterstuetzt, RechnerEingabe, RechnerErgebnis } from './rechner';
 import { runden } from './runden';
+import { rechtsstandFuer, RECHTSSTAND_GELTEND } from './parameter/rechtsstaende';
 
 /**
  * Abgeleitete Analysen auf Basis der Kernberechnung.
@@ -38,10 +39,13 @@ export function teilzeitanalyse(
     stufen: number[] = [100, 90, 80, 70, 60, 50],
     durchschnittsentgelt?: number
 ): TeilzeitPunkt[] {
+    const stand = basis.szenarioId ? rechtsstandFuer(basis.szenarioId) : RECHTSSTAND_GELTEND;
+    const entgelt = durchschnittsentgelt ?? stand.sv.durchschnittsentgelt.wert;
+    const bbgRente = stand.svUeberschreibungen?.bbgRvAv ?? stand.sv.bbgRvAv.wert;
     const vollzeit = berechne({ ...basis, bruttoJahr: basis.bruttoJahr });
     const nettoJeStundeVollzeit = vollzeit.netto.jahr / Math.max(1, wochenstundenVollzeit);
 
-    return stufen.map((anteil) => {
+    return stufen.filter((anteil) => bonusModellUnterstuetzt({ ...basis, bruttoJahr: basis.bruttoJahr * anteil / 100 })).map((anteil) => {
         const faktor = anteil / 100;
         const brutto = runden(basis.bruttoJahr * faktor, 2);
         const r = berechne({ ...basis, bruttoJahr: brutto });
@@ -62,8 +66,8 @@ export function teilzeitanalyse(
                 nettoJeStundeVollzeit > 0
                     ? runden((nettoJeStunde / nettoJeStundeVollzeit - 1) * 100, 2)
                     : 0,
-            entgeltpunkte: durchschnittsentgelt
-                ? runden(Math.min(brutto, 101400) / durchschnittsentgelt, 4)
+            entgeltpunkte: entgelt
+                ? runden(Math.min(brutto + (basis.sonstigeBezuege ?? 0), bbgRente) / entgelt, 4)
                 : 0,
         };
     });
@@ -89,6 +93,7 @@ export function gehaltskurve(
     for (let i = 0; i <= schritte; i++) {
         const faktor = (vonProzent + ((bisProzent - vonProzent) * i) / schritte) / 100;
         const brutto = runden(basis.bruttoJahr * faktor, 2);
+        if (!bonusModellUnterstuetzt({ ...basis, bruttoJahr: brutto })) continue;
         const r = berechne({ ...basis, bruttoJahr: brutto });
         punkte.push({
             bruttoJahr: brutto,

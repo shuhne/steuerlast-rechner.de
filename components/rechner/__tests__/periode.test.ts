@@ -69,3 +69,13 @@ describe('Einheitenwechsel Jährlich/Monatlich', () => {
         expect(bruttoJahr(nachher)).not.toBe(720000);
     });
 });
+
+describe('Gehaltseingabe aus Browser-Regressionen', () => {
+    it.each(['5000.00', '5000,00', '5.000,00', '5.000', ' 5000 '])('liest %s als 5.000 Euro', (text) => {
+        expect(parseZahl(text)).toBe(5000);
+    });
+    it.each(['-5000', 'abc', '5,000.00', '1.23.456', '5000x', '5,,0'])('weist %s zurück, ohne Zeichen still zu entfernen', (text) => {
+        expect(Number.isNaN(parseZahl(text))).toBe(true);
+        expect(periodeWechseln(mit({ bruttoEingabe: text }), 'monat').bruttoEingabe).toBe(text);
+    });
+});

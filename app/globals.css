@@ -5,3 +5,11 @@
         @apply bg-slate-950 text-slate-50 antialiased;
     }
 }
+/* Platz für die mobile Nettoleiste, auch mit iPhone-Sicherheitsabstand. */
+@media (max-width: 1023px) {
+    body { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+}
+html { scroll-padding-top: 1rem; }
+@media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+}

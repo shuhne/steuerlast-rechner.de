@@ -42,7 +42,7 @@ Angaben verlassen das Gerät nicht.
 - Grenzabgabenquote inklusive Sozialabgaben, mit den Sprüngen an den
   Beitragsbemessungsgrenzen
 - Teilzeitanalyse mit Netto je Arbeitsstunde und erworbenen Entgeltpunkten
-- Übergangsbereich bei Midijobs, Einmalzahlungen, ELStAM-Freibetrag,
+- Übergangsbereich bei Midijobs, Dezemberbonus bei ganzjähriger regulärer Beschäftigung, ELStAM-Freibetrag,
   private Krankenversicherung mit Arbeitgeberzuschuss
 - Einordnung in die amtliche Verdienstverteilung
 - Kaufkraftentwicklung
@@ -77,30 +77,47 @@ npx tsc --noEmit
 
 ## Deployment
 
-Firebase Hosting mit Next.js-Backend in `europe-west1`. Das Projekt ist über
-[`.firebaserc`](.firebaserc) fest hinterlegt, `--project` ist deshalb nicht
-nötig.
+Die Produktionsdomain **steuerlast-rechner.de** ist mit **Firebase App Hosting**
+verbunden: Backend `steuerlastrechner`, Region `europe-west4`, Projekt
+`steuerlast-rechner`. Ein Deployment mit `firebase deploy --only hosting`
+aktualisiert lediglich die separate Adresse `steuerlast-rechner.web.app` und
+deren Next.js-Backend in `europe-west1`, **nicht die Produktionsdomain**.
+Die Zuordnung wurde am 22.09.2026 über die App-Hosting-Domain-API geprüft.
+
+Vor jedem Deployment müssen `npm test`, `npm run lint`, `npx tsc --noEmit`
+und ein frischer `npm run build` sauber durchlaufen — insbesondere der Abgleich
+gegen die amtlichen Prüftabellen. Vor dem Build `.next` entfernen oder aus dem
+Projekt verschieben, damit keine Artefakte aus `.next/dev` verpackt werden.
+
+Produktionsdeployment eines geprüften Commits:
 
 ```bash
-rm -rf .next        # wichtig, siehe unten
+npm test
+npm run lint
+npx tsc --noEmit
+# Vorher .next entfernen oder außerhalb des Projekts sichern
 npm run build
-npx firebase deploy --only hosting
+git push origin HEAD
+npx firebase apphosting:rollouts:create steuerlastrechner --git-commit "$(git rev-parse HEAD)" --force
 ```
 
-**`.next` vor dem Build loeschen.** Das Firebase-Frameworks-Backend packt den
-Projektordner mitsamt `.next`. Wurde vorher `npm run dev` ausgefuehrt, liegt
-dort ein `dev`-Unterordner mit Entwicklungsartefakten — in einem gemessenen Fall
-288 MB, die unnoetig hochgeladen werden. Ein sauberer Build erzeugt rund 19 MB.
+App Hosting baut den gepushten Commit aus dem verbundenen GitHub-Repository.
+Die CLI startet den Rollout; anschließend dessen Status bis `SUCCEEDED`
+verfolgen und die Änderungen auf **https://steuerlast-rechner.de** prüfen.
+Eine Erfolgsmeldung für `steuerlast-rechner.web.app` genügt dafür nicht.
+Das Firebase-Projekt ist in [`.firebaserc`](.firebaserc) hinterlegt.
+
+Für die separate Firebase-Hosting-Seite gilt nach denselben Prüfungen:
+
+```bash
+npx firebase deploy --only hosting
+```
 
 Läuft die Anmeldung ab, meldet die CLI einen `Authentication Error`. Dann:
 
 ```bash
 npx firebase login --reauth
 ```
-
-Vor jedem Deployment müssen `npm test`, `npx tsc --noEmit`, `npm run lint` und
-`npm run build` sauber durchlaufen — insbesondere der Abgleich gegen die
-amtlichen Prüftabellen.
 
 ## Grenzen
 
@@ -115,3 +132,15 @@ Keine Steuerberatung.
 ## Lizenz
 
 MIT.
+
+### Bedienung und Modellgrenzen (22.09.2026)
+
+- Deutsche Gehaltsformate und Dezimalpunkt mit bis zu zwei Centstellen werden erkannt. Ungültige Angaben bleiben sichtbar und sperren die Auswertung.
+- Elterneigenschaft, Kinder unter 25 und steuerliche Kinderfreibeträge sind getrennte Angaben. Der Elternstatus wirkt auch im PAP auf den Kinderlosenzuschlag.
+- In Szenarien kann der angenommene Zusatzbeitrag ausdrücklich durch den eigenen Kassenbeitrag ersetzt werden.
+- PKV benötigt einen positiven Monatsbeitrag. Die Auswahl prüft keine Versicherungsberechtigung. Der PAP erhält den tatsächlich begrenzten Arbeitgeberzuschuss.
+- Der Bonus gilt als Dezemberzahlung bei ganzjähriger Beschäftigung mit gleichbleibendem Monatslohn. Andere Zahlungsmonate, Märzklausel und Mini-/Midijobs mit Bonus sind nicht modelliert. API-Aufrufe für diese Beschäftigungsfälle werden abgewiesen; Analysen lassen sie aus.
+- Die mobile Nettoleiste zeigt das Ergebnis während der Eingabe. Analysen sind über Tabs erreichbar, Teilzeit- und Paarvergleiche mobil als Karten lesbar.
+- Eingaben überleben interne Navigation im Arbeitsspeicher; Neuladen und Zurücksetzen löschen sie. Es gibt kein Local Storage und keine Übertragung.
+
+Prüfung und Nachweise: [UI-Prüfbericht](docs/ui-pruefung-2026-09-22.md).
